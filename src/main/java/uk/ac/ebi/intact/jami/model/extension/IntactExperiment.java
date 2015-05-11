@@ -4,6 +4,14 @@ import org.hibernate.Hibernate;
 import org.hibernate.annotations.Cascade;
 import org.hibernate.annotations.Target;
 import psidev.psi.mi.jami.model.*;
+import psidev.psi.mi.jami.model.impl.DefaultCvTerm;
+import psidev.psi.mi.jami.model.impl.DefaultXref;
+import psidev.psi.mi.jami.utils.CvTermUtils;
+import psidev.psi.mi.jami.utils.XrefUtils;
+import psidev.psi.mi.jami.utils.collection.AbstractCollectionWrapper;
+import psidev.psi.mi.jami.utils.collection.AbstractListHavingProperties;
+import uk.ac.ebi.intact.jami.ApplicationContextProvider;
+import uk.ac.ebi.intact.jami.context.IntactContext;
 import uk.ac.ebi.intact.jami.model.AbstractIntactPrimaryObject;
 import uk.ac.ebi.intact.jami.utils.IntactUtils;
 
@@ -34,7 +42,7 @@ import java.util.Collection;
 public class IntactExperiment extends AbstractIntactPrimaryObject implements Experiment{
     private String shortLabel;
     private Publication publication;
-    private Collection<Xref> xrefs;
+    //private Collection<Xref> xrefs;
     private Collection<Annotation> annotations;
     private CvTerm interactionDetectionMethod;
     private Organism hostOrganism;
@@ -43,6 +51,16 @@ public class IntactExperiment extends AbstractIntactPrimaryObject implements Exp
     private Collection<Confidence> confidences;
     private Collection<VariableParameter> variableParameters;
     private CvTerm participantIdentificationMethod;
+
+    //new 
+    private transient PersistentXrefList persistentXrefs;
+    private transient Xref acRef;
+    private transient InteractorIdentifierList identifiers;
+    private transient InteractorXrefList xrefs;
+
+
+
+
 
     protected IntactExperiment(){
         super();
@@ -131,6 +149,10 @@ public class IntactExperiment extends AbstractIntactPrimaryObject implements Exp
         return this.annotations;
     }
 
+    private void setAnnotations(Collection<Annotation> annotations) {
+        this.annotations = annotations;
+    }
+
     @Transient
     public Collection<Confidence> getConfidences() {
         if (confidences == null){
@@ -189,6 +211,10 @@ public class IntactExperiment extends AbstractIntactPrimaryObject implements Exp
             initialiseInteractions();
         }
         return this.interactions;
+    }
+
+    private void setInteractionEvidences(Collection<InteractionEvidence> interactions) {
+        this.interactions = interactions;
     }
 
     public boolean addInteractionEvidence(InteractionEvidence evidence) {
@@ -253,6 +279,10 @@ public class IntactExperiment extends AbstractIntactPrimaryObject implements Exp
         return variableParameters;
     }
 
+    private void setVariableParameters(Collection<VariableParameter> variableParameters) {
+        this.variableParameters = variableParameters;
+    }
+
     public boolean addVariableParameter(VariableParameter variableParameter) {
         if (variableParameter == null){
             return false;
@@ -307,62 +337,181 @@ public class IntactExperiment extends AbstractIntactPrimaryObject implements Exp
 
     @Override
     public String toString() {
-        return publication.toString() + "( " + interactionDetectionMethod.toString() + (hostOrganism != null ? ", " + hostOrganism.toString():"") + " )";
+        return publication.toString() + "( " + interactionDetectionMethod.toString() + (hostOrganism != null ? ", " + hostOrganism.toString() : "") + " )";
     }
 
     @Transient
-    public boolean areXrefsInitialized(){
+    public boolean areXrefsInitialized() {
         return Hibernate.isInitialized(getXrefs());
     }
 
+//    protected void initialiseXrefs(){
+//        this.xrefs = new ArrayList<Xref>();
+//    }
+
     @Transient
-    public boolean areAnnotationsInitialized(){
+    public boolean areAnnotationsInitialized() {
         return Hibernate.isInitialized(getAnnotations());
     }
 
     @Transient
-    public boolean areInteractionEvidencesInitialized(){
+    public boolean areInteractionEvidencesInitialized() {
         return Hibernate.isInitialized(getInteractionEvidences());
     }
 
     @Transient
-    public boolean areVariableParametersInitialized(){
+    public boolean areVariableParametersInitialized() {
         return Hibernate.isInitialized(getVariableParameters());
     }
 
-    protected void initialiseXrefs(){
-        this.xrefs = new ArrayList<Xref>();
-    }
-
-    protected void initialiseAnnotations(){
+    protected void initialiseAnnotations() {
         this.annotations = new ArrayList<Annotation>();
     }
 
-    protected void initialiseInteractions(){
+//    private void setXrefs(Collection<Xref> xrefs) {
+//        this.xrefs = xrefs;
+//    }
+
+    protected void initialiseInteractions() {
         this.interactions = new ArrayList<InteractionEvidence>();
     }
 
-    protected void initialiseConfidences(){
+    protected void initialiseConfidences() {
         this.confidences = new ArrayList<Confidence>();
     }
 
-    protected void initialiseVariableParameters(){
+    protected void initialiseVariableParameters() {
         this.variableParameters = new ArrayList<VariableParameter>();
     }
+    //new 
 
-    private void setXrefs(Collection<Xref> xrefs) {
-        this.xrefs = xrefs;
+    protected void initialiseXrefs() {
+        this.identifiers = new InteractorIdentifierList();
+        this.xrefs = new InteractorXrefList();
+        if (this.persistentXrefs != null) {
+            for (Xref ref : this.persistentXrefs) {
+                if (XrefUtils.isXrefAnIdentifier(ref) || XrefUtils.doesXrefHaveQualifier(ref, null, "intact-secondary")) {
+                    this.identifiers.addOnly(ref);
+                    processAddedIdentifierEvent(ref);
+                } else {
+                    this.xrefs.addOnly(ref);
+                }
+            }
+        } else {
+            this.persistentXrefs = new PersistentXrefList(null);
+        }
+
+        // initialise ac
+        if (getAc() != null) {
+            IntactContext intactContext = ApplicationContextProvider.getBean("intactJamiContext");
+            if (intactContext != null) {
+                this.acRef = new DefaultXref(intactContext.getIntactConfiguration().getDefaultInstitution(), getAc(), CvTermUtils.createIdentityQualifier());
+            } else {
+                this.acRef = new DefaultXref(new DefaultCvTerm("unknwon"), getAc(), CvTermUtils.createIdentityQualifier());
+            }
+            this.identifiers.addOnly(this.acRef);
+        }
     }
 
-    private void setAnnotations(Collection<Annotation> annotations) {
-        this.annotations = annotations;
+    protected void processAddedIdentifierEvent(Xref added) {
+        // nothing
     }
 
-    private void setInteractionEvidences(Collection<InteractionEvidence> interactions) {
-        this.interactions = interactions;
+    protected void processRemovedIdentifierEvent(Xref removed) {
+        // nothing
     }
 
-    private void setVariableParameters(Collection<VariableParameter> variableParameters) {
-        this.variableParameters = variableParameters;
+    protected void clearPropertiesLinkedToIdentifiers() {
+        // nothing
+    }
+
+    @Transient
+    public Collection<Xref> getIdentifiers() {
+        if (identifiers == null) {
+            initialiseXrefs();
+        }
+        return this.identifiers;
+    }
+
+    protected class InteractorIdentifierList extends AbstractListHavingProperties<Xref> {
+        public InteractorIdentifierList() {
+            super();
+        }
+
+        @Override
+        protected void processAddedObjectEvent(Xref added) {
+            if (!added.equals(acRef)) {
+                processAddedIdentifierEvent(added);
+                persistentXrefs.add(added);
+            }
+        }
+
+        @Override
+        protected void processRemovedObjectEvent(Xref removed) {
+            if (!removed.equals(acRef)) {
+                processRemovedIdentifierEvent(removed);
+                persistentXrefs.remove(removed);
+            } else {
+                super.addOnly(acRef);
+                throw new UnsupportedOperationException("Cannot remove the database accession of a Feature object from its list of identifiers.");
+            }
+        }
+
+        @Override
+        protected void clearProperties() {
+            clearPropertiesLinkedToIdentifiers();
+            persistentXrefs.retainAll(getXrefs());
+            if (acRef != null) {
+                super.addOnly(acRef);
+            }
+        }
+    }
+
+    protected class PersistentXrefList extends AbstractCollectionWrapper<Xref> {
+
+        public PersistentXrefList(Collection<Xref> persistentBag) {
+            super(persistentBag);
+        }
+
+        @Override
+        protected boolean needToPreProcessElementToAdd(Xref added) {
+            return false;
+        }
+
+        @Override
+        protected Xref processOrWrapElementToAdd(Xref added) {
+            return added;
+        }
+
+        @Override
+        protected void processElementToRemove(Object o) {
+            // do nothing
+        }
+
+        @Override
+        protected boolean needToPreProcessElementToRemove(Object o) {
+            return false;
+        }
+    }
+
+    protected class InteractorXrefList extends AbstractListHavingProperties<Xref> {
+        public InteractorXrefList() {
+            super();
+        }
+
+        @Override
+        protected void processAddedObjectEvent(Xref added) {
+            persistentXrefs.add(added);
+        }
+
+        @Override
+        protected void processRemovedObjectEvent(Xref removed) {
+            persistentXrefs.remove(removed);
+        }
+
+        @Override
+        protected void clearProperties() {
+            persistentXrefs.retainAll(getIdentifiers());
+        }
     }
 }
