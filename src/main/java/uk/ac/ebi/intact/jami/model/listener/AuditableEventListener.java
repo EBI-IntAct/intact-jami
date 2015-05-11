@@ -50,7 +50,7 @@ public class AuditableEventListener {
         }
 
         if (auditable.getCreator() == null) {
-            auditable.setCreator( currentUser );
+            auditable.setCreator( currentUser.toUpperCase() );
         }
         auditable.setUpdator( currentUser );
     }
