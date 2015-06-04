@@ -4,14 +4,6 @@ import org.hibernate.Hibernate;
 import org.hibernate.annotations.Cascade;
 import org.hibernate.annotations.Target;
 import psidev.psi.mi.jami.model.*;
-import psidev.psi.mi.jami.model.impl.DefaultCvTerm;
-import psidev.psi.mi.jami.model.impl.DefaultXref;
-import psidev.psi.mi.jami.utils.CvTermUtils;
-import psidev.psi.mi.jami.utils.XrefUtils;
-import psidev.psi.mi.jami.utils.collection.AbstractCollectionWrapper;
-import psidev.psi.mi.jami.utils.collection.AbstractListHavingProperties;
-import uk.ac.ebi.intact.jami.ApplicationContextProvider;
-import uk.ac.ebi.intact.jami.context.IntactContext;
 import uk.ac.ebi.intact.jami.model.AbstractIntactPrimaryObject;
 import uk.ac.ebi.intact.jami.utils.IntactUtils;
 
@@ -42,7 +34,7 @@ import java.util.Collection;
 public class IntactExperiment extends AbstractIntactPrimaryObject implements Experiment{
     private String shortLabel;
     private Publication publication;
-    //private Collection<Xref> xrefs;
+    private Collection<Xref> xrefs;
     private Collection<Annotation> annotations;
     private CvTerm interactionDetectionMethod;
     private Organism hostOrganism;
@@ -51,16 +43,6 @@ public class IntactExperiment extends AbstractIntactPrimaryObject implements Exp
     private Collection<Confidence> confidences;
     private Collection<VariableParameter> variableParameters;
     private CvTerm participantIdentificationMethod;
-
-    //new
-    private transient PersistentXrefList persistentXrefs;
-    private transient Xref acRef;
-    private transient ExperimentIdentifierList identifiers;
-    private transient ExperimentXrefList xrefs;
-
-
-
-
 
     protected IntactExperiment(){
         super();
@@ -122,14 +104,6 @@ public class IntactExperiment extends AbstractIntactPrimaryObject implements Exp
     @JoinColumn(name="parent_ac", referencedColumnName="ac")
     @Cascade( value = {org.hibernate.annotations.CascadeType.SAVE_UPDATE} )
     @Target(ExperimentXref.class)
-    public Collection<Xref> getDbXrefs() {
-        if (persistentXrefs == null){
-            persistentXrefs = new PersistentXrefList(null);
-        }
-        return persistentXrefs.getWrappedList();
-    }
-
-    @Transient
     public Collection<Xref> getXrefs() {
         if (xrefs == null){
             initialiseXrefs();
@@ -137,15 +111,9 @@ public class IntactExperiment extends AbstractIntactPrimaryObject implements Exp
         return this.xrefs;
     }
 
-    @Transient
-    public Collection<Xref> getIdentifiers() {
-        if (identifiers == null){
-            initialiseXrefs();
-        }
-        return this.identifiers;
+    private void setXrefs(Collection<Xref> xrefs) {
+        this.xrefs = xrefs;
     }
-
-
 
     @OneToMany( cascade = {CascadeType.ALL}, orphanRemoval = true, targetEntity = ExperimentAnnotation.class)
     @Cascade( value = {org.hibernate.annotations.CascadeType.SAVE_UPDATE} )
@@ -165,6 +133,10 @@ public class IntactExperiment extends AbstractIntactPrimaryObject implements Exp
             initialiseAnnotations();
         }
         return this.annotations;
+    }
+
+    private void setAnnotations(Collection<Annotation> annotations) {
+        this.annotations = annotations;
     }
 
     @Transient
@@ -227,6 +199,10 @@ public class IntactExperiment extends AbstractIntactPrimaryObject implements Exp
         return this.interactions;
     }
 
+    private void setInteractionEvidences(Collection<InteractionEvidence> interactions) {
+        this.interactions = interactions;
+    }
+
     public boolean addInteractionEvidence(InteractionEvidence evidence) {
         if (evidence == null){
             return false;
@@ -287,6 +263,10 @@ public class IntactExperiment extends AbstractIntactPrimaryObject implements Exp
             initialiseVariableParameters();
         }
         return variableParameters;
+    }
+
+    private void setVariableParameters(Collection<VariableParameter> variableParameters) {
+        this.variableParameters = variableParameters;
     }
 
     public boolean addVariableParameter(VariableParameter variableParameter) {
@@ -366,31 +346,8 @@ public class IntactExperiment extends AbstractIntactPrimaryObject implements Exp
         return Hibernate.isInitialized(getVariableParameters());
     }
 
-    protected void initialiseXrefs(){
-        this.identifiers = new ExperimentIdentifierList();
-        this.xrefs = new ExperimentXrefList();
-        if (this.persistentXrefs != null) {
-            for (Xref ref : this.persistentXrefs) {
-                if (XrefUtils.isXrefAnIdentifier(ref) || XrefUtils.doesXrefHaveQualifier(ref, null, "intact-secondary")) {
-                    this.identifiers.addOnly(ref);
-                } else {
-                    this.xrefs.addOnly(ref);
-                }
-            }
-        } else {
-            this.persistentXrefs = new PersistentXrefList(null);
-        }
-
-        // initialise ac
-        if (getAc() != null) {
-            IntactContext intactContext = ApplicationContextProvider.getBean("intactJamiContext");
-            if (intactContext != null) {
-                this.acRef = new DefaultXref(intactContext.getIntactConfiguration().getDefaultInstitution(), getAc(), CvTermUtils.createIdentityQualifier());
-            } else {
-                this.acRef = new DefaultXref(new DefaultCvTerm("unknwon"), getAc(), CvTermUtils.createIdentityQualifier());
-            }
-            this.identifiers.addOnly(this.acRef);
-        }
+    protected void initialiseXrefs() {
+        this.xrefs = new ArrayList<Xref>();
     }
 
     protected void initialiseAnnotations() {
@@ -407,109 +364,5 @@ public class IntactExperiment extends AbstractIntactPrimaryObject implements Exp
 
     protected void initialiseVariableParameters() {
         this.variableParameters = new ArrayList<VariableParameter>();
-    }
-
-    private void setDbXrefs(Collection<Xref> persistentXrefs) {
-        if (persistentXrefs instanceof PersistentXrefList){
-            this.persistentXrefs = (PersistentXrefList)persistentXrefs;
-        }
-        else{
-            this.persistentXrefs = new PersistentXrefList(persistentXrefs);
-        }
-        this.identifiers = null;
-        this.xrefs = null;
-    }
-
-    private void setAnnotations(Collection<Annotation> annotations) {
-        this.annotations = annotations;
-    }
-
-    private void setInteractionEvidences(Collection<InteractionEvidence> interactions) {
-        this.interactions = interactions;
-    }
-
-    private void setVariableParameters(Collection<VariableParameter> variableParameters) {
-        this.variableParameters = variableParameters;
-    }
-
-    //new
-
-    protected class ExperimentIdentifierList extends AbstractListHavingProperties<Xref> {
-        public ExperimentIdentifierList() {
-            super();
-        }
-
-        @Override
-        protected void processAddedObjectEvent(Xref added) {
-            if (!added.equals(acRef)) {
-                persistentXrefs.add(added);
-            }
-        }
-
-        @Override
-        protected void processRemovedObjectEvent(Xref removed) {
-            if (!removed.equals(acRef)) {
-                persistentXrefs.remove(removed);
-            } else {
-                super.addOnly(acRef);
-                throw new UnsupportedOperationException("Cannot remove the database accession of a Feature object from its list of identifiers.");
-            }
-        }
-
-        @Override
-        protected void clearProperties() {
-            persistentXrefs.retainAll(getXrefs());
-            if (acRef != null) {
-                super.addOnly(acRef);
-            }
-        }
-    }
-
-    protected class PersistentXrefList extends AbstractCollectionWrapper<Xref> {
-
-        public PersistentXrefList(Collection<Xref> persistentBag) {
-            super(persistentBag);
-        }
-
-        @Override
-        protected boolean needToPreProcessElementToAdd(Xref added) {
-            return false;
-        }
-
-        @Override
-        protected Xref processOrWrapElementToAdd(Xref added) {
-            return added;
-        }
-
-        @Override
-        protected void processElementToRemove(Object o) {
-            // do nothing
-        }
-
-        @Override
-        protected boolean needToPreProcessElementToRemove(Object o) {
-            return false;
-        }
-    }
-
-    protected class ExperimentXrefList extends AbstractListHavingProperties<Xref> {
-        public ExperimentXrefList() {
-            super();
-        }
-
-        @Override
-        protected void processAddedObjectEvent(Xref added) {
-            persistentXrefs.add(added);
-        }
-
-        @Override
-        protected void processRemovedObjectEvent(Xref removed) {
-            persistentXrefs.remove(removed);
-        }
-
-        @Override
-        protected void clearProperties() {
-            persistentXrefs.retainAll(getIdentifiers());
-        }
     }
 }

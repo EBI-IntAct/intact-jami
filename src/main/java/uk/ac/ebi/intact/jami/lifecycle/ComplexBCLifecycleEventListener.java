@@ -8,12 +8,14 @@ import uk.ac.ebi.intact.jami.model.lifecycle.Releasable;
 import uk.ac.ebi.intact.jami.model.user.User;
 import uk.ac.ebi.intact.jami.utils.IntactUtils;
 
+import java.util.Collection;
+
 /**
  * LifecycleEventListener for complexes with empty implementation of all methods that allows backward compatibility
  * with IntAct core.
- *
+ * <p/>
  * It will create and/or remove experiments depending on the lifecycle state
- *
+ * <p/>
  * - unassigned638 is publication for complexes not released
  * - 14681455 is publication for complexes released
  *
@@ -24,106 +26,123 @@ import uk.ac.ebi.intact.jami.utils.IntactUtils;
 public class ComplexBCLifecycleEventListener implements LifecycleEventListener {
 
     @Override
-    public void fireOwnerChanged( Releasable releaseable, User previousOwner, User newOwner ) {
+    public void fireOwnerChanged(Releasable releaseable, User previousOwner, User newOwner) {
     }
 
     @Override
-    public void fireReviewerChanged( Releasable releaseable, User previousReviewer, User newReviewer ) {
+    public void fireReviewerChanged(Releasable releaseable, User previousReviewer, User newReviewer) {
     }
 
     @Override
-    public void fireCreated( Releasable releaseable ) {
-        if (releaseable instanceof IntactComplex){
-            IntactComplex intactComplex = (IntactComplex)releaseable;
-            if (intactComplex.getExperiments().isEmpty()){
+    public void fireCreated(Releasable releaseable) {
+        if (releaseable instanceof IntactComplex) {
+            IntactComplex intactComplex = (IntactComplex) releaseable;
+            if (intactComplex.getExperiments().isEmpty()) {
                 IntactUtils.createAndAddDefaultExperimentForComplexes(intactComplex, "unassigned638");
             }
         }
     }
 
     @Override
-    public void fireReserved( Releasable releaseable ) {
+    public void fireReserved(Releasable releaseable) {
     }
 
     @Override
-    public void fireAssignentDeclined( Releasable releaseable ) {
+    public void fireAssignentDeclined(Releasable releaseable) {
     }
 
     @Override
-    public void fireAssigned( Releasable releaseable, User byUser, User toUser ) {
+    public void fireAssigned(Releasable releaseable, User byUser, User toUser) {
     }
 
     @Override
-    public void fireCurationInProgress( Releasable releaseable ) {
+    public void fireCurationInProgress(Releasable releaseable) {
     }
 
     @Override
-    public void fireReadyForChecking( Releasable releaseable ) {
-    }
+    public void fireReadyForChecking(Releasable releaseable) {
+        if (releaseable instanceof IntactComplex) {
+            IntactComplex complex = (IntactComplex) releaseable;
 
-    @Override
-    public void fireAccepted( Releasable releaseable ) {
-    }
 
-    @Override
-    public void fireAcceptedOnHold( Releasable releaseable ) {
-    }
+            Collection<Experiment> experimentList = complex.getExperiments();
 
-    @Override
-    public void fireRejected(Releasable releaseable ) {
-    }
-
-    @Override
-    public void fireReadyForRelease( Releasable releaseable ) {
-        if (releaseable instanceof IntactComplex){
-            IntactComplex complex = (IntactComplex)releaseable;
-
-            Experiment exp = !complex.getExperiments().isEmpty() ? complex.getExperiments().iterator().next() : null;
-            if (exp == null){
-                IntactUtils.createAndAddDefaultExperimentForComplexes(complex, "14681455");
-            }
-            else if (exp.getPublication() == null){
-                exp.setPublication(new IntactPublication("14681455"));
-            }
-            else if (exp.getPublication().getPubmedId() == null || !exp.getPublication().getPubmedId().equals("14681455")){
+            Experiment exp = !experimentList.isEmpty() ? experimentList.iterator().next() : null;
+            if (exp == null) {
+                IntactUtils.createAndAddDefaultExperimentForComplexes(complex, "unassigned638");
+            } else if (exp.getPublication() == null) {
+                exp.setPublication(new IntactPublication("unassigned638"));
+            } else if (exp.getPublication().getPubmedId() == null || !exp.getPublication().getPubmedId().equals("unassigned638")) {
                 complex.getExperiments().clear();
-                IntactUtils.createAndAddDefaultExperimentForComplexes(complex, "14681455");
+                IntactUtils.createAndAddDefaultExperimentForComplexes(complex, "unassigned638");
             }
+
         }
     }
 
     @Override
-    public void fireReleased( Releasable releaseable ) {
-        if (releaseable instanceof IntactComplex){
-            IntactComplex complex = (IntactComplex)releaseable;
+    public void fireAccepted(Releasable releaseable) {
+    }
 
-            Experiment exp = !complex.getExperiments().isEmpty() ? complex.getExperiments().iterator().next() : null;
-            if (exp == null){
+    @Override
+    public void fireAcceptedOnHold(Releasable releaseable) {
+    }
+
+    @Override
+    public void fireRejected(Releasable releaseable) {
+    }
+
+    @Override
+    public void fireReadyForRelease(Releasable releaseable) {
+        if (releaseable instanceof IntactComplex) {
+            IntactComplex complex = (IntactComplex) releaseable;
+
+            Collection<Experiment> experimentList = complex.getExperiments();
+
+            Experiment exp = !experimentList.isEmpty() ? experimentList.iterator().next() : null;
+            if (exp == null) {
                 IntactUtils.createAndAddDefaultExperimentForComplexes(complex, "14681455");
-            }
-            else if (exp.getPublication() == null){
+            } else if (exp.getPublication() == null) {
                 exp.setPublication(new IntactPublication("14681455"));
-            }
-            else if (exp.getPublication().getPubmedId() == null || !exp.getPublication().getPubmedId().equals("14681455")){
+            } else if (exp.getPublication().getPubmedId() == null || !exp.getPublication().getPubmedId().equals("14681455")) {
                 complex.getExperiments().clear();
                 IntactUtils.createAndAddDefaultExperimentForComplexes(complex, "14681455");
             }
+
+        }
+    }
+
+    @Override
+    public void fireReleased(Releasable releaseable) {
+        if (releaseable instanceof IntactComplex) {
+            IntactComplex complex = (IntactComplex) releaseable;
+
+            Collection<Experiment> experimentList = complex.getExperiments();
+
+            Experiment exp = !experimentList.isEmpty() ? experimentList.iterator().next() : null;
+            if (exp == null) {
+                IntactUtils.createAndAddDefaultExperimentForComplexes(complex, "14681455");
+            } else if (exp.getPublication() == null) {
+                exp.setPublication(new IntactPublication("14681455"));
+            } else if (exp.getPublication().getPubmedId() == null || !exp.getPublication().getPubmedId().equals("14681455")) {
+                complex.getExperiments().clear();
+                IntactUtils.createAndAddDefaultExperimentForComplexes(complex, "14681455");
+            }
+
         }
     }
 
     @Override
     public void fireDiscarded(Releasable releaseable) {
-        if (releaseable instanceof IntactComplex){
-            IntactComplex complex = (IntactComplex)releaseable;
+        if (releaseable instanceof IntactComplex) {
+            IntactComplex complex = (IntactComplex) releaseable;
 
             Experiment exp = !complex.getExperiments().isEmpty() ? complex.getExperiments().iterator().next() : null;
-            if (exp == null){
+            if (exp == null) {
                 IntactUtils.createAndAddDefaultExperimentForComplexes(complex, "unassigned638");
-            }
-            else if (exp.getPublication() == null){
+            } else if (exp.getPublication() == null) {
                 exp.setPublication(new IntactPublication("unassigned638"));
-            }
-            else if (exp.getPublication().getPubmedId() == null || !exp.getPublication().getPubmedId().equals("unassigned638")){
+            } else if (exp.getPublication().getPubmedId() == null || !exp.getPublication().getPubmedId().equals("unassigned638")) {
                 complex.getExperiments().clear();
                 IntactUtils.createAndAddDefaultExperimentForComplexes(complex, "unassigned638");
             }
@@ -132,17 +151,15 @@ public class ComplexBCLifecycleEventListener implements LifecycleEventListener {
 
     @Override
     public void firePutOnHold(Releasable releaseable) {
-        if (releaseable instanceof IntactComplex){
-            IntactComplex complex = (IntactComplex)releaseable;
+        if (releaseable instanceof IntactComplex) {
+            IntactComplex complex = (IntactComplex) releaseable;
 
             Experiment exp = !complex.getExperiments().isEmpty() ? complex.getExperiments().iterator().next() : null;
-            if (exp == null){
+            if (exp == null) {
                 IntactUtils.createAndAddDefaultExperimentForComplexes(complex, "unassigned638");
-            }
-            else if (exp.getPublication() == null){
+            } else if (exp.getPublication() == null) {
                 exp.setPublication(new IntactPublication("unassigned638"));
-            }
-            else if (exp.getPublication().getPubmedId() == null || !exp.getPublication().getPubmedId().equals("unassigned638")){
+            } else if (exp.getPublication().getPubmedId() == null || !exp.getPublication().getPubmedId().equals("unassigned638")) {
                 complex.getExperiments().clear();
                 IntactUtils.createAndAddDefaultExperimentForComplexes(complex, "unassigned638");
             }
