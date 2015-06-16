@@ -114,32 +114,23 @@ public class IntactCvTerm extends AbstractIntactCvTerm implements OntologyTerm{
     /////////////////////////////
     // Entity fields
 
-    /**
-     *
-     * @param objClass
-     * @deprecated the objclass is deprecated and only kept for backward compatibility with intact-core.
-     */
-    @Deprecated
-    public void setObjClass( String objClass ) {
-        this.objClass = objClass;
-    }
-
-    @OneToMany( cascade = {CascadeType.ALL}, orphanRemoval = true, targetEntity = CvTermAlias.class)
-    @JoinColumn(name="parent_ac", referencedColumnName="ac")
-    @Cascade( value = {org.hibernate.annotations.CascadeType.SAVE_UPDATE} )
+    @OneToMany(cascade = {CascadeType.ALL}, orphanRemoval = true, targetEntity = CvTermAlias.class)
+    @JoinColumn(name = "parent_ac", referencedColumnName = "ac")
+    @Cascade(value = {org.hibernate.annotations.CascadeType.SAVE_UPDATE})
     @Target(CvTermAlias.class)
+    @LazyCollection(LazyCollectionOption.FALSE)
     @Override
     public Collection<Alias> getSynonyms() {
         return super.getSynonyms();
     }
 
-    @OneToMany( cascade = {CascadeType.ALL}, orphanRemoval = true, targetEntity = CvTermAnnotation.class)
+    @OneToMany(cascade = {CascadeType.ALL}, orphanRemoval = true, targetEntity = CvTermAnnotation.class)
     @JoinTable(
-            name="ia_cvobject2annot",
-            joinColumns = @JoinColumn( name="cvobject_ac"),
-            inverseJoinColumns = @JoinColumn( name="annotation_ac")
+            name = "ia_cvobject2annot",
+            joinColumns = @JoinColumn(name = "cvobject_ac"),
+            inverseJoinColumns = @JoinColumn(name = "annotation_ac")
     )
-    @Cascade( value = {org.hibernate.annotations.CascadeType.SAVE_UPDATE} )
+    @Cascade(value = {org.hibernate.annotations.CascadeType.SAVE_UPDATE})
     @Target(CvTermAnnotation.class)
     @Override
     /**
@@ -153,7 +144,7 @@ public class IntactCvTerm extends AbstractIntactCvTerm implements OntologyTerm{
 
     @Override
     protected boolean processAddedAnnotations(Annotation annot) {
-        if (annot.getTopic().getShortName().equalsIgnoreCase("definition")){
+        if (annot.getTopic().getShortName().equalsIgnoreCase("definition")) {
             this.definition = annot;
             return true;
         }
@@ -166,14 +157,17 @@ public class IntactCvTerm extends AbstractIntactCvTerm implements OntologyTerm{
         this.definition = null;
     }
 
-    /**
-     * Sets the old identifier
-     * @param identifier
-     * @deprecated only kept for backward compatibility with intact-core
-     */
-    @Deprecated
-    public void setIdentifier(String identifier) {
-        this.identifier = identifier;
+    @ManyToMany(mappedBy = "parents", targetEntity = IntactCvTerm.class)
+    @Target(IntactCvTerm.class)
+    public Collection<OntologyTerm> getChildren() {
+        if (children == null) {
+            children = new ArrayList<OntologyTerm>();
+        }
+        return children;
+    }
+
+    private void setChildren(Collection<OntologyTerm> children) {
+        this.children = children;
     }
 
     ///////////////////////////////////////
@@ -182,30 +176,21 @@ public class IntactCvTerm extends AbstractIntactCvTerm implements OntologyTerm{
     ///////////////////////////////////////
     // access methods for associations
 
-    @ManyToMany( mappedBy = "parents", targetEntity = IntactCvTerm.class )
-    @Target(IntactCvTerm.class)
-    public Collection<OntologyTerm> getChildren() {
-        if (children == null){
-            children = new ArrayList<OntologyTerm>();
+    public void addChild(OntologyTerm cvDagObject) {
+
+        getChildren().add(cvDagObject);
+        if (!cvDagObject.getParents().contains(cvDagObject)) {
+            cvDagObject.getParents().add(this);
         }
-        return children;
     }
 
 //////////////////////////////////////////////////////////
     // the setter and getter are only used for testing
 
-    public void addChild( OntologyTerm cvDagObject ) {
-
-        getChildren().add( cvDagObject );
-        if (!cvDagObject.getParents().contains(cvDagObject)){
-            cvDagObject.getParents().add( this );
-        }
-    }
-
     public void removeChild( OntologyTerm cvDagObject ) {
         boolean removed = getChildren().remove( cvDagObject );
         if ( removed ) {
-            cvDagObject.getParents().remove( this );
+            cvDagObject.getParents().remove(this);
         }
     }
 
@@ -221,6 +206,10 @@ public class IntactCvTerm extends AbstractIntactCvTerm implements OntologyTerm{
             parents = new ArrayList<OntologyTerm>();
         }
         return parents;
+    }
+
+    private void setParents(Collection<OntologyTerm> parents) {
+        this.parents = parents;
     }
 
     public void addParent( OntologyTerm cvDagObject ) {
@@ -281,6 +270,15 @@ public class IntactCvTerm extends AbstractIntactCvTerm implements OntologyTerm{
         return objClass;
     }
 
+    /**
+     * @param objClass
+     * @deprecated the objclass is deprecated and only kept for backward compatibility with intact-core.
+     */
+    @Deprecated
+    public void setObjClass(String objClass) {
+        this.objClass = objClass;
+    }
+
     @Transient
     public boolean areXrefsInitialized(){
         return Hibernate.isInitialized(getDbXrefs());
@@ -335,12 +333,14 @@ public class IntactCvTerm extends AbstractIntactCvTerm implements OntologyTerm{
         return this.identifier;
     }
 
-    private void setChildren( Collection<OntologyTerm> children ) {
-        this.children = children;
-    }
-
-    private void setParents( Collection<OntologyTerm> parents ) {
-        this.parents = parents;
+    /**
+     * Sets the old identifier
+     * @param identifier
+     * @deprecated only kept for backward compatibility with intact-core
+     */
+    @Deprecated
+    public void setIdentifier(String identifier) {
+        this.identifier = identifier;
     }
 
 }
