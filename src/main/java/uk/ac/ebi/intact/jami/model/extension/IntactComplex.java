@@ -9,7 +9,10 @@ import psidev.psi.mi.jami.utils.AliasUtils;
 import psidev.psi.mi.jami.utils.AnnotationUtils;
 import psidev.psi.mi.jami.utils.ChecksumUtils;
 import psidev.psi.mi.jami.utils.collection.AbstractListHavingProperties;
-import uk.ac.ebi.intact.jami.model.lifecycle.*;
+import uk.ac.ebi.intact.jami.model.lifecycle.ComplexLifeCycleEvent;
+import uk.ac.ebi.intact.jami.model.lifecycle.LifeCycleEvent;
+import uk.ac.ebi.intact.jami.model.lifecycle.LifeCycleStatus;
+import uk.ac.ebi.intact.jami.model.lifecycle.Releasable;
 import uk.ac.ebi.intact.jami.model.listener.ComplexParameterListener;
 import uk.ac.ebi.intact.jami.model.user.User;
 import uk.ac.ebi.intact.jami.utils.IntactUtils;
@@ -184,6 +187,11 @@ public class IntactComplex extends IntactInteractor implements Complex,Releasabl
         return status;
     }
 
+    public void setStatus(LifeCycleStatus status) {
+        this.status = status != null ? status : LifeCycleStatus.NEW;
+        this.cvStatus = this.status.toCvTerm();
+    }
+
     private void initialiseStatus() {
         if (this.cvStatus == null){
             this.status = LifeCycleStatus.NEW;
@@ -191,11 +199,6 @@ public class IntactComplex extends IntactInteractor implements Complex,Releasabl
         else{
             this.status = LifeCycleStatus.toLifeCycleStatus(this.cvStatus);
         }
-    }
-
-    public void setStatus( LifeCycleStatus status ) {
-        this.status = status != null ? status : LifeCycleStatus.NEW;
-        this.cvStatus = this.status.toCvTerm();
     }
 
     @ManyToOne(targetEntity = IntactCvTerm.class)
@@ -265,6 +268,10 @@ public class IntactComplex extends IntactInteractor implements Complex,Releasabl
             this.lifecycleEvents = new ArrayList<LifeCycleEvent>();
         }
         return lifecycleEvents;
+    }
+
+    private void setLifecycleEvents(List<LifeCycleEvent> lifecycleEvents) {
+        this.lifecycleEvents = lifecycleEvents;
     }
 
     @Override
@@ -443,6 +450,10 @@ public class IntactComplex extends IntactInteractor implements Complex,Releasabl
         return this.components;
     }
 
+    private void setParticipants(Collection<ModelledParticipant> components) {
+        this.components = components;
+    }
+
     public boolean addParticipant(ModelledParticipant part) {
         if (part == null){
             return false;
@@ -462,10 +473,7 @@ public class IntactComplex extends IntactInteractor implements Complex,Releasabl
             initialiseComponents();
         }
         part.setInteraction(null);
-        if (components.remove(part)){
-            return true;
-        }
-        return false;
+        return components.remove(part);
     }
 
     public boolean addAllParticipants(Collection<? extends ModelledParticipant> participants) {
@@ -508,6 +516,10 @@ public class IntactComplex extends IntactInteractor implements Complex,Releasabl
         return this.confidences;
     }
 
+    private void setModelledConfidences(Collection<ModelledConfidence> confidences) {
+        this.confidences = confidences;
+    }
+
     @OneToMany( orphanRemoval = true,
             cascade = {CascadeType.ALL}, targetEntity = ComplexParameter.class)
     @JoinColumn(name="interaction_ac", referencedColumnName="ac")
@@ -518,6 +530,10 @@ public class IntactComplex extends IntactInteractor implements Complex,Releasabl
             initialiseParameters();
         }
         return this.parameters;
+    }
+
+    private void setModelledParameters(Collection<ModelledParameter> parameters) {
+        this.parameters = parameters;
     }
 
     /*@OneToMany( orphanRemoval = true,
@@ -534,6 +550,10 @@ public class IntactComplex extends IntactInteractor implements Complex,Releasabl
             initialiseCooperativeEffects();
         }
         return this.cooperativeEffects;
+    }
+
+    private void setCooperativeEffects(Collection<CooperativeEffect> cooperativeEffects) {
+        this.cooperativeEffects = cooperativeEffects;
     }
 
     @Transient
@@ -647,6 +667,7 @@ public class IntactComplex extends IntactInteractor implements Complex,Releasabl
             inverseJoinColumns = {@JoinColumn( name = "experiment_ac" )}
     )
     @Target(IntactExperiment.class)
+    @LazyCollection(LazyCollectionOption.FALSE)  //It will contain only one experiment for complexes, should be OK
     @Deprecated
     /**
      * This method should not be used in any applications. It is only for synchronization with the database and backward compatibility
@@ -658,6 +679,10 @@ public class IntactComplex extends IntactInteractor implements Complex,Releasabl
             experiments = new ArrayList<Experiment>();
         }
         return experiments;
+    }
+
+    private void setExperiments(Collection<Experiment> experiments) {
+        this.experiments = experiments;
     }
 
     @Transient
@@ -727,6 +752,10 @@ public class IntactComplex extends IntactInteractor implements Complex,Releasabl
             initialiseInteractionEvidences();
         }
         return this.interactionEvidences;
+    }
+
+    private void setInteractionEvidences(Collection<InteractionEvidence> interactionEvidences) {
+        this.interactionEvidences = interactionEvidences;
     }
 
     @Transient
@@ -865,68 +894,40 @@ public class IntactComplex extends IntactInteractor implements Complex,Releasabl
     }
 
     private void processAddedChecksumEvent(Checksum added) {
-        if (rigid == null && ChecksumUtils.doesChecksumHaveMethod(added, Checksum.RIGID_MI, Checksum.RIGID)){
+        if (rigid == null && ChecksumUtils.doesChecksumHaveMethod(added, Checksum.RIGID_MI, Checksum.RIGID)) {
             // the rigid is not set, we can set the rigid
             rigid = added;
         }
     }
 
     private void processRemovedChecksumEvent(Checksum removed) {
-        if (rigid == removed){
+        if (rigid == removed) {
             rigid = ChecksumUtils.collectFirstChecksumWithMethod(getChecksums(), Checksum.RIGID_MI, Checksum.RIGID);
         }
     }
 
-    private void initialiseInteractionEvidences(){
+    private void initialiseInteractionEvidences() {
         this.interactionEvidences = new ArrayList<InteractionEvidence>();
     }
 
-    private void initialiseCooperativeEffects(){
+    private void initialiseCooperativeEffects() {
         this.cooperativeEffects = new ArrayList<CooperativeEffect>();
     }
 
-    private void initialiseConfidences(){
+    private void initialiseConfidences() {
         this.confidences = new ArrayList<ModelledConfidence>();
     }
 
-    private void initialiseParameters(){
+    private void initialiseParameters() {
         this.parameters = new ArrayList<ModelledParameter>();
     }
 
-    private void initialiseComponents(){
+    private void initialiseComponents() {
         this.components = new ArrayList<ModelledParticipant>();
     }
 
     private void clearPropertiesLinkedToChecksums() {
         this.rigid = null;
-    }
-
-    private void setParticipants(Collection<ModelledParticipant> components) {
-        this.components = components;
-    }
-
-    private void setModelledConfidences(Collection<ModelledConfidence> confidences) {
-        this.confidences = confidences;
-    }
-
-    private void setModelledParameters(Collection<ModelledParameter> parameters) {
-        this.parameters = parameters;
-    }
-
-    private void setCooperativeEffects(Collection<CooperativeEffect> cooperativeEffects) {
-        this.cooperativeEffects = cooperativeEffects;
-    }
-
-    private void setExperiments(Collection<Experiment> experiments) {
-        this.experiments = experiments;
-    }
-
-    private void setLifecycleEvents( List<LifeCycleEvent> lifecycleEvents ) {
-        this.lifecycleEvents = lifecycleEvents;
-    }
-
-    private void setInteractionEvidences(Collection<InteractionEvidence> interactionEvidences) {
-        this.interactionEvidences = interactionEvidences;
     }
 
     @Override
