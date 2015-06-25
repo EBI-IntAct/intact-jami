@@ -132,6 +132,7 @@ public class IntactCvTerm extends AbstractIntactCvTerm implements OntologyTerm{
     )
     @Cascade(value = {org.hibernate.annotations.CascadeType.SAVE_UPDATE})
     @Target(CvTermAnnotation.class)
+    @LazyCollection(LazyCollectionOption.FALSE)
     @Override
     /**
      * WARNING: The join table is for backward compatibility with intact-core.
