@@ -111,6 +111,10 @@ public class IntactExperiment extends AbstractIntactPrimaryObject implements Exp
         return this.xrefs;
     }
 
+    private void setXrefs(Collection<Xref> xrefs) {
+        this.xrefs = xrefs;
+    }
+
     @OneToMany( cascade = {CascadeType.ALL}, orphanRemoval = true, targetEntity = ExperimentAnnotation.class)
     @Cascade( value = {org.hibernate.annotations.CascadeType.SAVE_UPDATE} )
     @JoinTable(
@@ -129,6 +133,10 @@ public class IntactExperiment extends AbstractIntactPrimaryObject implements Exp
             initialiseAnnotations();
         }
         return this.annotations;
+    }
+
+    private void setAnnotations(Collection<Annotation> annotations) {
+        this.annotations = annotations;
     }
 
     @Transient
@@ -189,6 +197,10 @@ public class IntactExperiment extends AbstractIntactPrimaryObject implements Exp
             initialiseInteractions();
         }
         return this.interactions;
+    }
+
+    private void setInteractionEvidences(Collection<InteractionEvidence> interactions) {
+        this.interactions = interactions;
     }
 
     public boolean addInteractionEvidence(InteractionEvidence evidence) {
@@ -253,6 +265,10 @@ public class IntactExperiment extends AbstractIntactPrimaryObject implements Exp
         return variableParameters;
     }
 
+    private void setVariableParameters(Collection<VariableParameter> variableParameters) {
+        this.variableParameters = variableParameters;
+    }
+
     public boolean addVariableParameter(VariableParameter variableParameter) {
         if (variableParameter == null){
             return false;
@@ -307,62 +323,46 @@ public class IntactExperiment extends AbstractIntactPrimaryObject implements Exp
 
     @Override
     public String toString() {
-        return publication.toString() + "( " + interactionDetectionMethod.toString() + (hostOrganism != null ? ", " + hostOrganism.toString():"") + " )";
+        return publication.toString() + "( " + interactionDetectionMethod.toString() + (hostOrganism != null ? ", " + hostOrganism.toString() : "") + " )";
     }
 
     @Transient
-    public boolean areXrefsInitialized(){
+    public boolean areXrefsInitialized() {
         return Hibernate.isInitialized(getXrefs());
     }
 
     @Transient
-    public boolean areAnnotationsInitialized(){
+    public boolean areAnnotationsInitialized() {
         return Hibernate.isInitialized(getAnnotations());
     }
 
     @Transient
-    public boolean areInteractionEvidencesInitialized(){
+    public boolean areInteractionEvidencesInitialized() {
         return Hibernate.isInitialized(getInteractionEvidences());
     }
 
     @Transient
-    public boolean areVariableParametersInitialized(){
+    public boolean areVariableParametersInitialized() {
         return Hibernate.isInitialized(getVariableParameters());
     }
 
-    protected void initialiseXrefs(){
+    protected void initialiseXrefs() {
         this.xrefs = new ArrayList<Xref>();
     }
 
-    protected void initialiseAnnotations(){
+    protected void initialiseAnnotations() {
         this.annotations = new ArrayList<Annotation>();
     }
 
-    protected void initialiseInteractions(){
+    protected void initialiseInteractions() {
         this.interactions = new ArrayList<InteractionEvidence>();
     }
 
-    protected void initialiseConfidences(){
+    protected void initialiseConfidences() {
         this.confidences = new ArrayList<Confidence>();
     }
 
-    protected void initialiseVariableParameters(){
+    protected void initialiseVariableParameters() {
         this.variableParameters = new ArrayList<VariableParameter>();
-    }
-
-    private void setXrefs(Collection<Xref> xrefs) {
-        this.xrefs = xrefs;
-    }
-
-    private void setAnnotations(Collection<Annotation> annotations) {
-        this.annotations = annotations;
-    }
-
-    private void setInteractionEvidences(Collection<InteractionEvidence> interactions) {
-        this.interactions = interactions;
-    }
-
-    private void setVariableParameters(Collection<VariableParameter> variableParameters) {
-        this.variableParameters = variableParameters;
     }
 }
