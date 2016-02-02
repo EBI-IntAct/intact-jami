@@ -144,7 +144,7 @@ public class FeatureSynchronizerTemplate<F extends Feature, I extends AbstractIn
                             convertToPersistentObject((F)feature);
                     // we have a different instance because needed to be synchronized
                     if (linkedFeature != feature){
-                        intactFeature.getDbLinkedFeatures().remove(linkedFeature);
+                        intactFeature.getDbLinkedFeatures().remove(feature);
                         if (linkedFeature != null && !intactFeature.getDbLinkedFeatures().contains(linkedFeature)){
                             intactFeature.getDbLinkedFeatures().add(linkedFeature);
                         }
