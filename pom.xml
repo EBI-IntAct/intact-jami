@@ -1,22 +1,18 @@
 <?xml version="1.0"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
+
     <parent>
-      <groupId>uk.ac.ebi.intact.core</groupId>
-      <artifactId>core</artifactId>
-      <version>2.6.10-20141016.142047-1</version>
+        <groupId>uk.ac.ebi.intact.maven</groupId>
+        <artifactId>intact-hibernate-master</artifactId>
+        <version>44</version>
     </parent>
+
     <groupId>uk.ac.ebi.intact.jami</groupId>
     <artifactId>intact-jami</artifactId>
-    <version>1.2.14</version>
+    <version>1.2.15-SNAPSHOT</version>
 
     <name>INTACT :: JAMI - Core interfaces, default implementations of IntAct API based on JAMI interfaces</name>
-
-    <!--<scm>-->
-        <!--<connection>scm:svn:https://intact.googlecode.com/svn/repo/core/trunk/intact-jami</connection>-->
-        <!--<developerConnection>scm:svn:https://intact.googlecode.com/svn/repo/core/trunk/intact-jami</developerConnection>-->
-        <!--<url>http://code.google.com/p/intact/source/browse/repo/core/trunk/intact-jami/</url>-->
-    <!--</scm>-->
 
     <scm>
         <connection>scm:git:https://bitbucket.org/intact-ebi/intact-jami.git</connection>
@@ -27,9 +23,8 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <!--<jami.core.version>1.2.2-SNAPSHOT</jami.core.version>-->
-        <!--<jami.enricher.version>1.1.2-SNAPSHOT</jami.enricher.version>-->
-        <spring.version>3.2.4.RELEASE</spring.version>
+        <spring.version>3.2.9.RELEASE</spring.version>
+        <jami.version>3.0.0-SNAPSHOT</jami.version>
     </properties>
 
     <build>
@@ -60,14 +55,14 @@
         <dependency>
             <groupId>psidev.psi.mi.jami</groupId>
             <artifactId>jami-core</artifactId>
-            <version>1.2.4</version>
+            <version>${jami.version}</version>
         </dependency>
 
         <!-- JAMI enricher -->
         <dependency>
             <groupId>psidev.psi.mi.jami</groupId>
             <artifactId>jami-enricher</artifactId>
-            <version>1.1.3</version>
+            <version>${jami.version}</version>
         </dependency>
 
         <!-- commons lang -->
@@ -160,27 +155,16 @@
 
     <repositories>
         <repository>
-            <id>intact.nexus</id>
-            <name>IntAct Nexus</name>
-            <url>http://www.ebi.ac.uk/intact/maven/nexus/content/groups/public</url>
+            <id>nexus-ebi-repo-old</id>
+            <url>http://www.ebi.ac.uk/intact/maven/nexus/content/repositories/ebi-repo/</url>
+        </repository>
+        <repository>
+            <id>nexus-ebi-release-repo</id>
+            <url>http://www.ebi.ac.uk/Tools/maven/repos/content/groups/ebi-repo/</url>
+        </repository>
+        <repository>
+            <id>nexus-ebi-snapshot-repo</id>
+            <url>http://www.ebi.ac.uk/Tools/maven/repos/content/groups/ebi-snapshots/</url>
         </repository>
     </repositories>
-
-    <!-- Overwrites the previous repositories-->
-    <distributionManagement>
-        <!-- EBI repo -->
-        <repository>
-            <id>pst-release</id>
-            <name>EBI Nexus Repository</name>
-            <url>http://www.ebi.ac.uk/Tools/maven/repos/content/repositories/pst-release</url>
-        </repository>
-        <!-- EBI SNAPSHOT repo -->
-        <snapshotRepository>
-            <uniqueVersion>false</uniqueVersion>
-            <id>pst-snapshots</id>
-            <name>EBI Nexus Snapshots Repository</name>
-            <url>http://www.ebi.ac.uk/Tools/maven/repos/content/repositories/pst-snapshots</url>
-        </snapshotRepository>
-    </distributionManagement>
-
 </project>
