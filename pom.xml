@@ -10,7 +10,7 @@
 
     <groupId>uk.ac.ebi.intact.jami</groupId>
     <artifactId>intact-jami</artifactId>
-    <version>1.2.15-SNAPSHOT</version>
+    <version>1.2.15</version>
 
     <name>INTACT :: JAMI - Core interfaces, default implementations of IntAct API based on JAMI interfaces</name>
 
@@ -18,7 +18,7 @@
         <connection>scm:git:https://bitbucket.org/intact-ebi/intact-jami.git</connection>
         <developerConnection>scm:git:https://bitbucket.org/intact-ebi/intact-jami.git</developerConnection>
         <url>https://bitbucket.org/intact-ebi/intact-jami</url>
-        <tag>HEAD</tag>
+        <tag>intact-jami-1.2.15</tag>
     </scm>
 
     <properties>
@@ -55,14 +55,14 @@
         <dependency>
             <groupId>psidev.psi.mi.jami</groupId>
             <artifactId>jami-core</artifactId>
-            <version>${jami.version}</version>
+            <version>3.0.0</version>
         </dependency>
 
         <!-- JAMI enricher -->
         <dependency>
             <groupId>psidev.psi.mi.jami</groupId>
             <artifactId>jami-enricher</artifactId>
-            <version>${jami.version}</version>
+            <version>3.0.0</version>
         </dependency>
 
         <!-- commons lang -->
