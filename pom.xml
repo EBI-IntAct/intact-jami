@@ -24,7 +24,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <spring.version>3.2.9.RELEASE</spring.version>
-        <jami.version>3.0.0-SNAPSHOT</jami.version>
+        <jami.version>3.0.1-SNAPSHOT</jami.version>
     </properties>
 
     <build>
@@ -55,14 +55,14 @@
         <dependency>
             <groupId>psidev.psi.mi.jami</groupId>
             <artifactId>jami-core</artifactId>
-            <version>3.0.1-SNAPSHOT</version>
+            <version>${jami.version}</version>
         </dependency>
 
         <!-- JAMI enricher -->
         <dependency>
             <groupId>psidev.psi.mi.jami</groupId>
             <artifactId>jami-enricher</artifactId>
-            <version>3.0.1-SNAPSHOT</version>
+            <version>${jami.version}</version>
         </dependency>
 
         <!-- commons lang -->
