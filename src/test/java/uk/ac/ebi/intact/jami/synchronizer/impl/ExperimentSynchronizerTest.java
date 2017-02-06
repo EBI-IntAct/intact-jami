@@ -20,7 +20,8 @@ import uk.ac.ebi.intact.jami.synchronizer.SynchronizerException;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import java.util.Date;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 
 /**
  * Unit test for UserSynchronizerTemplate
@@ -50,9 +51,9 @@ public class ExperimentSynchronizerTest {
     @Transactional
     @Test
     @DirtiesContext
-    public void test_persist_two_experiments() throws PersisterException, FinderException, SynchronizerException {
+    public void test_persist_two_experiments() throws PersisterException, FinderException, SynchronizerException, ParseException {
         Publication intactPublication = new IntactPublication("12345");
-        intactPublication.setPublicationDate(new Date());
+        intactPublication.setPublicationDate(new SimpleDateFormat("dd/MM/yyyy").parse("10/02/2016"));
         intactPublication.getAuthors().add("bla_bla");
 
         IntactExperiment exp = new IntactExperiment(intactPublication);
