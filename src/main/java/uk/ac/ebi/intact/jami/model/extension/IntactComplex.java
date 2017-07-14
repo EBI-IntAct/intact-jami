@@ -5,10 +5,12 @@ import org.hibernate.annotations.*;
 import psidev.psi.mi.jami.model.*;
 import psidev.psi.mi.jami.model.Source;
 import psidev.psi.mi.jami.model.impl.DefaultChecksum;
-import psidev.psi.mi.jami.utils.AliasUtils;
-import psidev.psi.mi.jami.utils.AnnotationUtils;
-import psidev.psi.mi.jami.utils.ChecksumUtils;
+import psidev.psi.mi.jami.model.impl.DefaultCvTerm;
+import psidev.psi.mi.jami.model.impl.DefaultXref;
+import psidev.psi.mi.jami.utils.*;
 import psidev.psi.mi.jami.utils.collection.AbstractListHavingProperties;
+import uk.ac.ebi.intact.jami.ApplicationContextProvider;
+import uk.ac.ebi.intact.jami.context.IntactContext;
 import uk.ac.ebi.intact.jami.model.lifecycle.ComplexLifeCycleEvent;
 import uk.ac.ebi.intact.jami.model.lifecycle.LifeCycleEvent;
 import uk.ac.ebi.intact.jami.model.lifecycle.LifeCycleStatus;
@@ -51,6 +53,8 @@ import java.util.List;
 @Where(clause = "category = 'complex'")
 @Cacheable
 public class IntactComplex extends IntactInteractor implements Complex,Releasable{
+
+    private transient Xref complexAc;
     private Collection<InteractionEvidence> interactionEvidences;
     private Collection<ModelledParticipant> components;
     private transient Annotation physicalProperties;
@@ -167,7 +171,19 @@ public class IntactComplex extends IntactInteractor implements Complex,Releasabl
     @Override
     @Transient
     public Collection<Xref> getIdentifiers() {
-        return super.getIdentifiers();
+        super.getIdentifiers();
+        // initialise complexAc
+        if (getComplexAc() != null){
+            IntactContext intactContext = ApplicationContextProvider.getBean("intactJamiContext");
+            if (intactContext != null){
+                this.complexAc = new DefaultXref(intactContext.getIntactConfiguration().getDefaultInstitution(), getAc(), getComplexAc(), XrefUtils.COMPLEX-PRIMARY);
+            }
+            else{
+                this.complexAc = new DefaultXref(new DefaultCvTerm("unknwon"), getAc(), CvTermUtils.createIdentityQualifier());
+            }
+            this.identifiers.addOnly(this.complexAc);
+        }
+        return this.identifiers;
     }
 
     @Override
@@ -557,6 +573,20 @@ public class IntactComplex extends IntactInteractor implements Complex,Releasabl
     }
 
     @Transient
+    public String getComplexAc() {
+        // initialise xrefs if not done yet
+        getXrefs();
+        return this.complexAc != null ? this.complexAc.getId() : null;
+    }
+
+    @Transient
+    public String setComplexAc() {
+        // initialise xrefs if not done yet
+        getXrefs();
+        return this.complexAc != null ? this.complexAc.getId() : null;
+    }
+
+    @Transient
     public String getPhysicalProperties() {
         // initialise annotations if necessary
         getAnnotations();
@@ -601,7 +631,7 @@ public class IntactComplex extends IntactInteractor implements Complex,Releasabl
 
             CvTerm recommendedName = IntactUtils.createMIAliasType(Alias.COMPLEX_RECOMMENDED_NAME, Alias.COMPLEX_RECOMMENDED_NAME_MI);
             // first remove old recommended name if not null
-            if (this.recommendedName != null && !name.equals(this.recommendedName)){
+            if (this.recommendedName != null && !name.equals(this.recommendedName.getName())){
                 if (this.recommendedName instanceof AbstractIntactAlias){
                     ((AbstractIntactAlias) this.recommendedName).setName(name);
                 }
