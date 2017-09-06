@@ -24,7 +24,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <spring.version>3.2.9.RELEASE</spring.version>
-        <jami.version>3.0.8</jami.version>
+        <jami.version>3.0.9</jami.version>
     </properties>
 
     <build>
