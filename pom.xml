@@ -10,7 +10,7 @@
 
     <groupId>uk.ac.ebi.intact.jami</groupId>
     <artifactId>intact-jami</artifactId>
-    <version>1.2.21</version>
+    <version>1.2.22</version>
 
     <name>INTACT :: JAMI - Core interfaces, default implementations of IntAct API based on JAMI interfaces</name>
 
@@ -24,7 +24,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <spring.version>3.2.9.RELEASE</spring.version>
-        <jami.version>3.0.10</jami.version>
+        <jami.version>3.0.11</jami.version>
     </properties>
 
     <build>
