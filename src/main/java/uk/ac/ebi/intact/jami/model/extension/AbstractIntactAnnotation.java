@@ -1,6 +1,5 @@
 package uk.ac.ebi.intact.jami.model.extension;
 
-import org.hibernate.annotations.ForeignKey;
 import org.hibernate.annotations.Target;
 import psidev.psi.mi.jami.model.Annotation;
 import psidev.psi.mi.jami.model.CvTerm;
@@ -86,8 +85,7 @@ public abstract class AbstractIntactAnnotation extends AbstractIntactPrimaryObje
     ///////////////////////////////////////
     // access methods for associations
     @ManyToOne(targetEntity = IntactCvTerm.class)
-    @JoinColumn( name = "topic_ac", referencedColumnName = "ac")
-    @ForeignKey(name = "FK_ANNOTATION$TOPIC")
+    @JoinColumn( name = "topic_ac", referencedColumnName = "ac",foreignKey = @ForeignKey(name = "FK_ANNOTATION$TOPIC"))
     @Target(IntactCvTerm.class)
     @NotNull
     public CvTerm getTopic() {

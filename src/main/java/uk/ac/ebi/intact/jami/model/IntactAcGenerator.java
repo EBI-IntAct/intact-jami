@@ -5,11 +5,14 @@
  */
 package uk.ac.ebi.intact.jami.model;
 
+import com.sun.corba.se.spi.ior.Identifiable;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.HibernateException;
 import org.hibernate.MappingException;
+import org.hibernate.Session;
 import org.hibernate.dialect.Dialect;
+import org.hibernate.engine.jdbc.env.spi.JdbcEnvironment;
 import org.hibernate.engine.spi.SessionImplementor;
 import org.hibernate.id.IdentifierGeneratorHelper;
 import org.hibernate.id.IntegralDataTypeHolder;
@@ -34,14 +37,9 @@ public class IntactAcGenerator extends SequenceStyleGenerator {
 
     private static final Log log = LogFactory.getLog( IntactAcGenerator.class );
 
-    /**
-     * The sequence parameter
-     */
-    public static final String SEQUENCE = "sequence";
-    public static final String INTACT_AC_SEQUENCE_NAME = "intact_ac";
+    private String sequenceCallSyntax;
 
-
-    @Override
+/*    @Override
     public void configure( Type type, Properties properties, ServiceRegistry serviceRegistry ) throws MappingException {
         String defaultSeqValue = "hibernate_sequence";
         String sequenceName = ConfigurationHelper.getString(SEQUENCE, properties, defaultSeqValue);
@@ -52,6 +50,21 @@ public class IntactAcGenerator extends SequenceStyleGenerator {
             properties.put( SEQUENCE, sequenceName );
         }
         super.configure( type, properties, serviceRegistry );
+    }*/
+
+    @Override
+    public void configure(Type type, Properties properties, ServiceRegistry serviceRegistry) throws MappingException {
+        final JdbcEnvironment jdbcEnvironment = serviceRegistry.getService(JdbcEnvironment.class);
+        final Dialect dialect = jdbcEnvironment.getDialect();
+
+        final String sequencePerEntitySuffix = ConfigurationHelper.getString(CONFIG_SEQUENCE_PER_ENTITY_SUFFIX, properties, DEF_SEQUENCE_SUFFIX);
+
+        final String defaultSequenceName = ConfigurationHelper.getBoolean(CONFIG_PREFER_SEQUENCE_PER_ENTITY, properties, false)
+                ? properties.getProperty(JPA_ENTITY_NAME) + sequencePerEntitySuffix
+                : DEF_SEQUENCE_NAME;
+
+        sequenceCallSyntax = dialect.getSequenceNextValString(ConfigurationHelper.getString(SEQUENCE_PARAM, properties, defaultSequenceName));
+       // super.configure( type, properties, serviceRegistry );
     }
 
     /**
@@ -65,19 +78,42 @@ public class IntactAcGenerator extends SequenceStyleGenerator {
      *
      * @throws org.hibernate.HibernateException if something goes wrong
      */
+    /* @Override
+   public Serializable generate( SessionImplementor sessionImplementor, Object object ) throws HibernateException {
+
+        String prefix="UNK";
+        IntactContext intactContext = ApplicationContextProvider.getBean("intactJamiContext");
+        if (intactContext != null) {
+            prefix = intactContext.getIntactConfiguration().getAcPrefix();
+        }
+        String id = prefix + "-" + super.generate( sessionImplementor, object );
+
+        log.trace( "Assigning Id: " + id );
+
+        return id;
+    }*/
+
     @Override
-    public Serializable generate( SessionImplementor sessionImplementor, Object object ) throws HibernateException {
+    public Serializable generate(SessionImplementor sessionImplementor, Object object)throws HibernateException {
+        if (object instanceof Identifiable) {
+            Identifiable identifiable = (Identifiable) object;
+            Serializable id = identifiable.getId();
+            if (id != null) {
+                return id;
+            }
+        }
+
         String prefix="UNK";
         IntactContext intactContext = ApplicationContextProvider.getBean("intactJamiContext");
         if (intactContext != null) {
             prefix = intactContext.getIntactConfiguration().getAcPrefix();
         }
 
-        String id = prefix + "-" + super.generate( sessionImplementor, object );
+        long seqValue = ((Number) Session.class.cast(sessionImplementor)
+                .createSQLQuery(sequenceCallSyntax)
+                .uniqueResult()).longValue();
 
-        log.trace( "Assigning Id: " + id );
-
-        return id;
+        return prefix+"-" + seqValue;
     }
 
 
