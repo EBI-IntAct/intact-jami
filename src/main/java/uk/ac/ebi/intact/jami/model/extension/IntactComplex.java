@@ -20,6 +20,7 @@ import uk.ac.ebi.intact.jami.utils.IntactUtils;
 import javax.persistence.*;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.ForeignKey;
 import javax.persistence.OrderBy;
 import javax.validation.constraints.NotNull;
 import java.io.IOException;
@@ -202,8 +203,7 @@ public class IntactComplex extends IntactInteractor implements Complex,Releasabl
     }
 
     @ManyToOne(targetEntity = IntactCvTerm.class)
-    @JoinColumn( name = "status_ac", referencedColumnName = "ac" )
-    @ForeignKey(name="FK_COMPLEX_STATUS")
+    @JoinColumn( name = "status_ac", referencedColumnName = "ac",foreignKey = @ForeignKey(name="FK_COMPLEX_STATUS"))
     @Target(IntactCvTerm.class)
     /**
      * NOTE: in the future, should be persisted and cvStatus should be removed
@@ -229,8 +229,7 @@ public class IntactComplex extends IntactInteractor implements Complex,Releasabl
     }
 
     @ManyToOne( targetEntity = User.class )
-    @JoinColumn( name = "owner_pk", referencedColumnName = "ac" )
-    @ForeignKey(name="FK_COMPLEX_OWNER")
+    @JoinColumn( name = "owner_pk", referencedColumnName = "ac",foreignKey = @ForeignKey(name="FK_COMPLEX_OWNER"))
     @Target(User.class)
     public User getCurrentOwner() {
         return currentOwner;
@@ -241,8 +240,7 @@ public class IntactComplex extends IntactInteractor implements Complex,Releasabl
     }
 
     @ManyToOne( targetEntity = User.class )
-    @JoinColumn( name = "reviewer_pk", referencedColumnName = "ac" )
-    @ForeignKey(name="FK_COMPLEX_REVIEWER")
+    @JoinColumn( name = "reviewer_pk", referencedColumnName = "ac",foreignKey = @ForeignKey(name="FK_COMPLEX_REVIEWER"))
     @Target(User.class)
     public User getCurrentReviewer() {
         return currentReviewer;
@@ -258,8 +256,7 @@ public class IntactComplex extends IntactInteractor implements Complex,Releasabl
     }
 
     @OneToMany( orphanRemoval = true, cascade = CascadeType.ALL, targetEntity = ComplexLifeCycleEvent.class)
-    @JoinColumn(name="complex_ac", referencedColumnName="ac")
-    @ForeignKey(name="FK_LIFECYCLE_EVENT_COMPLEX")
+    @JoinColumn(name="complex_ac", referencedColumnName="ac",foreignKey = @ForeignKey(name="FK_LIFECYCLE_EVENT_COMPLEX"))
     @Cascade( value = {org.hibernate.annotations.CascadeType.SAVE_UPDATE} )
     @OrderBy("when, created")
     @Target(ComplexLifeCycleEvent.class)

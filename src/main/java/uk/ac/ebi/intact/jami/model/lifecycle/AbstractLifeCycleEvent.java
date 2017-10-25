@@ -105,7 +105,7 @@ public abstract class AbstractLifeCycleEvent extends AbstractIntactPrimaryObject
     }
 
     @Lob
-    @Type(type = "org.hibernate.type.StringClobType")
+    @Type(type = "org.hibernate.type.StringType")
     public String getNote() {
         return note;
     }

@@ -9,6 +9,7 @@ import uk.ac.ebi.intact.jami.utils.IntactUtils;
 import javax.persistence.*;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.Index;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
@@ -35,7 +36,7 @@ import java.util.Collection;
  * @since <pre>07/01/14</pre>
  */
 @Entity
-@Table( name = "ia_controlledvocab",
+@Table( name = "ia_controlledvocab",indexes = { @Index(columnList=("identifier"),name=("cvobject_id_idx"))},
         uniqueConstraints = {@UniqueConstraint(columnNames={"objclass", "shortlabel"})})
 @Cacheable
 public class IntactCvTerm extends AbstractIntactCvTerm implements OntologyTerm{
@@ -328,7 +329,6 @@ public class IntactCvTerm extends AbstractIntactCvTerm implements OntologyTerm{
      */
     @Column(name = "identifier", length = 30)
     @Size(max = 30)
-    @Index(name = "cvobject_id_idx")
     @Deprecated
     protected String getIdentifier() {
         return this.identifier;

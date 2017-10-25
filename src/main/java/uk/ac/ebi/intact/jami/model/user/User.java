@@ -8,6 +8,8 @@ import uk.ac.ebi.intact.jami.utils.IntactUtils;
 import javax.persistence.*;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.ForeignKey;
+import javax.persistence.Index;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
@@ -21,7 +23,7 @@ import java.util.*;
  * @since 2.2.1
  */
 @Entity
-@Table(name="ia_user")
+@Table(name="ia_user",indexes = { @Index(columnList=("login"),name=("idx_user_login")),@Index(columnList=("email"),name=("idx_user_email"))})
 public class User extends AbstractIntactPrimaryObject {
 
     private String login;
@@ -57,7 +59,7 @@ public class User extends AbstractIntactPrimaryObject {
     // Getters and Setters
 
     @Column(nullable = false, unique = true, length = IntactUtils.MAX_SHORT_LABEL_LEN)
-    @Index(name = "idx_user_login")
+
     @Size( max = IntactUtils.MAX_SHORT_LABEL_LEN)
     @NotNull
     public String getLogin() {
@@ -109,7 +111,6 @@ public class User extends AbstractIntactPrimaryObject {
     }
 
     @Column(nullable = false, unique = true, length = IntactUtils.MAX_SHORT_LABEL_LEN)
-    @Index(name = "idx_user_email")
     @Size( max = IntactUtils.MAX_SHORT_LABEL_LEN)
     @NotNull
     public String getEmail() {
@@ -141,10 +142,10 @@ public class User extends AbstractIntactPrimaryObject {
     @Cascade(org.hibernate.annotations.CascadeType.SAVE_UPDATE)
     @JoinTable(
             name = "ia_user2role",
-            joinColumns = {@JoinColumn(name = "user_ac")},
+            joinColumns = {@JoinColumn(name = "user_ac",foreignKey=@ForeignKey(name = "FK_USER_ROLES"))},
             inverseJoinColumns = {@JoinColumn(name = "role_ac")}
     )
-    @ForeignKey(name = "FK_USER_ROLES", inverseName = "FK_ROLE_USER")
+
     @LazyCollection(LazyCollectionOption.FALSE)
     public Set<Role> getRoles() {
         if (this.roles == null){
@@ -186,8 +187,7 @@ public class User extends AbstractIntactPrimaryObject {
 
     @OneToMany( cascade = {CascadeType.ALL},orphanRemoval = true)
     @Cascade( value = org.hibernate.annotations.CascadeType.SAVE_UPDATE )
-    @JoinColumn(name = "user_ac", referencedColumnName = "ac")
-    @ForeignKey(name="FK_PREF_USER")
+    @JoinColumn(name = "user_ac", referencedColumnName = "ac",foreignKey = @ForeignKey(name="FK_PREF_USER"))
     @LazyCollection(LazyCollectionOption.FALSE)
     public Collection<Preference> getPreferences() {
         if (this.preferences == null){

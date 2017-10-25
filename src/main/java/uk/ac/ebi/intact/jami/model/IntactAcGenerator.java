@@ -14,7 +14,9 @@ import org.hibernate.engine.spi.SessionImplementor;
 import org.hibernate.id.IdentifierGeneratorHelper;
 import org.hibernate.id.IntegralDataTypeHolder;
 import org.hibernate.id.SequenceGenerator;
+import org.hibernate.id.enhanced.SequenceStyleGenerator;
 import org.hibernate.internal.util.config.ConfigurationHelper;
+import org.hibernate.service.ServiceRegistry;
 import org.hibernate.type.Type;
 import uk.ac.ebi.intact.jami.ApplicationContextProvider;
 import uk.ac.ebi.intact.jami.context.IntactContext;
@@ -28,7 +30,7 @@ import java.util.Properties;
  *
  * @author Marine Dumousseau (marine@ebi.ac.uk)
  */
-public class IntactAcGenerator extends SequenceGenerator {
+public class IntactAcGenerator extends SequenceStyleGenerator {
 
     private static final Log log = LogFactory.getLog( IntactAcGenerator.class );
 
@@ -38,17 +40,9 @@ public class IntactAcGenerator extends SequenceGenerator {
     public static final String SEQUENCE = "sequence";
     public static final String INTACT_AC_SEQUENCE_NAME = "intact_ac";
 
-    /**
-     * @HACK if we don't override this method with the specific Long type, the generator cannot be initialized.
-     * @return
-     */
-    @Override
-    protected IntegralDataTypeHolder buildHolder() {
-        return IdentifierGeneratorHelper.getIntegralDataTypeHolder(Long.class);
-    }
 
     @Override
-    public void configure( Type type, Properties properties, Dialect dialect ) throws MappingException {
+    public void configure( Type type, Properties properties, ServiceRegistry serviceRegistry ) throws MappingException {
         String defaultSeqValue = "hibernate_sequence";
         String sequenceName = ConfigurationHelper.getString(SEQUENCE, properties, defaultSeqValue);
 
@@ -57,7 +51,7 @@ public class IntactAcGenerator extends SequenceGenerator {
             sequenceName = INTACT_AC_SEQUENCE_NAME;
             properties.put( SEQUENCE, sequenceName );
         }
-        super.configure( type, properties, dialect );
+        super.configure( type, properties, serviceRegistry );
     }
 
     /**
@@ -87,8 +81,4 @@ public class IntactAcGenerator extends SequenceGenerator {
     }
 
 
-    @Override
-    public String getSequenceName() {
-        return INTACT_AC_SEQUENCE_NAME;
-    }
 }

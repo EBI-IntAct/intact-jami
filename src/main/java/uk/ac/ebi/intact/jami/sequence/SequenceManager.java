@@ -18,7 +18,7 @@ package uk.ac.ebi.intact.jami.sequence;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.dialect.Dialect;
-import org.hibernate.ejb.HibernateEntityManagerFactory;
+import org.hibernate.jpa.HibernateEntityManagerFactory;
 import org.hibernate.engine.spi.SessionFactoryImplementor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;

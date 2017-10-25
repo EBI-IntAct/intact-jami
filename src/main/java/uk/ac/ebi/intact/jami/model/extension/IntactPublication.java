@@ -21,6 +21,7 @@ import uk.ac.ebi.intact.jami.utils.IntactUtils;
 import javax.persistence.*;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.ForeignKey;
 import javax.persistence.OrderBy;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
@@ -678,8 +679,7 @@ public class IntactPublication extends AbstractIntactPrimaryObject implements Pu
     }
 
     @ManyToOne(targetEntity = IntactCvTerm.class)
-    @JoinColumn( name = "status_ac", referencedColumnName = "ac" )
-    @ForeignKey(name="FK_PUBLICATION_STATUS")
+    @JoinColumn( name = "status_ac", referencedColumnName = "ac",foreignKey = @ForeignKey(name="FK_PUBLICATION_STATUS"))
     @Target(IntactCvTerm.class)
     /**
      * NOTE: in the future, should be persisted and cvStatus should be removed
@@ -841,8 +841,7 @@ public class IntactPublication extends AbstractIntactPrimaryObject implements Pu
     }
 
     @ManyToOne( targetEntity = User.class )
-    @JoinColumn( name = "owner_pk", referencedColumnName = "ac" )
-    @ForeignKey(name="FK_PUBLICATION_OWNER")
+    @JoinColumn( name = "owner_pk", referencedColumnName = "ac",foreignKey = @ForeignKey(name="FK_PUBLICATION_OWNER"))
     @Target(User.class)
     public User getCurrentOwner() {
         return currentOwner;
@@ -853,8 +852,7 @@ public class IntactPublication extends AbstractIntactPrimaryObject implements Pu
     }
 
     @ManyToOne( targetEntity = User.class )
-    @JoinColumn( name = "reviewer_pk", referencedColumnName = "ac" )
-    @ForeignKey(name="FK_PUBLICATION_REVIEWER")
+    @JoinColumn( name = "reviewer_pk", referencedColumnName = "ac",foreignKey = @ForeignKey(name="FK_PUBLICATION_REVIEWER"))
     @Target(User.class)
     public User getCurrentReviewer() {
         return currentReviewer;
