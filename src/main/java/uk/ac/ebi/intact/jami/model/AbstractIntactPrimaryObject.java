@@ -7,7 +7,7 @@ package uk.ac.ebi.intact.jami.model;
 
 import org.hibernate.annotations.GenericGenerator;
 import uk.ac.ebi.intact.jami.model.audit.AbstractAuditable;
-
+import com.sun.corba.se.spi.ior.Identifiable;
 import javax.persistence.*;
 
 /**
@@ -15,7 +15,7 @@ import javax.persistence.*;
  *
  */
 @MappedSuperclass
-public abstract class AbstractIntactPrimaryObject extends AbstractAuditable implements IntactPrimaryObject {
+public abstract class AbstractIntactPrimaryObject extends AbstractAuditable implements IntactPrimaryObject,Identifiable {
     private String ac;
 
     public AbstractIntactPrimaryObject() {
