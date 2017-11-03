@@ -5,9 +5,10 @@
  */
 package uk.ac.ebi.intact.jami.model;
 
+import com.sun.corba.se.spi.ior.Identifiable;
 import org.hibernate.annotations.GenericGenerator;
 import uk.ac.ebi.intact.jami.model.audit.AbstractAuditable;
-import com.sun.corba.se.spi.ior.Identifiable;
+
 import javax.persistence.*;
 
 /**
@@ -15,7 +16,7 @@ import javax.persistence.*;
  *
  */
 @MappedSuperclass
-public abstract class AbstractIntactPrimaryObject extends AbstractAuditable implements IntactPrimaryObject,Identifiable {
+public abstract class AbstractIntactPrimaryObject extends AbstractAuditable implements IntactPrimaryObject {
     private String ac;
 
     public AbstractIntactPrimaryObject() {
@@ -25,9 +26,9 @@ public abstract class AbstractIntactPrimaryObject extends AbstractAuditable impl
     //access methods for attributes
 
     @Id
-    @GeneratedValue( generator = "intact-id-generator",strategy = GenerationType.SEQUENCE )
     @GenericGenerator( name = "intact-id-generator", strategy = "uk.ac.ebi.intact.jami.model.IntactAcGenerator",parameters = @org.hibernate.annotations.Parameter(name = "sequence_name", value = "hibernate_sequence"))
-    @Column( name = "ac", length = 30 )
+    @GeneratedValue( generator = "intact-id-generator",strategy = GenerationType.SEQUENCE )
+    @Column( name = "ac", length = 30,unique = true)
     public String getAc() {
         return ac;
     }
@@ -50,5 +51,8 @@ public abstract class AbstractIntactPrimaryObject extends AbstractAuditable impl
     public void setAc( String ac ) {
         this.ac = ac;
     }
+
+    @Version
+    private Integer version;
 }
 
