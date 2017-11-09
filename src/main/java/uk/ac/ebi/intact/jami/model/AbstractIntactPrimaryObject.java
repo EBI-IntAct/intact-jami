@@ -51,8 +51,5 @@ public abstract class AbstractIntactPrimaryObject extends AbstractAuditable impl
     public void setAc( String ac ) {
         this.ac = ac;
     }
-
-    @Version
-    private Integer version;
 }
 
