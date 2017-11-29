@@ -50,3 +50,7 @@ local.properties
 
 # Hidden files
 .DS_Store
+
+#embedded db
+*.mv.db
+*.trace.db
