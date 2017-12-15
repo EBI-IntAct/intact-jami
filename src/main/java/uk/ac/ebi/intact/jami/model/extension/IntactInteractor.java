@@ -411,6 +411,7 @@ public class IntactInteractor extends AbstractIntactPrimaryObject implements Int
                 }
                 else{
                     this.xrefs.addOnly(ref);
+                    processAddedXrefEvent(ref);
                 }
             }
         }
@@ -537,6 +538,18 @@ public class IntactInteractor extends AbstractIntactPrimaryObject implements Int
         return false;
     }
 
+    protected void processAddedXrefEvent(Xref added) {
+        // nothing to do
+    }
+
+    protected void processRemovedXrefEvent(Xref removed) {
+        // nothing to do
+    }
+
+    protected void clearPropertiesLinkedToXrefs() {
+        // nothing to do
+    }
+
     protected void processAddedAnnotation(Annotation added) {
         // nothing to do
     }
@@ -609,7 +622,7 @@ public class IntactInteractor extends AbstractIntactPrimaryObject implements Int
             }
             else{
                 super.addOnly(acRef);
-                throw new UnsupportedOperationException("Cannot remove the database accession of a Feature object from its list of identifiers.");
+                throw new UnsupportedOperationException("Cannot remove the database accession of a Interactor object from its list of identifiers.");
             }
         }
 
@@ -630,16 +643,19 @@ public class IntactInteractor extends AbstractIntactPrimaryObject implements Int
 
         @Override
         protected void processAddedObjectEvent(Xref added) {
+            processAddedXrefEvent(added);
             persistentXrefs.add(added);
         }
 
         @Override
         protected void processRemovedObjectEvent(Xref removed) {
+            processRemovedXrefEvent(removed);
             persistentXrefs.remove(removed);
         }
 
         @Override
         protected void clearProperties() {
+            clearPropertiesLinkedToXrefs();
             persistentXrefs.retainAll(getIdentifiers());
         }
     }
