@@ -271,7 +271,7 @@ public class IntactPublication extends AbstractIntactPrimaryObject implements Pu
             CvTerm imexDatabase = IntactUtils.createMIDatabase(Xref.IMEX, Xref.IMEX_MI);
             CvTerm imexPrimaryQualifier = IntactUtils.createMIQualifier(Xref.IMEX_PRIMARY, Xref.IMEX_PRIMARY_MI);
             // first remove old imex if not null
-            if (this.imexId != null && !identifier.equals(this.imexId)){
+            if (this.imexId != null && !identifier.equals(this.imexId.getId())){
                 if (this.imexId instanceof AbstractIntactXref){
                     ((AbstractIntactXref) this.imexId).setId(identifier);
                 }
