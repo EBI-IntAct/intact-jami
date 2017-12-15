@@ -72,17 +72,17 @@ public class ComplexAcGenerator extends SequenceGenerator {
      */
     @Override
     public Serializable generate( SessionImplementor sessionImplementor, Object object ) throws HibernateException {
-        String prefix="CP";
+        String prefix="CPX";
         IntactContext intactContext = ApplicationContextProvider.getBean("intactJamiContext");
         if (intactContext != null) {
             prefix = intactContext.getIntactConfiguration().getComplexAcPrefix();
         }
+        //We add the default version
+        String id = prefix + "-" + super.generate( sessionImplementor, object ) + ".1";
 
-        String ac = prefix + "-" + super.generate( sessionImplementor, object );
+        log.trace( "Assigning Complex Ac: " + id );
 
-        log.trace( "Assigning Complex Ac: " + ac );
-
-        return ac;
+        return id;
     }
 
 
