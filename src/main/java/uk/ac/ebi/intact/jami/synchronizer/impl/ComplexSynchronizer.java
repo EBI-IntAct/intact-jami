@@ -7,7 +7,6 @@ import psidev.psi.mi.jami.utils.clone.InteractorCloner;
 import psidev.psi.mi.jami.utils.comparator.CollectionComparator;
 import uk.ac.ebi.intact.jami.context.SynchronizerContext;
 import uk.ac.ebi.intact.jami.merger.ComplexMergerEnrichOnly;
-import uk.ac.ebi.intact.jami.merger.InteractorBaseMergerEnrichOnly;
 import uk.ac.ebi.intact.jami.model.extension.*;
 import uk.ac.ebi.intact.jami.model.lifecycle.LifeCycleEvent;
 import uk.ac.ebi.intact.jami.model.user.User;
@@ -60,9 +59,11 @@ public class ComplexSynchronizer extends InteractorSynchronizerTemplate<Complex,
             if (term.getParticipants().isEmpty()){
                 filteredResults.add(complex);
             }
-            // same participants
+            // same participants but different complex_ac to exclude the new versions as duplicates
             else if (this.participantsComparator.compare(term.getParticipants(), complex.getParticipants()) == 0){
-                filteredResults.add(complex);
+                if (term.getComplexAc().equalsIgnoreCase(complex.getComplexAc())) {
+                    filteredResults.add(complex);
+                }
             }
         }
 
@@ -106,17 +107,18 @@ public class ComplexSynchronizer extends InteractorSynchronizerTemplate<Complex,
     @Override
     protected Collection<IntactComplex> postFilterAll(Complex term, Collection<IntactComplex> results) {
         Collection<IntactComplex> filteredResults = new ArrayList<IntactComplex>(results.size());
-        for (IntactComplex complex : results){
+        for (IntactComplex complex : results) {
             // we accept empty participants when finding complexes
-            if (term.getParticipants().isEmpty()){
+            if (term.getParticipants().isEmpty()) {
                 filteredResults.add(complex);
             }
-            // same participants
-            else if (this.participantsComparator.compare(term.getParticipants(), complex.getParticipants()) == 0){
-                filteredResults.add(complex);
+            // same participants but different complex_ac to exclude the new versions as duplicates and allow then to be saved in the database
+            else if (this.participantsComparator.compare(term.getParticipants(), complex.getParticipants()) == 0) {
+                if (term.getComplexAc().equalsIgnoreCase(complex.getComplexAc())) {
+                    filteredResults.add(complex);
+                }
             }
         }
-
         return filteredResults;
     }
 
@@ -128,9 +130,11 @@ public class ComplexSynchronizer extends InteractorSynchronizerTemplate<Complex,
             if (term.getParticipants().isEmpty() && complex.getAc() != null){
                 filteredResults.add(complex.getAc());
             }
-            // same participants
+            // same participants but different complex_ac to exclude the new versions as duplicates and allow then to be saved in the database
             else if (this.participantsComparator.compare(term.getParticipants(), complex.getParticipants()) == 0 && complex.getAc() != null){
-                filteredResults.add(complex.getAc());
+                if (term.getComplexAc().equalsIgnoreCase(complex.getComplexAc())) {
+                    filteredResults.add(complex.getAc());
+                }
             }
         }
 
