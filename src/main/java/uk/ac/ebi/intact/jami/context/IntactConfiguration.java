@@ -72,7 +72,7 @@ public class IntactConfiguration {
 
     public String getComplexAcPrefix() {
         if (complexAcPrefix == null){
-            complexAcPrefix = "CP";
+            complexAcPrefix = "CPX";
         }
         return complexAcPrefix;
     }
