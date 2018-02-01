@@ -31,7 +31,7 @@ import javax.annotation.Resource;
  *
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(locations = {"classpath*:/META-INF/intact-jami-test.spring.xml"})
+@ContextConfiguration(locations = {"classpath*:/META-INF/intact-jami-test-spring.xml"})
 @Transactional(value = "jamiTransactionManager")
 @TransactionConfiguration
 @DirtiesContext

@@ -15,16 +15,16 @@
     <name>INTACT :: JAMI - Core interfaces, default implementations of IntAct API based on JAMI interfaces</name>
 
     <scm>
-        <connection>scm:git:https://bitbucket.org/intact-ebi/intact-jami.git</connection>
-        <developerConnection>scm:git:https://bitbucket.org/intact-ebi/intact-jami.git</developerConnection>
-        <url>https://bitbucket.org/intact-ebi/intact-jami</url>
+        <connection>scm:git:https://github.com/EBI-IntAct/intact-jami.git</connection>
+        <developerConnection>scm:git:https://github.com/EBI-IntAct/intact-ebi/intact-jami.git</developerConnection>
+        <url>https://github.com/EBI-IntAct/intact-ebi/intact-jami</url>
         <tag>HEAD</tag>
     </scm>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <spring.version>3.2.9.RELEASE</spring.version>
-        <jami.version>3.0.12</jami.version>
+        <jami.version>3.0.15</jami.version>
     </properties>
 
     <build>
@@ -51,8 +51,16 @@
                         <hotfixBranchPrefix>hotfix-</hotfixBranchPrefix>
                         <versionTagPrefix>${project.artifactId}-</versionTagPrefix>
                     </flowInitContext>
+                    <username>${git.user}</username>
+                    <password>${git.password}</password>
                     <!-- see goals wiki page for configuration options -->
                     <allowUntracked>true</allowUntracked>
+                    <noDeploy>true</noDeploy>
+                    <pullMaster>true</pullMaster>
+                    <pullDevelop>true</pullDevelop>
+                    <pushReleases>true</pushReleases>
+                    <pushHotfixes>true</pushHotfixes>
+                    <pushFeatures>true</pushFeatures>
                 </configuration>
             </plugin>
         </plugins>
