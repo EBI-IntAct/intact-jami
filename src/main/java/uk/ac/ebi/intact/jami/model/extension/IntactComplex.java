@@ -73,8 +73,6 @@ public class IntactComplex extends IntactInteractor implements Complex,Releasabl
     private User currentOwner;
     private User currentReviewer;
 
-    private String complexAc;
-
     private transient CvTerm cvStatus;
 
     private transient Annotation toBeReviewed;
@@ -566,16 +564,52 @@ public class IntactComplex extends IntactInteractor implements Complex,Releasabl
     public String getComplexAc() {
         // initialise xrefs if not done yet
         getXrefs();
-        return this.complexAcXref != null ? this.complexAcXref.getId() + "." + this.complexAcXref.getVersion() : null;
+        return this.complexAcXref != null ? this.complexAcXref.getId() : null;
     }
 
+    @Transient
+    public String getComplexVersion() {
+        // initialise xrefs if not done yet
+        getXrefs();
+        return this.complexAcXref != null ? this.complexAcXref.getVersion() : null;
+    }
 
-    //TODO Review possible error with version and acc
+    @Transient
+    public Xref getComplexAcXref() {
+        // initialise xrefs if not done yet
+        getXrefs();
+        return this.complexAcXref;
+    }
+
+    @Override
+    public void assignComplexAc(String accession, String version) {
+        // add new complex ac if not null
+        if (accession != null) {
+            InteractorXrefList interactionXrefs = (InteractorXrefList) getXrefs();
+
+            CvTerm complexPortalDatabase = IntactUtils.createMIDatabase(Xref.COMPLEX_PORTAL, Xref.COMPLEX_PORTAL_MI);
+            CvTerm complexPortalPrimaryQualifier = IntactUtils.createMIQualifier(Xref.COMPLEX_PRIMARY, Xref.COMPLEX_PRIMARY_MI);
+            // first remove old ac if not null
+            if (this.complexAcXref != null) {
+                if (!accession.equals(complexAcXref.getId())) {
+                    // first remove old complexAcXref and creates the new one;
+                    interactionXrefs.remove(this.complexAcXref);
+                    this.complexAcXref = new InteractorXref(complexPortalDatabase, accession, version, complexPortalPrimaryQualifier);
+                    interactionXrefs.add(this.complexAcXref);
+                }
+            } else {
+                this.complexAcXref = new InteractorXref(complexPortalDatabase, accession, version, complexPortalPrimaryQualifier);
+                interactionXrefs.add(this.complexAcXref);
+            }
+        } else {
+            throw new IllegalArgumentException("The complex ac has to be non null.");
+        }
+    }
+
     @Override
     public void assignComplexAc(String accession) {
         // add new complex ac if not null
         if (accession != null) {
-            InteractorXrefList interactionXrefs = (InteractorXrefList) getXrefs();
             String id;
             String version;
 
@@ -592,21 +626,8 @@ public class IntactComplex extends IntactInteractor implements Complex,Releasabl
             } else {
                 throw new IllegalArgumentException("The complex ac has a non valid format (e.g. CPX-12345.1)");
             }
+            assignComplexAc(id, version);
 
-            CvTerm complexPortalDatabase = IntactUtils.createMIDatabase(Xref.COMPLEX_PORTAL, Xref.COMPLEX_PORTAL_MI);
-            CvTerm complexPortalPrimaryQualifier = IntactUtils.createMIQualifier(Xref.COMPLEX_PRIMARY, Xref.COMPLEX_PRIMARY_MI);
-            // first remove old ac if not null
-            if (this.complexAcXref != null) {
-                if (!id.equals(complexAcXref.getId())) {
-                    // first remove old complexAcXref and creates the new one;
-                    interactionXrefs.remove(this.complexAcXref);
-                    this.complexAcXref = new InteractorXref(complexPortalDatabase, id, version, complexPortalPrimaryQualifier);
-                    interactionXrefs.add(this.complexAcXref);
-                }
-            } else {
-                this.complexAcXref = new InteractorXref(complexPortalDatabase, id, version, complexPortalPrimaryQualifier);
-                interactionXrefs.add(this.complexAcXref);
-            }
         } else {
             throw new IllegalArgumentException("The complex ac has to be non null.");
         }
@@ -876,13 +897,16 @@ public class IntactComplex extends IntactInteractor implements Complex,Releasabl
 
     @Override
     protected void processAddedXrefEvent(Xref added) {
-
-        // the added identifier is complex ac and the current complex ac is not set
-        if (complexAcXref == null && XrefUtils.isXrefFromDatabase(added,  Xref.COMPLEX_PORTAL_MI, Xref.COMPLEX_PORTAL)){
-            // the added xref is complex-primary
-            if (XrefUtils.doesXrefHaveQualifier(added,  Xref.COMPLEX_PRIMARY_MI, Xref.COMPLEX_PRIMARY)){
-                complexAcXref = added;
+        // the added identifier is complex ac
+        if (XrefUtils.isXrefFromDatabase(added, Xref.COMPLEX_PORTAL_MI, Xref.COMPLEX_PORTAL) &&
+                XrefUtils.doesXrefHaveQualifier(added, Xref.COMPLEX_PRIMARY_MI, Xref.COMPLEX_PRIMARY)) {
+            // first remove old ac if not null
+            if (complexAcXref != null) {
+                // the added xref is complex-primary
+                // first remove old complexAcXref and add the new one;
+                getXrefs().remove(this.complexAcXref);
             }
+            complexAcXref = added;
         }
     }
 

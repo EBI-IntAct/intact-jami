@@ -36,6 +36,8 @@ public interface InteractorDao<I extends IntactInteractor> extends IntactBaseDao
 
     public Collection<I> getByXref(String dbName, String dbMI, String primaryId, String qualifierName, String qualifierMI);
 
+    public Collection<I> getByXref(String dbName, String dbMI, String primaryId, String version, String qualifierName, String qualifierMI);
+
     public Collection<I> getByXrefLike(String dbName, String dbMI, String primaryId, String qualifierName, String qualifierMI);
 
     public Collection<I> getByAnnotationTopic(String topicName, String topicMI);

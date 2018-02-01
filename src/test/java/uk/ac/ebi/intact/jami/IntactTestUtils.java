@@ -426,6 +426,15 @@ public class IntactTestUtils {
         return organism;
     }
 
+    public static IntactOrganism createIntactOrganism2() throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
+        IntactOrganism organism = new IntactOrganism(10116);
+        organism.setCommonName("rat");
+        organism.setScientificName("Rattus norvegicus");
+        organism.getAliases().add(createAliasSynonym(OrganismAlias.class));
+
+        return organism;
+    }
+
     public static Organism createOrganism() {
         Organism organism = new DefaultOrganism(9606);
         organism.setCommonName("human");
@@ -522,6 +531,22 @@ public class IntactTestUtils {
         return interactor;
     }
 
+    public static IntactComplex createIntactComplex(String complexAc, String version) throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
+        IntactComplex interactor = createIntactInteractor(IntactComplex.class);
+        interactor.setEvidenceType(createEvidenceType());
+        interactor.setSource(createIntactSource());
+        interactor.assignComplexAc(complexAc, version);
+
+        return interactor;
+    }
+
+    private static CvTerm createEvidenceType() {
+        IntactCvTerm cvEvidenceType = IntactUtils.createIntactMITerm(Complex.ECO, Complex.ECO_MI, null);
+        cvEvidenceType.setFullName("Test eidence type");
+
+        return cvEvidenceType;
+    }
+
     public static IntactInteractorPool createIntactInteractorPool() throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
         IntactInteractorPool interactor = createIntactInteractor(IntactInteractorPool.class);
         Interactor interactor1 = createDefaultIntactInteractor();
@@ -598,6 +623,49 @@ public class IntactTestUtils {
         interactor.getCausalRelationships().add(new ModelledCausalRelationship(IntactUtils.createMITopic("increases", null), interactor));
 
         return interactor;
+    }
+
+    public static ModelledParticipant createIntactModelledParticipant2() throws NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException {
+
+        IntactInteractor interactor = new IntactInteractor("test interactor 2");
+        interactor.setFullName("Full interactor name");
+        interactor.getAliases().add(createAliasSynonym(InteractorAlias.class));
+        interactor.getXrefs().add(IntactTestUtils.createPubmedXrefNoQualifier(InteractorXref.class, "123456"));
+        interactor.getAnnotations().add(createAnnotationComment(InteractorAnnotation.class));
+        interactor.setOrganism(createIntactOrganism());
+        interactor.getChecksums().add(ChecksumUtils.createRogid("xxxx1"));
+
+        IntactModelledParticipant modelledParticipant = new IntactModelledParticipant(interactor);
+        modelledParticipant.setStoichiometry(new IntactStoichiometry(2));
+        modelledParticipant.getAliases().add(createAliasSynonym(ModelledParticipantAlias.class));
+        modelledParticipant.getXrefs().add(IntactTestUtils.createPubmedXrefNoQualifier(ModelledParticipantXref.class, "123456"));
+        modelledParticipant.getAnnotations().add(createAnnotationComment(ModelledParticipantAnnotation.class));
+        modelledParticipant.getFeatures().add(createBasicModelledFeature("type2", "MI:xxxx"));
+        modelledParticipant.getFeatures().iterator().next().getLinkedFeatures().clear();
+        modelledParticipant.getCausalRelationships().add(new ModelledCausalRelationship(IntactUtils.createMITopic("increases", null), modelledParticipant));
+
+        return modelledParticipant;
+    }
+
+    public static ModelledParticipant createIntactModelledParticipant3() throws NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException {
+        IntactInteractor interactor = new IntactInteractor("test interactor 3");
+        interactor.setFullName("Full interactor name");
+        interactor.getAliases().add(createAliasSynonym(InteractorAlias.class));
+        interactor.getXrefs().add(IntactTestUtils.createPubmedXrefNoQualifier(InteractorXref.class, "123456"));
+        interactor.getAnnotations().add(createAnnotationComment(InteractorAnnotation.class));
+        interactor.setOrganism(createIntactOrganism());
+        interactor.getChecksums().add(ChecksumUtils.createRogid("xxxx1"));
+
+        IntactModelledParticipant modelledParticipant = new IntactModelledParticipant(interactor);
+        modelledParticipant.setStoichiometry(new IntactStoichiometry(3));
+        modelledParticipant.getAliases().add(createAliasSynonym(ModelledParticipantAlias.class));
+        modelledParticipant.getXrefs().add(IntactTestUtils.createPubmedXrefNoQualifier(ModelledParticipantXref.class, "123456"));
+        modelledParticipant.getAnnotations().add(createAnnotationComment(ModelledParticipantAnnotation.class));
+        modelledParticipant.getFeatures().add(createBasicModelledFeature("type3", "MI:xxxx"));
+        modelledParticipant.getFeatures().iterator().next().getLinkedFeatures().clear();
+        modelledParticipant.getCausalRelationships().add(new ModelledCausalRelationship(IntactUtils.createMITopic("increases", null), modelledParticipant));
+
+        return modelledParticipant;
     }
 
     public static ModelledParticipant createModelledParticipant() throws NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException {

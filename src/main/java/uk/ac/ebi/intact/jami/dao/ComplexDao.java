@@ -17,6 +17,12 @@ import java.util.Collection;
 
 public interface ComplexDao extends InteractorDao<IntactComplex>{
 
+    public IntactComplex getLatestComplexVersionByComplexAc(String complexAc);
+
+    public IntactComplex getByComplexAcAndVersion(String complexAc, String version);
+
+    public Collection<IntactComplex> getByComplexAc(String complexAc);
+
     public Collection<IntactComplex> getByInteractionType(String typeName, String typeMI, int first, int max);
 
     public Collection<IntactComplex> getByLifecycleEvent(String evtName, int first, int max);

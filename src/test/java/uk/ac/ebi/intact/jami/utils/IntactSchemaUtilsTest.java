@@ -25,7 +25,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
  * @author Marine Dumousseau (marine@ebi.ac.uk)
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(locations = {"classpath*:/META-INF/intact-jami-test.spring.xml"})
+@ContextConfiguration(locations = {"classpath*:/META-INF/intact-jami-test-spring.xml"})
 public class IntactSchemaUtilsTest {
 
     @Test
@@ -36,9 +36,9 @@ public class IntactSchemaUtilsTest {
             System.out.println(sql);
         }
 
-        Assert.assertEquals(275, strings.length);
-        Assert.assertEquals(275, IntactSchemaUtils.generateCreateSchemaDDLForPostgreSQL().length);
-        Assert.assertEquals(275, IntactSchemaUtils.generateCreateSchemaDDLForHSQL().length);
-        Assert.assertEquals(275, IntactSchemaUtils.generateCreateSchemaDDLForH2().length);
+        Assert.assertEquals(277, strings.length);
+        Assert.assertEquals(277, IntactSchemaUtils.generateCreateSchemaDDLForPostgreSQL().length);
+        Assert.assertEquals(277, IntactSchemaUtils.generateCreateSchemaDDLForHSQL().length);
+        Assert.assertEquals(277, IntactSchemaUtils.generateCreateSchemaDDLForH2().length);
     }
 }

@@ -35,6 +35,12 @@ public class ComplexAcGenerator extends SequenceGenerator {
      * The sequence parameter
      */
     public static final String SEQUENCE = "sequence";
+    // To avoid the use of the schema in the sequence name a public synonim was added after created the sequence
+    // INTACT_AC sequence works in the same way
+    // grant select on INTACT.COMPLEX_AC to SCHEMA_USER;
+    // create public synonym COMPLEX_AC for INTACT.COMPLEX_AC;
+    // grant select,delete,insert,update on IA_COMPLEX_AC to SCHEMA_USER;
+    // create public synonym IA_COMPLEX_AC for INTACT.IA_COMPLEX_AC;
     public static final String COMPLEX_AC_SEQUENCE_NAME = "complex_ac";
 
     /**
@@ -78,7 +84,7 @@ public class ComplexAcGenerator extends SequenceGenerator {
             prefix = intactContext.getIntactConfiguration().getComplexAcPrefix();
         }
         //We add the default version
-        String id = prefix + "-" + super.generate( sessionImplementor, object ) + ".1";
+        String id = prefix + "-" + super.generate( sessionImplementor, object );
 
         log.trace( "Assigning Complex Ac: " + id );
 
