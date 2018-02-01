@@ -310,6 +310,132 @@ public class InteractorDaoImpl<T extends Interactor, F extends IntactInteractor>
         return query.getResultList();
     }
 
+    public Collection<F> getByXref(String dbName, String dbMI, String primaryId, String version, String qualifierName, String qualifierMI) {
+        Query query;
+        if (dbMI != null){
+            if (qualifierName == null && qualifierMI == null){
+                query = getEntityManager().createQuery("select distinct f from "+getEntityClass().getSimpleName()+" f "  +
+                        "join f.dbXrefs as x " +
+                        "join x.database as dat " +
+                        "join dat.dbXrefs as xref " +
+                        "join xref.database as d " +
+                        "join xref.qualifier as q " +
+                        "where x.qualifier is null " +
+                        "and (q.shortName = :identity or q.shortName = :secondaryAc) " +
+                        "and d.shortName = :psimi " +
+                        "and xref.id = :mi " +
+                        "and x.id = :primary " +
+                        "and x.version = :version");
+                query.setParameter("identity", Xref.IDENTITY);
+                query.setParameter("secondaryAc", Xref.SECONDARY);
+                query.setParameter("psimi", CvTerm.PSI_MI);
+                query.setParameter("mi", dbMI);
+                query.setParameter("primary", primaryId);
+                query.setParameter("version", version);
+            }
+            else if (qualifierMI != null){
+                query = getEntityManager().createQuery("select distinct f from "+getEntityClass().getSimpleName()+" f "  +
+                        "join f.dbXrefs as x " +
+                        "join x.database as dat " +
+                        "join dat.dbXrefs as xref " +
+                        "join x.qualifier as qual " +
+                        "join qual.dbXrefs as xref2 " +
+                        "join xref.database as d " +
+                        "join xref.qualifier as q " +
+                        "join xref2.database as d2 " +
+                        "join xref2.qualifier as q2 " +
+                        "where (q.shortName = :identity or q.shortName = :secondaryAc) " +
+                        "and d.shortName = :psimi " +
+                        "and xref.id = :mi "+
+                        "and (q2.shortName = :identity or q2.shortName = :secondaryAc) " +
+                        "and d2.shortName = :psimi " +
+                        "and xref2.id = :mi2 " +
+                        "and x.id = :primary "+
+                        "and x.version = :version");
+                query.setParameter("identity", Xref.IDENTITY);
+                query.setParameter("secondaryAc", Xref.SECONDARY);
+                query.setParameter("psimi", CvTerm.PSI_MI);
+                query.setParameter("mi", dbMI);
+                query.setParameter("mi2", qualifierMI);
+                query.setParameter("primary", primaryId);
+                query.setParameter("version", version);
+            }
+            else{
+                query = getEntityManager().createQuery("select distinct f from "+getEntityClass().getSimpleName()+" f "  +
+                        "join f.dbXrefs as x " +
+                        "join x.database as dat " +
+                        "join x.qualifier as qual " +
+                        "join dat.dbXrefs as xref " +
+                        "join xref.database as d " +
+                        "join xref.qualifier as q " +
+                        "where (q.shortName = :identity or q.shortName = :secondaryAc) " +
+                        "and d.shortName = :psimi " +
+                        "and xref.id = :mi " +
+                        "and qual.shortName = :qName " +
+                        "and x.id = :primary "+
+                        "and x.version = :version");
+                query.setParameter("identity", Xref.IDENTITY);
+                query.setParameter("secondaryAc", Xref.SECONDARY);
+                query.setParameter("psimi", CvTerm.PSI_MI);
+                query.setParameter("mi", dbMI);
+                query.setParameter("qName", qualifierName);
+                query.setParameter("primary", primaryId);
+                query.setParameter("version", version);
+            }
+        }
+        else{
+            if (qualifierName == null && qualifierMI == null){
+                query = getEntityManager().createQuery("select distinct f from "+getEntityClass().getSimpleName()+" f "  +
+                        "join f.dbXrefs as x " +
+                        "join x.database as d " +
+                        "where d.shortName = :dbName " +
+                        "and x.qualifier is null " +
+                        "and x.id = :primary "+
+                        "and x.version = :version");
+                query.setParameter("dbName", dbName);
+                query.setParameter("primary", primaryId);
+                query.setParameter("version", version);
+            }
+            else if (qualifierMI != null){
+                query = getEntityManager().createQuery("select distinct f from "+getEntityClass().getSimpleName()+" f "  +
+                        "join f.dbXrefs as x " +
+                        "join x.database as dat " +
+                        "join x.qualifier as qual " +
+                        "join qual.dbXrefs as xref " +
+                        "join xref.database as d " +
+                        "join xref.qualifier as q " +
+                        "where dat.shortName = :dbName " +
+                        "and (q.shortName = :identity or q.shortName = :secondaryAc) " +
+                        "and d.shortName = :psimi " +
+                        "and xref.id = :mi " +
+                        "and x.id = :primary "+
+                        "and x.version = :version");
+                query.setParameter("dbName", dbName);
+                query.setParameter("identity", Xref.IDENTITY);
+                query.setParameter("secondaryAc", Xref.SECONDARY);
+                query.setParameter("psimi", CvTerm.PSI_MI);
+                query.setParameter("mi", qualifierMI);
+                query.setParameter("primary", primaryId);
+                query.setParameter("version", version);
+            }
+            else{
+                query = getEntityManager().createQuery("select distinct f from "+getEntityClass().getSimpleName()+" f "  +
+                        "join f.dbXrefs as x " +
+                        "join x.database as d " +
+                        "join x.qualifier as q " +
+                        "where d.shortName = :dbName " +
+                        "and q.shortName = :qName " +
+                        "and x.id = :primary "+
+                        "and x.version = :version");
+                query.setParameter("dbName", dbName);
+                query.setParameter("qName", qualifierName);
+                query.setParameter("primary", primaryId);
+                query.setParameter("version", version);
+            }
+        }
+        return query.getResultList();
+    }
+
     public Collection<F> getByXrefLike(String dbName, String dbMI, String primaryId, String qualifierName, String qualifierMI) {
         Query query;
         if (dbMI != null){

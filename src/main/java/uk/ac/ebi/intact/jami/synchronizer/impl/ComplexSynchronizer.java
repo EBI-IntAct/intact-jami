@@ -7,7 +7,6 @@ import psidev.psi.mi.jami.utils.clone.InteractorCloner;
 import psidev.psi.mi.jami.utils.comparator.CollectionComparator;
 import uk.ac.ebi.intact.jami.context.SynchronizerContext;
 import uk.ac.ebi.intact.jami.merger.ComplexMergerEnrichOnly;
-import uk.ac.ebi.intact.jami.merger.InteractorBaseMergerEnrichOnly;
 import uk.ac.ebi.intact.jami.model.extension.*;
 import uk.ac.ebi.intact.jami.model.lifecycle.LifeCycleEvent;
 import uk.ac.ebi.intact.jami.model.user.User;
@@ -27,7 +26,7 @@ import java.util.*;
 
 /**
  * Default synchronizer for complexes
- *
+ * <p>
  * NOTE: when we want to persist cooperative effects, we would remove the transcient property in the IntActConmplex
  * and uncomment the prepareCooperativeEffects
  *
@@ -36,7 +35,7 @@ import java.util.*;
  * @since <pre>21/01/14</pre>
  */
 
-public class ComplexSynchronizer extends InteractorSynchronizerTemplate<Complex, IntactComplex>{
+public class ComplexSynchronizer extends InteractorSynchronizerTemplate<Complex, IntactComplex> {
 
     private CollectionComparator<ModelledParticipant> participantsComparator;
     private ComplexExperimentBCSynchronizer experimentBCSynchronizer;
@@ -55,24 +54,31 @@ public class ComplexSynchronizer extends InteractorSynchronizerTemplate<Complex,
     @Override
     protected IntactComplex postFilter(Complex term, Collection<IntactComplex> results) throws FinderException {
         Collection<IntactComplex> filteredResults = new ArrayList<IntactComplex>(results.size());
-        for (IntactComplex complex : results){
+        for (IntactComplex complex : results) {
             // we accept empty participants when finding complexes
-            if (term.getParticipants().isEmpty()){
+            if (term.getParticipants().isEmpty()) {
                 filteredResults.add(complex);
             }
-            // same participants
-            else if (this.participantsComparator.compare(term.getParticipants(), complex.getParticipants()) == 0){
-                filteredResults.add(complex);
+            // same participants but same complex_ac with different version to exclude the new versions as duplicates and allow then to be saved in the database
+            else if (this.participantsComparator.compare(term.getParticipants(), complex.getParticipants()) == 0) {
+                if (term instanceof IntactComplex) {
+                    IntactComplex intactComplex = (IntactComplex) term;
+                    if (intactComplex.getComplexAcXref() != null && complex.getComplexAcXref() != null) {
+                        if (!intactComplex.getComplexAcXref().getId().equalsIgnoreCase(complex.getComplexAcXref().getId())){
+                            filteredResults.add(complex);
+                        } else if (intactComplex.getComplexAcXref().getVersion().equalsIgnoreCase(complex.getComplexAcXref().getVersion())) {
+                            filteredResults.add(complex);
+                        }
+                    }
+                }
             }
         }
 
-        if (filteredResults.size() == 1){
+        if (filteredResults.size() == 1) {
             return filteredResults.iterator().next();
-        }
-        else if (filteredResults.size() > 1){
-            throw new FinderException("The complex "+term + " can match "+filteredResults.size()+" complexes in the database and we cannot determine which one is valid: "+filteredResults);
-        }
-        else{
+        } else if (filteredResults.size() > 1) {
+            throw new FinderException("The complex " + term + " can match " + filteredResults.size() + " complexes in the database and we cannot determine which one is valid: " + filteredResults);
+        } else {
             return null;
         }
     }
@@ -80,7 +86,7 @@ public class ComplexSynchronizer extends InteractorSynchronizerTemplate<Complex,
     @Override
     protected Collection<IntactComplex> findByOtherProperties(Complex term, IntactCvTerm existingType, IntactOrganism existingOrganism) {
         Query query;
-        if (existingOrganism == null){
+        if (existingOrganism == null) {
             query = getEntityManager().createQuery("select i from IntactComplex i " +
                     "join i.interactorType as t " +
                     "where i.organism is null " +
@@ -88,9 +94,8 @@ public class ComplexSynchronizer extends InteractorSynchronizerTemplate<Complex,
                     "and t.ac = :typeAc");
             query.setParameter("typeAc", existingType.getAc());
             query.setParameter("participantSize", term.getParticipants().size());
-        }
-        else{
-            query = getEntityManager().createQuery("select i from "+getIntactClass().getSimpleName()+" i " +
+        } else {
+            query = getEntityManager().createQuery("select i from " + getIntactClass().getSimpleName() + " i " +
                     "join i.interactorType as t " +
                     "join i.organism as o " +
                     "where o.ac = :orgAc " +
@@ -106,31 +111,48 @@ public class ComplexSynchronizer extends InteractorSynchronizerTemplate<Complex,
     @Override
     protected Collection<IntactComplex> postFilterAll(Complex term, Collection<IntactComplex> results) {
         Collection<IntactComplex> filteredResults = new ArrayList<IntactComplex>(results.size());
-        for (IntactComplex complex : results){
+        for (IntactComplex complex : results) {
             // we accept empty participants when finding complexes
-            if (term.getParticipants().isEmpty()){
+            if (term.getParticipants().isEmpty()) {
                 filteredResults.add(complex);
             }
-            // same participants
-            else if (this.participantsComparator.compare(term.getParticipants(), complex.getParticipants()) == 0){
-                filteredResults.add(complex);
+            // same participants but same complex_ac with different version to exclude the new versions as duplicates and allow then to be saved in the database
+            else if (this.participantsComparator.compare(term.getParticipants(), complex.getParticipants()) == 0) {
+                if (term instanceof IntactComplex) {
+                    IntactComplex intactComplex = (IntactComplex) term;
+                    if (intactComplex.getComplexAcXref() != null && complex.getComplexAcXref() != null) {
+                        if (!intactComplex.getComplexAcXref().getId().equalsIgnoreCase(complex.getComplexAcXref().getId())){
+                            filteredResults.add(complex);
+                        } else if (intactComplex.getComplexAcXref().getVersion().equalsIgnoreCase(complex.getComplexAcXref().getVersion())) {
+                            filteredResults.add(complex);
+                        }
+                    }
+                }
             }
         }
-
         return filteredResults;
     }
 
     @Override
     protected Collection<String> postFilterAllAcs(Complex term, Collection<IntactComplex> results) {
         Collection<String> filteredResults = new ArrayList<String>(results.size());
-        for (IntactComplex complex : results){
+        for (IntactComplex complex : results) {
             // we accept empty participants when finding complexes
-            if (term.getParticipants().isEmpty() && complex.getAc() != null){
+            if (term.getParticipants().isEmpty() && complex.getAc() != null) {
                 filteredResults.add(complex.getAc());
             }
-            // same participants
-            else if (this.participantsComparator.compare(term.getParticipants(), complex.getParticipants()) == 0 && complex.getAc() != null){
-                filteredResults.add(complex.getAc());
+            // same participants but same complex_ac with different version to exclude the new versions as duplicates and allow then to be saved in the database
+            else if (this.participantsComparator.compare(term.getParticipants(), complex.getParticipants()) == 0) {
+                if (term instanceof IntactComplex) {
+                    IntactComplex intactComplex = (IntactComplex) term;
+                    if (intactComplex.getComplexAcXref() != null && complex.getComplexAcXref() != null) {
+                        if (!intactComplex.getComplexAcXref().getId().equalsIgnoreCase(complex.getComplexAcXref().getId())){
+                            filteredResults.add(complex.getAc());
+                        } else if (intactComplex.getComplexAcXref().getVersion().equalsIgnoreCase(complex.getComplexAcXref().getVersion())) {
+                            filteredResults.add(complex.getAc());
+                        }
+                    }
+                }
             }
         }
 
@@ -140,7 +162,7 @@ public class ComplexSynchronizer extends InteractorSynchronizerTemplate<Complex,
     @Override
     protected Collection<IntactComplex> findByOtherProperties(Complex term, Collection<String> existingTypes, Collection<String> existingOrganisms) {
         Query query;
-        if (existingOrganisms.isEmpty()){
+        if (existingOrganisms.isEmpty()) {
             query = getEntityManager().createQuery("select i from IntactComplex i " +
                     "join i.interactorType as t " +
                     "where i.organism is null " +
@@ -148,9 +170,8 @@ public class ComplexSynchronizer extends InteractorSynchronizerTemplate<Complex,
                     "and t.ac in (:typeAc)");
             query.setParameter("typeAc", existingTypes);
             query.setParameter("participantSize", term.getParticipants().size());
-        }
-        else{
-            query = getEntityManager().createQuery("select i from "+getIntactClass().getSimpleName()+" i " +
+        } else {
+            query = getEntityManager().createQuery("select i from " + getIntactClass().getSimpleName() + " i " +
                     "join i.interactorType as t " +
                     "join i.organism as o " +
                     "where o.ac in (:orgAc) " +
@@ -195,18 +216,18 @@ public class ComplexSynchronizer extends InteractorSynchronizerTemplate<Complex,
 
     @Override
     protected void prepareXrefs(IntactComplex intactInteractor, boolean enableSynchronization) throws FinderException, PersisterException, SynchronizerException {
-        if (intactInteractor.areXrefsInitialized()){
+        if (intactInteractor.areXrefsInitialized()) {
             List<Xref> xrefsToPersist = new ArrayList<Xref>(intactInteractor.getDbXrefs());
             Set<Xref> goReferences = new TreeSet<Xref>(new IntactComplexGoXrefComparator());
-            for (Xref xref : xrefsToPersist){
+            for (Xref xref : xrefsToPersist) {
                 // do not persist or merge xrefs because of cascades
                 Xref cvXref = enableSynchronization ?
                         getContext().getComplexXrefSynchronizer().synchronize(xref, false) :
                         getContext().getComplexXrefSynchronizer().convertToPersistentObject(xref);
                 // we have a different instance because needed to be synchronized
-                if (cvXref != xref){
+                if (cvXref != xref) {
                     intactInteractor.getDbXrefs().remove(xref);
-                    if (cvXref != null && goReferences.add(cvXref)){
+                    if (cvXref != null && goReferences.add(cvXref)) {
                         intactInteractor.getDbXrefs().add(cvXref);
                     }
                 }
@@ -241,7 +262,7 @@ public class ComplexSynchronizer extends InteractorSynchronizerTemplate<Complex,
 
     protected void prepareSource(IntactComplex intactSource, boolean enableSynchronization) throws PersisterException, FinderException, SynchronizerException {
         Source source = intactSource.getSource();
-        if (source != null){
+        if (source != null) {
             intactSource.setSource(enableSynchronization ?
                     getContext().getSourceSynchronizer().synchronize(source, true) :
                     getContext().getSourceSynchronizer().convertToPersistentObject(source));
@@ -256,8 +277,8 @@ public class ComplexSynchronizer extends InteractorSynchronizerTemplate<Complex,
 
     @Override
     protected void prepareAnnotations(IntactComplex intactInteractor, boolean enableSynchronization) throws FinderException, PersisterException, SynchronizerException {
-        if (intactInteractor.areAnnotationsInitialized()){
-            if (AnnotationUtils.collectFirstAnnotationWithTopic(intactInteractor.getAnnotations(), null, "curated-complex") == null){
+        if (intactInteractor.areAnnotationsInitialized()) {
+            if (AnnotationUtils.collectFirstAnnotationWithTopic(intactInteractor.getAnnotations(), null, "curated-complex") == null) {
                 intactInteractor.getAnnotations().add(new InteractorAnnotation(IntactUtils.createMITopic("curated-complex", null)));
             }
         }
@@ -266,47 +287,46 @@ public class ComplexSynchronizer extends InteractorSynchronizerTemplate<Complex,
 
     protected void prepareEvidenceType(IntactComplex intactComplex, boolean enableSynchronization) throws PersisterException, FinderException, SynchronizerException {
 
-       if (intactComplex.getEvidenceType() != null){
-           CvTerm evidenceType = enableSynchronization ?
-                   getContext().getDatabaseSynchronizer().synchronize(intactComplex.getEvidenceType(), true) :
-                   getContext().getDatabaseSynchronizer().convertToPersistentObject(intactComplex.getEvidenceType());
-           intactComplex.setEvidenceType(evidenceType);
+        if (intactComplex.getEvidenceType() != null) {
+            CvTerm evidenceType = enableSynchronization ?
+                    getContext().getDatabaseSynchronizer().synchronize(intactComplex.getEvidenceType(), true) :
+                    getContext().getDatabaseSynchronizer().convertToPersistentObject(intactComplex.getEvidenceType());
+            intactComplex.setEvidenceType(evidenceType);
 
-           // for BC with intact-core only
-           Xref ecoCode = XrefUtils.collectFirstIdentifierWithDatabase(evidenceType.getIdentifiers(), Complex.ECO_MI, Complex.ECO);
-           // only add xref when we can reload the xrefs becaus ethe complex is in the session
-           if (ecoCode != null && (intactComplex.getAc() == null || getEntityManager().contains(intactComplex))){
-               Collection<Xref> ecoCodes = XrefUtils.collectAllXrefsHavingDatabase(intactComplex.getXrefs(), Complex.ECO_MI, Complex.ECO);
-               // no eco codes
-               if (ecoCodes.isEmpty()){
-                   CvTerm db = IntactUtils.createMIDatabase(Complex.ECO,
-                           Complex.ECO_MI);
-                   intactComplex.getXrefs().add(new InteractorXref(getContext().getDatabaseSynchronizer().synchronize(db, true),
-                           ecoCode.getId()));
-               }
-               // update eco codes
-               else {
-                   Collection<Xref> ecoCodesToRemove = new ArrayList<Xref>(ecoCodes.size());
-                   boolean hasEco = false;
-                   for (Xref eco : ecoCodes){
-                       if (eco.getQualifier() == null && !eco.getId().equalsIgnoreCase(eco.getId())){
-                           ecoCodesToRemove.add(eco);
-                       }
-                       else if (eco.getId().equalsIgnoreCase(eco.getId())){
-                           hasEco = true;
-                       }
-                   }
+            // for BC with intact-core only
+            Xref ecoCode = XrefUtils.collectFirstIdentifierWithDatabase(evidenceType.getIdentifiers(), Complex.ECO_MI, Complex.ECO);
+            // only add xref when we can reload the xrefs becaus ethe complex is in the session
+            if (ecoCode != null && (intactComplex.getAc() == null || getEntityManager().contains(intactComplex))) {
+                Collection<Xref> ecoCodes = XrefUtils.collectAllXrefsHavingDatabase(intactComplex.getXrefs(), Complex.ECO_MI, Complex.ECO);
+                // no eco codes
+                if (ecoCodes.isEmpty()) {
+                    CvTerm db = IntactUtils.createMIDatabase(Complex.ECO,
+                            Complex.ECO_MI);
+                    intactComplex.getXrefs().add(new InteractorXref(getContext().getDatabaseSynchronizer().synchronize(db, true),
+                            ecoCode.getId()));
+                }
+                // update eco codes
+                else {
+                    Collection<Xref> ecoCodesToRemove = new ArrayList<Xref>(ecoCodes.size());
+                    boolean hasEco = false;
+                    for (Xref eco : ecoCodes) {
+                        if (eco.getQualifier() == null && !eco.getId().equalsIgnoreCase(eco.getId())) {
+                            ecoCodesToRemove.add(eco);
+                        } else if (eco.getId().equalsIgnoreCase(eco.getId())) {
+                            hasEco = true;
+                        }
+                    }
 
-                   if (!hasEco){
-                       CvTerm db = IntactUtils.createMIDatabase(Complex.ECO,
-                               Complex.ECO_MI);
-                       intactComplex.getXrefs().add(new InteractorXref(getContext().getDatabaseSynchronizer().synchronize(db, true),
-                               ecoCode.getId()));
-                   }
-                   intactComplex.getXrefs().removeAll(ecoCodesToRemove);
-               }
-           }
-       }
+                    if (!hasEco) {
+                        CvTerm db = IntactUtils.createMIDatabase(Complex.ECO,
+                                Complex.ECO_MI);
+                        intactComplex.getXrefs().add(new InteractorXref(getContext().getDatabaseSynchronizer().synchronize(db, true),
+                                ecoCode.getId()));
+                    }
+                    intactComplex.getXrefs().removeAll(ecoCodesToRemove);
+                }
+            }
+        }
     }
 
     /*protected void prepareInteractionEvidences(IntactComplex intactComplex) throws PersisterException, FinderException, SynchronizerException {
@@ -335,7 +355,7 @@ public class ComplexSynchronizer extends InteractorSynchronizerTemplate<Complex,
         // then curator
         User curator = intactComplex.getCurrentOwner();
         // do not persist user if not there
-        if (curator != null){
+        if (curator != null) {
             intactComplex.setCurrentOwner(enableSynchronization ?
                     getContext().getUserReadOnlySynchronizer().synchronize(curator, false) :
                     getContext().getUserReadOnlySynchronizer().convertToPersistentObject(curator));
@@ -343,7 +363,7 @@ public class ComplexSynchronizer extends InteractorSynchronizerTemplate<Complex,
 
         // then reviewer
         User reviewer = intactComplex.getCurrentReviewer();
-        if (reviewer != null){
+        if (reviewer != null) {
             intactComplex.setCurrentReviewer(enableSynchronization ?
                     getContext().getUserReadOnlySynchronizer().synchronize(reviewer, false) :
                     getContext().getUserReadOnlySynchronizer().convertToPersistentObject(reviewer));
@@ -352,18 +372,18 @@ public class ComplexSynchronizer extends InteractorSynchronizerTemplate<Complex,
 
     protected void prepareLifeCycleEvents(IntactComplex intactComplex, boolean enableSynchronization) throws PersisterException, FinderException, SynchronizerException {
 
-        if (intactComplex.areLifeCycleEventsInitialized()){
+        if (intactComplex.areLifeCycleEventsInitialized()) {
             List<LifeCycleEvent> eventsToPersist = new ArrayList<LifeCycleEvent>(intactComplex.getLifecycleEvents());
-            for (LifeCycleEvent event : eventsToPersist){
+            for (LifeCycleEvent event : eventsToPersist) {
                 // do not persist or merge events because of cascades
                 LifeCycleEvent evt = enableSynchronization ?
                         getContext().getComplexLifecycleSynchronizer().synchronize(event, false) :
                         getContext().getComplexLifecycleSynchronizer().convertToPersistentObject(event);
                 // we have a different instance because needed to be synchronized
-                if (evt != event){
+                if (evt != event) {
                     int index = intactComplex.getLifecycleEvents().indexOf(event);
                     intactComplex.getLifecycleEvents().remove(event);
-                    if (evt != null && !intactComplex.getLifecycleEvents().contains(evt)){
+                    if (evt != null && !intactComplex.getLifecycleEvents().contains(evt)) {
                         intactComplex.getLifecycleEvents().add(index, evt);
                     }
                 }
@@ -373,17 +393,17 @@ public class ComplexSynchronizer extends InteractorSynchronizerTemplate<Complex,
 
     protected void prepareCooperativeEffects(IntactComplex intactInteraction, boolean enableSynchronization) throws PersisterException, FinderException, SynchronizerException {
 
-        if (intactInteraction.areCooperativeEffectsInitialized()){
+        if (intactInteraction.areCooperativeEffectsInitialized()) {
             List<CooperativeEffect> parametersToPersist = new ArrayList<CooperativeEffect>(intactInteraction.getCooperativeEffects());
-            for (CooperativeEffect param : parametersToPersist){
+            for (CooperativeEffect param : parametersToPersist) {
                 // do not persist or merge parameters because of cascades
                 CooperativeEffect expParam = enableSynchronization ?
                         getContext().getCooperativeEffectSynchronizer().synchronize(param, false) :
                         getContext().getCooperativeEffectSynchronizer().convertToPersistentObject(param);
                 // we have a different instance because needed to be synchronized
-                if (expParam != param){
+                if (expParam != param) {
                     intactInteraction.getCooperativeEffects().remove(param);
-                    if (expParam != null && !intactInteraction.getCooperativeEffects().contains(expParam)){
+                    if (expParam != null && !intactInteraction.getCooperativeEffects().contains(expParam)) {
                         intactInteraction.getCooperativeEffects().add(expParam);
                     }
                 }
@@ -392,9 +412,9 @@ public class ComplexSynchronizer extends InteractorSynchronizerTemplate<Complex,
     }
 
     protected void prepareParticipants(IntactComplex intactInteraction, boolean enableSynchronization) throws PersisterException, FinderException, SynchronizerException {
-        if (intactInteraction.areParticipantsInitialized()){
+        if (intactInteraction.areParticipantsInitialized()) {
             List<ModelledParticipant> participantsToPersist = new ArrayList<ModelledParticipant>(intactInteraction.getParticipants());
-            for (ModelledParticipant participant : participantsToPersist){
+            for (ModelledParticipant participant : participantsToPersist) {
                 // reinit parent
                 participant.setInteraction(intactInteraction);
                 // do not persist or merge participants because of cascades
@@ -402,9 +422,9 @@ public class ComplexSynchronizer extends InteractorSynchronizerTemplate<Complex,
                         (ModelledParticipant) getContext().getModelledParticipantSynchronizer().synchronize(participant, false) :
                         (ModelledParticipant) getContext().getModelledParticipantSynchronizer().convertToPersistentObject(participant);
                 // we have a different instance because needed to be synchronized
-                if (participant != expPart){
+                if (participant != expPart) {
                     intactInteraction.getParticipants().remove(participant);
-                    if (expPart != null && !intactInteraction.getParticipants().contains(expPart)){
+                    if (expPart != null && !intactInteraction.getParticipants().contains(expPart)) {
                         intactInteraction.addParticipant(expPart);
                     }
                 }
@@ -414,20 +434,19 @@ public class ComplexSynchronizer extends InteractorSynchronizerTemplate<Complex,
 
     protected void prepareExperiments(IntactComplex intactComplex, boolean enableSynchronization) throws PersisterException, FinderException, SynchronizerException {
 
-        if (intactComplex.areExperimentsInitialized()){
+        if (intactComplex.areExperimentsInitialized()) {
 
-            if (!intactComplex.getExperiments().isEmpty()){
-               Experiment exp = intactComplex.getExperiments().iterator().next();
+            if (!intactComplex.getExperiments().isEmpty()) {
+                Experiment exp = intactComplex.getExperiments().iterator().next();
                 // check that experiment host is the same as existing organism
-                if (intactComplex.getOrganism() != null && exp.getHostOrganism() != null){
-                     if (intactComplex.getOrganism().getTaxId() != exp.getHostOrganism().getTaxId()){
-                         intactComplex.getExperiments().clear();
-                         IntactUtils.createAndAddDefaultExperimentForComplexes(intactComplex, exp.getPublication() != null ?
-                                 (exp.getPublication().getPubmedId() != null ? exp.getPublication().getPubmedId() : "unassigned638")
-                                 : "unassigned638");
-                     }
-                }
-                else {
+                if (intactComplex.getOrganism() != null && exp.getHostOrganism() != null) {
+                    if (intactComplex.getOrganism().getTaxId() != exp.getHostOrganism().getTaxId()) {
+                        intactComplex.getExperiments().clear();
+                        IntactUtils.createAndAddDefaultExperimentForComplexes(intactComplex, exp.getPublication() != null ?
+                                (exp.getPublication().getPubmedId() != null ? exp.getPublication().getPubmedId() : "unassigned638")
+                                : "unassigned638");
+                    }
+                } else {
                     intactComplex.getExperiments().clear();
                     IntactUtils.createAndAddDefaultExperimentForComplexes(intactComplex, exp.getPublication() != null ?
                             (exp.getPublication().getPubmedId() != null ? exp.getPublication().getPubmedId() : "unassigned638")
@@ -437,14 +456,14 @@ public class ComplexSynchronizer extends InteractorSynchronizerTemplate<Complex,
             }
             List<Experiment> experimentsToPersist = new ArrayList<Experiment>(intactComplex.getExperiments());
             Set<Experiment> processedExperiments = new HashSet<Experiment>(intactComplex.getExperiments().size());
-            for (Experiment exp : experimentsToPersist){
+            for (Experiment exp : experimentsToPersist) {
                 // synchronize publication if not done yet
-                if (exp.getPublication() != null){
+                if (exp.getPublication() != null) {
                     Publication syncPub = enableSynchronization ?
                             getContext().getPublicationSynchronizer().synchronize(exp.getPublication(), true) :
                             getContext().getPublicationSynchronizer().convertToPersistentObject(exp.getPublication());
                     // we have a different instance because needed to be synchronized
-                    if (syncPub != exp.getPublication()){
+                    if (syncPub != exp.getPublication()) {
                         exp.setPublication(syncPub);
                     }
                 }
@@ -453,9 +472,9 @@ public class ComplexSynchronizer extends InteractorSynchronizerTemplate<Complex,
                         this.experimentBCSynchronizer.synchronize(exp, true) :
                         this.experimentBCSynchronizer.convertToPersistentObject(exp);
                 // we have a different instance because needed to be synchronized
-                if (expPar != exp){
+                if (expPar != exp) {
                     intactComplex.getExperiments().remove(exp);
-                    if (expPar != null && processedExperiments.add(expPar)){
+                    if (expPar != null && processedExperiments.add(expPar)) {
                         intactComplex.getExperiments().add(expPar);
                     }
                 }
@@ -464,17 +483,17 @@ public class ComplexSynchronizer extends InteractorSynchronizerTemplate<Complex,
     }
 
     protected void prepareParameters(IntactComplex intactInteraction, boolean enableSynchronization) throws PersisterException, FinderException, SynchronizerException {
-        if (intactInteraction.areParametersInitialized()){
+        if (intactInteraction.areParametersInitialized()) {
             List<ModelledParameter> parametersToPersist = new ArrayList<ModelledParameter>(intactInteraction.getModelledParameters());
-            for (ModelledParameter param : parametersToPersist){
+            for (ModelledParameter param : parametersToPersist) {
                 // do not persist or merge parameters because of cascades
                 ModelledParameter expPar = enableSynchronization ?
                         getContext().getComplexParameterSynchronizer().synchronize(param, false) :
                         getContext().getComplexParameterSynchronizer().convertToPersistentObject(param);
                 // we have a different instance because needed to be synchronized
-                if (expPar != param){
+                if (expPar != param) {
                     intactInteraction.getModelledParameters().remove(param);
-                    if (expPar != null && !intactInteraction.getModelledParameters().contains(expPar)){
+                    if (expPar != null && !intactInteraction.getModelledParameters().contains(expPar)) {
                         intactInteraction.getModelledParameters().add(expPar);
                     }
                 }
@@ -483,17 +502,17 @@ public class ComplexSynchronizer extends InteractorSynchronizerTemplate<Complex,
     }
 
     protected void prepareConfidences(IntactComplex intactInteraction, boolean enableSynchronization) throws FinderException, PersisterException, SynchronizerException {
-        if (intactInteraction.areConfidencesInitialized()){
+        if (intactInteraction.areConfidencesInitialized()) {
             List<ModelledConfidence> confsToPersist = new ArrayList<ModelledConfidence>(intactInteraction.getModelledConfidences());
-            for (ModelledConfidence confidence : confsToPersist){
+            for (ModelledConfidence confidence : confsToPersist) {
                 // do not persist or merge confidences because of cascades
                 ModelledConfidence expConf = enableSynchronization ?
                         getContext().getComplexConfidenceSynchronizer().synchronize(confidence, false) :
                         getContext().getComplexConfidenceSynchronizer().convertToPersistentObject(confidence);
                 // we have a different instance because needed to be synchronized
-                if (expConf != confidence){
+                if (expConf != confidence) {
                     intactInteraction.getModelledConfidences().remove(confidence);
-                    if (expConf != null && !intactInteraction.getModelledConfidences().contains(expConf)){
+                    if (expConf != null && !intactInteraction.getModelledConfidences().contains(expConf)) {
                         intactInteraction.getModelledConfidences().add(expConf);
                     }
                 }
@@ -504,7 +523,7 @@ public class ComplexSynchronizer extends InteractorSynchronizerTemplate<Complex,
     @Override
     public void prepareAndSynchronizeShortLabel(IntactComplex intactInteraction) {
         // first initialise shortlabel if not done
-        if (intactInteraction.getShortName() == null){
+        if (intactInteraction.getShortName() == null) {
             intactInteraction.setShortName(IntactUtils.generateAutomaticComplexShortlabelFor(intactInteraction, IntactUtils.MAX_SHORT_LABEL_LEN));
         }
 
@@ -526,9 +545,9 @@ public class ComplexSynchronizer extends InteractorSynchronizerTemplate<Complex,
     }
 
     @Override
-    public void deleteRelatedProperties(IntactComplex intactParticipant){
-        for (Object f : intactParticipant.getParticipants()){
-            getContext().getModelledParticipantSynchronizer().delete((ModelledParticipant)f);
+    public void deleteRelatedProperties(IntactComplex intactParticipant) {
+        for (Object f : intactParticipant.getParticipants()) {
+            getContext().getModelledParticipantSynchronizer().delete((ModelledParticipant) f);
         }
         intactParticipant.getParticipants().clear();
     }

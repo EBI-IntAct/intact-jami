@@ -31,7 +31,7 @@ import java.text.SimpleDateFormat;
  * @since <pre>28/02/14</pre>
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(locations = {"classpath*:/META-INF/intact-jami-test.spring.xml"})
+@ContextConfiguration(locations = {"classpath*:/META-INF/intact-jami-test-spring.xml"})
 @Transactional(value = "jamiTransactionManager")
 @TransactionConfiguration
 @DirtiesContext

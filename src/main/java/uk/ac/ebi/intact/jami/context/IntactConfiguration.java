@@ -32,6 +32,7 @@ public class IntactConfiguration {
     private String acPrefix;
     private IntactSource defaultInstitution;
     private String localCvPrefix;
+    private String complexAcPrefix;
 
     public IntactConfiguration() {
     }
@@ -69,6 +70,17 @@ public class IntactConfiguration {
         this.localCvPrefix = localCvPrefix;
     }
 
+    public String getComplexAcPrefix() {
+        if (complexAcPrefix == null){
+            complexAcPrefix = "CPX";
+        }
+        return complexAcPrefix;
+    }
+
+    public void setComplexAcPrefix(String complexAcPrefix) {
+        this.complexAcPrefix = complexAcPrefix;
+    }
+
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder( 256 );
@@ -76,6 +88,7 @@ public class IntactConfiguration {
         sb.append( "{acPrefix='" ).append( acPrefix ).append( '\'' );
         sb.append( ", defaultInstitution=" ).append( defaultInstitution );
         sb.append( ", localCvPrefix='" ).append( localCvPrefix ).append( '\'' );
+        sb.append( ", complexAcPrefix='" ).append(complexAcPrefix).append( '\'' );
         sb.append( '}' );
         return sb.toString();
     }
