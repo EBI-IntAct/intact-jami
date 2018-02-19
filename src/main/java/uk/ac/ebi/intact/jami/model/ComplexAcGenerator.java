@@ -35,11 +35,11 @@ public class ComplexAcGenerator extends SequenceGenerator {
      * The sequence parameter
      */
     public static final String SEQUENCE = "sequence";
-    // To avoid the use of the schema in the sequence name a public synonim was added after created the sequence
+    // To avoid the use of the schema in the sequence name a public synonym was added after created the sequence
     // INTACT_AC sequence works in the same way
-    // grant select on INTACT.COMPLEX_AC to SCHEMA_USER;
+    // grant select on INTACT.COMPLEX_AC to REPLACE_SCHEMA_USER;
     // create public synonym COMPLEX_AC for INTACT.COMPLEX_AC;
-    // grant select,delete,insert,update on IA_COMPLEX_AC to SCHEMA_USER;
+    // grant select,delete,insert,update on IA_COMPLEX_AC to REPLACE_SCHEMA_USER;
     // create public synonym IA_COMPLEX_AC for INTACT.IA_COMPLEX_AC;
     public static final String COMPLEX_AC_SEQUENCE_NAME = "complex_ac";
 
