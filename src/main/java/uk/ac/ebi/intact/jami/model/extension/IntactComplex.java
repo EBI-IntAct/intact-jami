@@ -180,6 +180,13 @@ public class IntactComplex extends IntactInteractor implements Complex,Releasabl
         return super.getAliases();
     }
 
+    /** {@inheritDoc} */
+    @Override
+    @Transient
+    public Xref getPreferredIdentifier() {
+        return complexAcXref != null ? complexAcXref : super.getPreferredIdentifier();
+    }
+
     @Transient
     /**
      * NOTE: in the future, should be persisted and cvStatus should be removed
