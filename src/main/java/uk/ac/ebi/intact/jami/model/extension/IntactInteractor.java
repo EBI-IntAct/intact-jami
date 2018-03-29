@@ -405,7 +405,8 @@ public class IntactInteractor extends AbstractIntactPrimaryObject implements Int
         this.xrefs = new InteractorXrefList();
         if (this.persistentXrefs != null){
             for (Xref ref : this.persistentXrefs){
-                if (XrefUtils.isXrefAnIdentifier(ref) || XrefUtils.doesXrefHaveQualifier(ref, null, "intact-secondary")){
+                if (XrefUtils.isXrefAnIdentifier(ref) || XrefUtils.doesXrefHaveQualifier(ref, null, "intact-secondary")
+                        || XrefUtils.doesXrefHaveQualifier(ref,  Xref.COMPLEX_PORTAL_MI, Xref.COMPLEX_PORTAL)){
                     this.identifiers.addOnly(ref);
                     processAddedIdentifierEvent(ref);
                 }
