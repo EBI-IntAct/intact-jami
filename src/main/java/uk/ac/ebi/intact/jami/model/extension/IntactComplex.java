@@ -184,6 +184,9 @@ public class IntactComplex extends IntactInteractor implements Complex,Releasabl
     @Override
     @Transient
     public Xref getPreferredIdentifier() {
+        if(complexAcXref == null){
+            initialiseXrefs();
+        }
         return complexAcXref != null ? complexAcXref : super.getPreferredIdentifier();
     }
 
@@ -903,7 +906,7 @@ public class IntactComplex extends IntactInteractor implements Complex,Releasabl
     }
 
     @Override
-    protected void processAddedXrefEvent(Xref added) {
+    protected void processAddedIdentifierEvent(Xref added) {
         // the added identifier is complex ac
         if (XrefUtils.isXrefFromDatabase(added, Xref.COMPLEX_PORTAL_MI, Xref.COMPLEX_PORTAL) &&
                 XrefUtils.doesXrefHaveQualifier(added, Xref.COMPLEX_PRIMARY_MI, Xref.COMPLEX_PRIMARY)) {
@@ -918,7 +921,7 @@ public class IntactComplex extends IntactInteractor implements Complex,Releasabl
     }
 
     @Override
-    protected void processRemovedXrefEvent(Xref removed) {
+    protected void processRemovedIdentifierEvent(Xref removed) {
         // the removed identifier is pubmed
         if (complexAcXref != null && complexAcXref.equals(removed)){
             Collection<Xref> existingComplexAcXref = XrefUtils.collectAllXrefsHavingDatabaseAndQualifier(getXrefs(),
