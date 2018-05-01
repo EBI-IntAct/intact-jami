@@ -178,7 +178,10 @@ public abstract class AbstractIntactParticipant<I extends Interaction, F extends
 
     public void setStoichiometry(Integer stoichiometry) {
         if (stoichiometry == null){
-            this.stoichiometry = null;
+            //TODO Due to backward compatibility with IntAct core that forces to have not
+            //TODO null stoichiometry we assume that the default value is zero for unknown
+            //this.stoichiometry = null;
+            this.stoichiometry = new IntactStoichiometry(0);
         }
         else {
             this.stoichiometry = new IntactStoichiometry(stoichiometry, stoichiometry);

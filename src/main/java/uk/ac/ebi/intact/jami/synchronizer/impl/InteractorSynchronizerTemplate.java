@@ -192,7 +192,7 @@ implements InteractorFetcher<T>, InteractorSynchronizer<T, I>{
             return results.iterator().next();
         }
         else if (results.size() > 1){
-            throw new FinderException("The interactor "+term + " can match "+results.size()+" interactors in the database and we cannot determine which one is valid.");
+            throw new FinderException("The interactor "+ results + " can match "+results.size()+" interactors in the database and we cannot determine which one is valid.");
         }
         return null;
     }
@@ -202,7 +202,7 @@ implements InteractorFetcher<T>, InteractorSynchronizer<T, I>{
     }
 
     protected Collection<String> postFilterAllAcs(T term, Collection<I> results) {
-        Collection<String> acs = new ArrayList<String>(results.size());
+        Collection<String> acs = new HashSet<String>();
         for (I interactor : results){
            if (interactor.getAc() != null){
               acs.add(interactor.getAc());
@@ -493,7 +493,7 @@ implements InteractorFetcher<T>, InteractorSynchronizer<T, I>{
              return Collections.EMPTY_LIST;
         }
         Query query=null;
-        Collection<I> totalInteractors = new ArrayList<I>();
+        Collection<I> totalInteractors = new HashSet<I>();
         // no organism for this interactor.
         if (existingOrganism == null){
             for (Xref ref : term.getIdentifiers()){
@@ -589,7 +589,7 @@ implements InteractorFetcher<T>, InteractorSynchronizer<T, I>{
             return Collections.EMPTY_LIST;
         }
         Query query=null;
-        Collection<I> totalInteractors = new ArrayList<I>();
+        Collection<I> totalInteractors = new HashSet<I>();
         // no organism for this interactor.
         if (existingOrganisms.isEmpty()){
             for (Xref ref : term.getIdentifiers()){

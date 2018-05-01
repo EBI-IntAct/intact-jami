@@ -1,13 +1,10 @@
 package uk.ac.ebi.intact.jami.synchronizer.impl;
 
-import org.apache.commons.collections.CollectionUtils;
 import psidev.psi.mi.jami.model.Interactor;
 import psidev.psi.mi.jami.model.InteractorPool;
-import psidev.psi.mi.jami.model.VariableParameterValueSet;
 import psidev.psi.mi.jami.utils.clone.InteractorCloner;
 import psidev.psi.mi.jami.utils.comparator.interactor.DefaultInteractorPoolComparator;
 import uk.ac.ebi.intact.jami.context.SynchronizerContext;
-import uk.ac.ebi.intact.jami.merger.ComplexMergerEnrichOnly;
 import uk.ac.ebi.intact.jami.merger.InteractorPoolMergerEnrichOnly;
 import uk.ac.ebi.intact.jami.model.extension.IntactCvTerm;
 import uk.ac.ebi.intact.jami.model.extension.IntactInteractorPool;
@@ -17,7 +14,6 @@ import uk.ac.ebi.intact.jami.synchronizer.PersisterException;
 import uk.ac.ebi.intact.jami.synchronizer.SynchronizerException;
 import uk.ac.ebi.intact.jami.synchronizer.listener.impl.DbInteractorEnricherListener;
 import uk.ac.ebi.intact.jami.synchronizer.listener.impl.DbInteractorPoolEnricherListener;
-import uk.ac.ebi.intact.jami.utils.IntactEnricherUtils;
 import uk.ac.ebi.intact.jami.utils.comparator.IntactInteractorPoolComparator;
 
 import javax.persistence.Query;
@@ -82,7 +78,7 @@ public class InteractorPoolSynchronizer extends InteractorSynchronizerTemplate<I
 
     @Override
     protected IntactInteractorPool postFilter(InteractorPool term, Collection<IntactInteractorPool> results) throws FinderException {
-        Collection<IntactInteractorPool> filteredResults = new ArrayList<IntactInteractorPool>(results.size());
+        Collection<IntactInteractorPool> filteredResults = new HashSet<IntactInteractorPool>();
         for (IntactInteractorPool interactor : results){
             if (DefaultInteractorPoolComparator.areEquals(term, interactor)){
                 filteredResults.add(interactor);
@@ -128,7 +124,7 @@ public class InteractorPoolSynchronizer extends InteractorSynchronizerTemplate<I
 
     @Override
     protected Collection<IntactInteractorPool> postFilterAll(InteractorPool term, Collection<IntactInteractorPool> results) {
-        Collection<IntactInteractorPool> filteredResults = new ArrayList<IntactInteractorPool>(results.size());
+        Collection<IntactInteractorPool> filteredResults = new HashSet<IntactInteractorPool>();
         for (IntactInteractorPool interactor : results){
             if (DefaultInteractorPoolComparator.areEquals(term, interactor)){
                 filteredResults.add(interactor);
@@ -140,7 +136,7 @@ public class InteractorPoolSynchronizer extends InteractorSynchronizerTemplate<I
 
     @Override
     protected Collection<String> postFilterAllAcs(InteractorPool term, Collection<IntactInteractorPool> results) {
-        Collection<String> filteredResults = new ArrayList<String>(results.size());
+        Collection<String> filteredResults =new HashSet<String>();
         for (IntactInteractorPool interactor : results){
             if (DefaultInteractorPoolComparator.areEquals(term, interactor) && interactor.getAc()!= null){
                 filteredResults.add(interactor.getAc());
