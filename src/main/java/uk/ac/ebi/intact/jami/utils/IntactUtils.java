@@ -1241,7 +1241,9 @@ public class IntactUtils {
         initialiseFeature(feature);
         // initialise linked features
         for (FeatureEvidence feat : feature.getLinkedFeatures()){
-            initialiseFeatureEvidence((IntactFeatureEvidence) feat);
+            if(!Hibernate.isInitialized(feat)) {
+                initialiseFeatureEvidence((IntactFeatureEvidence) feat);
+            }
         }
         // initialise db method
         for (CvTerm cv : feature.getDetectionMethods()){
