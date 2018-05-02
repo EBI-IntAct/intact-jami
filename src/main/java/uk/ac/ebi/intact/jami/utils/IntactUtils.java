@@ -1233,7 +1233,9 @@ public class IntactUtils {
         initialiseFeature(feature);
         // initialise linked features
         for (ModelledFeature feat : feature.getLinkedFeatures()){
-            initialiseModelledFeature((IntactModelledFeature)feat);
+            if(!Hibernate.isInitialized(feat)) {
+                initialiseModelledFeature((IntactModelledFeature) feat);
+            }
         }
     }
 
