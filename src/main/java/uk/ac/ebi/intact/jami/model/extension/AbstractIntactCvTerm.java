@@ -168,7 +168,7 @@ public abstract class AbstractIntactCvTerm extends AbstractIntactPrimaryObject i
             CvTerm psiMiDatabase = IntactUtils.createPsiMiDatabase();
             CvTerm identityQualifier = IntactUtils.createIdentityQualifier(psiMiDatabase);
             // first remove old psi mi if not null
-            if (this.miIdentifier != null && !mi.equals(this.miIdentifier)){
+            if (this.miIdentifier != null && !mi.equals(this.miIdentifier.getId())){
                 if (this.miIdentifier instanceof AbstractIntactXref){
                    ((AbstractIntactXref) this.miIdentifier).setId(mi);
                 }
@@ -199,7 +199,7 @@ public abstract class AbstractIntactCvTerm extends AbstractIntactPrimaryObject i
             CvTerm psiModDatabase = IntactUtils.createMIDatabase(CvTerm.PSI_MOD, CvTerm.PSI_MOD_MI);
             CvTerm identityQualifier = IntactUtils.createIdentityQualifier();
             // first remove old psi mod if not null
-            if (this.modIdentifier != null && !mod.equals(this.modIdentifier)){
+            if (this.modIdentifier != null && !mod.equals(this.modIdentifier.getId())){
                 if (this.modIdentifier instanceof AbstractIntactXref){
                     ((AbstractIntactXref) this.modIdentifier).setId(mod);
                 }
@@ -227,21 +227,21 @@ public abstract class AbstractIntactCvTerm extends AbstractIntactPrimaryObject i
         // add new mod if not null
         if (par != null){
 
-            CvTerm psiModDatabase = IntactUtils.createMIDatabase(CvTerm.PSI_PAR, null);
+            CvTerm psiParDatabase = IntactUtils.createMIDatabase(CvTerm.PSI_PAR, null);
             CvTerm identityQualifier = IntactUtils.createIdentityQualifier();
             // first remove old psi mod if not null
-            if (this.parIdentifier != null && !par.equals(this.parIdentifier)){
+            if (this.parIdentifier != null && !par.equals(this.parIdentifier.getId())){
                 if (this.parIdentifier instanceof AbstractIntactXref){
                     ((AbstractIntactXref) this.parIdentifier).setId(par);
                 }
                 else{
                     cvTermIdentifiers.remove(this.parIdentifier);
-                    this.parIdentifier = new CvTermXref(psiModDatabase, par, identityQualifier);
+                    this.parIdentifier = new CvTermXref(psiParDatabase, par, identityQualifier);
                     cvTermIdentifiers.add(this.parIdentifier);
                 }
             }
             else if (this.parIdentifier == null){
-                this.parIdentifier = new CvTermXref(psiModDatabase, par, identityQualifier);
+                this.parIdentifier = new CvTermXref(psiParDatabase, par, identityQualifier);
                 cvTermIdentifiers.add(this.parIdentifier);
             }
         }
