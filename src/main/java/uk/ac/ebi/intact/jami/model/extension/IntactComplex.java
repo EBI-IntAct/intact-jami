@@ -78,6 +78,7 @@ public class IntactComplex extends IntactInteractor implements Complex,Releasabl
     private transient Annotation onHold;
     private transient Annotation accepted;
     private transient Annotation correctionComment;
+    private transient Xref complexAcXref;
 
     protected IntactComplex(){
         super();
@@ -332,6 +333,16 @@ public class IntactComplex extends IntactInteractor implements Complex,Releasabl
     @Transient
     public String getCorrectionComment() {
         return this.correctionComment != null ? this.correctionComment.getValue() : null;
+    }
+
+    /**
+     * Overrides the method in IntactInteractor to give back complex preferred name.
+     * @return
+     */
+    @Override
+    @Transient
+    public String getPreferredName(){
+        return this.getShortName();
     }
 
     @Override
@@ -753,6 +764,79 @@ public class IntactComplex extends IntactInteractor implements Complex,Releasabl
 
     private void setInteractionEvidences(Collection<InteractionEvidence> interactionEvidences) {
         this.interactionEvidences = interactionEvidences;
+    }
+
+    @Transient
+    public String getComplexAc() {
+        // initialise xrefs if not done yet
+        getXrefs();
+        return this.complexAcXref != null ? this.complexAcXref.getId() : null;
+    }
+
+    @Transient
+    public String getComplexVersion() {
+        // initialise xrefs if not done yet
+        getXrefs();
+        return this.complexAcXref != null ? this.complexAcXref.getVersion() : null;
+    }
+
+    @Transient
+    public Xref getComplexAcXref() {
+        // initialise xrefs if not done yet
+        getXrefs();
+        return this.complexAcXref;
+    }
+
+    @Override
+    public void assignComplexAc(String accession, String version) {
+        // add new complex ac if not null
+        if (accession != null) {
+            InteractorXrefList interactionXrefs = (InteractorXrefList) getXrefs();
+
+            CvTerm complexPortalDatabase = IntactUtils.createMIDatabase(Xref.COMPLEX_PORTAL, Xref.COMPLEX_PORTAL_MI);
+            CvTerm complexPortalPrimaryQualifier = IntactUtils.createMIQualifier(Xref.COMPLEX_PRIMARY, Xref.COMPLEX_PRIMARY_MI);
+            // first remove old ac if not null
+            if (this.complexAcXref != null) {
+                if (!accession.equals(complexAcXref.getId())) {
+                    // first remove old complexAcXref and creates the new one;
+                    interactionXrefs.remove(this.complexAcXref);
+                    this.complexAcXref = new InteractorXref(complexPortalDatabase, accession, version, complexPortalPrimaryQualifier);
+                    interactionXrefs.add(this.complexAcXref);
+                }
+            } else {
+                this.complexAcXref = new InteractorXref(complexPortalDatabase, accession, version, complexPortalPrimaryQualifier);
+                interactionXrefs.add(this.complexAcXref);
+            }
+        } else {
+            throw new IllegalArgumentException("The complex ac has to be non null.");
+        }
+    }
+
+    @Override
+    public void assignComplexAc(String accession) {
+        // add new complex ac if not null
+        if (accession != null) {
+            String id;
+            String version;
+
+            //It checks if the accession is valid and split the version if it is provided
+            String[] splittedComplexAc = accession.split("\\.");
+            if (splittedComplexAc.length == 1) {
+                id = splittedComplexAc[0];
+                version = "1";
+            } else if (splittedComplexAc.length == 2) {
+                {
+                    id = splittedComplexAc[0];
+                    version = splittedComplexAc[1];
+                }
+            } else {
+                throw new IllegalArgumentException("The complex ac has a non valid format (e.g. CPX-12345.1)");
+            }
+            assignComplexAc(id, version);
+
+        } else {
+            throw new IllegalArgumentException("The complex ac has to be non null.");
+        }
     }
 
     @Transient

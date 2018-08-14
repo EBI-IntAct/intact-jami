@@ -221,6 +221,14 @@ public class IntactInteractor extends AbstractIntactPrimaryObject implements Int
     public Xref getPreferredIdentifier() {
         return !getIdentifiers().isEmpty() ? getIdentifiers().iterator().next() : null;
     }
+    /**
+     *
+     * @return the preferredName
+     */
+    @Transient
+    public String getPreferredName(){
+        return this.getShortName();
+    }
 
     @Transient
     public Collection<Checksum> getChecksums() {
