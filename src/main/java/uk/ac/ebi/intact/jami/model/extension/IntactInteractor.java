@@ -406,7 +406,7 @@ public class IntactInteractor extends AbstractIntactPrimaryObject implements Int
         if (this.persistentXrefs != null){
             for (Xref ref : this.persistentXrefs){
                 if (XrefUtils.isXrefAnIdentifier(ref) || XrefUtils.doesXrefHaveQualifier(ref, null, "intact-secondary")
-                        || XrefUtils.doesXrefHaveQualifier(ref,  Xref.COMPLEX_PRIMARY_MI, Xref.COMPLEX_PRIMARY_MI)){
+                        || XrefUtils.doesXrefHaveQualifier(ref,  Xref.COMPLEX_PRIMARY_MI, Xref.COMPLEX_PRIMARY)){
                     this.identifiers.addOnly(ref);
                     processAddedIdentifierEvent(ref);
                 }

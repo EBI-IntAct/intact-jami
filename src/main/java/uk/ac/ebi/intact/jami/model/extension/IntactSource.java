@@ -8,6 +8,8 @@ import org.hibernate.annotations.Target;
 import psidev.psi.mi.jami.model.*;
 import psidev.psi.mi.jami.utils.AnnotationUtils;
 import psidev.psi.mi.jami.utils.XrefUtils;
+import psidev.psi.mi.jami.utils.collection.AbstractCollectionWrapper;
+import psidev.psi.mi.jami.utils.collection.AbstractListHavingProperties;
 import uk.ac.ebi.intact.jami.utils.IntactUtils;
 
 import javax.persistence.*;
@@ -44,6 +46,9 @@ public class IntactSource extends AbstractIntactCvTerm implements Source {
     private transient Annotation url;
     private transient Annotation postalAddress;
     private transient Publication bibRef;
+
+    private transient SourceAnnotationList annotations;
+    private transient SourcePersistentAnnotationList persistentAnnotations;
 
     protected IntactSource(){
         super();
@@ -112,6 +117,9 @@ public class IntactSource extends AbstractIntactCvTerm implements Source {
     }
 
     public void setShortName(String name) {
+        if (name == null) {
+            throw new IllegalArgumentException("The short name cannot be null");
+        }
         super.setShortName(name);
     }
 
@@ -211,32 +219,29 @@ public class IntactSource extends AbstractIntactCvTerm implements Source {
     }
 
     @Transient
-    public boolean areXrefsInitialized(){
-        return Hibernate.isInitialized(getDbXrefs());
+    public Collection<Annotation> getAnnotations() {
+        if (annotations == null){
+            initialiseAnnotations();
+        }
+        return this.annotations;
     }
 
-    @Transient
-    public boolean areSynonymsInitialized(){
-        return Hibernate.isInitialized(getSynonyms());
+    protected void initialiseAnnotations(){
+        this.annotations = new SourceAnnotationList(null);
+
+        // initialise persistent annotations and content
+        if (this.persistentAnnotations != null){
+            for (Annotation annot : this.persistentAnnotations){
+                if (!processAddedAnnotations(annot)){
+                    this.annotations.addOnly(annot);
+                }
+            }
+        }
+        else{
+            this.persistentAnnotations = new SourcePersistentAnnotationList(null);
+        }
     }
 
-    @Transient
-    public boolean areAnnotationsInitialized(){
-        return Hibernate.isInitialized(getDbAnnotations());
-    }
-
-    @OneToMany( cascade = {CascadeType.ALL}, orphanRemoval = true, targetEntity = SourceXref.class)
-    @JoinColumn(name="parent_ac", referencedColumnName="ac")
-    @Cascade( value = {org.hibernate.annotations.CascadeType.SAVE_UPDATE} )
-    @Target(SourceXref.class)
-    @LazyCollection(LazyCollectionOption.FALSE)
-    /**
-     * This method give direct access to the persistent collection of xrefs (identifiers and xrefs all together) for this object.
-     * WARNING: It should not be used to add/remove objects as it may mess up with the state of the object (only used this way by the synchronizers).
-     */
-    public Collection<Xref> getDbXrefs() {
-        return super.getDbXrefs();
-    }
 
     @OneToMany( cascade = {CascadeType.ALL}, orphanRemoval = true, targetEntity = SourceAnnotation.class)
     @JoinTable(
@@ -257,19 +262,21 @@ public class IntactSource extends AbstractIntactCvTerm implements Source {
      */
     @Override
     public Collection<Annotation> getDbAnnotations() {
-        return super.getDbAnnotations();
+        if (this.persistentAnnotations == null) {
+            this.persistentAnnotations = new SourcePersistentAnnotationList(null);
+        }
+        return this.persistentAnnotations.getWrappedList();
     }
 
-    @Override
-    protected void resetFieldsLinkedToAnnotations() {
-        super.resetFieldsLinkedToAnnotations();
-        this.url = null;
-        this.postalAddress = null;
-    }
-
-    @Override
-    protected void instantiateAnnotations() {
-        super.initialiseAnnotationsWith(new SourceAnnotationList(null));
+    protected void setDbAnnotations(Collection<Annotation> annotations){
+        if (annotations instanceof SourcePersistentAnnotationList){
+            this.persistentAnnotations = (SourcePersistentAnnotationList)annotations;
+            resetFieldsLinkedToAnnotations();
+        }
+        else{
+            this.persistentAnnotations = new SourcePersistentAnnotationList(annotations);
+            resetFieldsLinkedToAnnotations();
+        }
     }
 
     @Override
@@ -284,9 +291,36 @@ public class IntactSource extends AbstractIntactCvTerm implements Source {
     }
 
     @Override
+    protected void resetFieldsLinkedToAnnotations() {
+        this.annotations = null;
+        this.url = null;
+        this.postalAddress = null;
+    }
+
+
+    @OneToMany( cascade = {CascadeType.ALL}, orphanRemoval = true, targetEntity = SourceXref.class)
+    @JoinColumn(name="parent_ac", referencedColumnName="ac")
+    @Cascade( value = {org.hibernate.annotations.CascadeType.SAVE_UPDATE} )
+    @Target(SourceXref.class)
+    @LazyCollection(LazyCollectionOption.FALSE)
+    /**
+     * This method give direct access to the persistent collection of xrefs (identifiers and xrefs all together) for this object.
+     * WARNING: It should not be used to add/remove objects as it may mess up with the state of the object (only used this way by the synchronizers).
+     */
+    public Collection<Xref> getDbXrefs() {
+        return super.getDbXrefs();
+    }
+
+    @Override
+    protected void setDbXrefs(Collection<Xref> persistentXrefs) {
+        super.setDbXrefs(persistentXrefs);
+        this.bibRef = null;
+    }
+
+    @Override
     protected void processAddedXrefEvent(Xref ref) {
         if (this.bibRef == null && XrefUtils.doesXrefHaveQualifier(ref, Xref.PRIMARY_MI, Xref.PRIMARY)){
-             this.bibRef = new IntactPublication(ref);
+            this.bibRef = new IntactPublication(ref);
         }
         else if (XrefUtils.doesXrefHaveQualifier(ref, Xref.PRIMARY_MI, Xref.PRIMARY)){
             this.bibRef.getIdentifiers().add(ref);
@@ -310,53 +344,81 @@ public class IntactSource extends AbstractIntactCvTerm implements Source {
     }
 
     @Override
-    protected void setDbXrefs(Collection<Xref> persistentXrefs) {
-        super.setDbXrefs(persistentXrefs);
-        this.bibRef = null;
-    }
-
-    @Override
     public void resetCachedDbProperties() {
         super.resetCachedDbProperties();
         this.bibRef = null;
     }
 
-    private void processAddedAnnotationEvent(Annotation added) {
-        processAddedAnnotations(added);
+    @Transient
+    public boolean areXrefsInitialized(){
+        return Hibernate.isInitialized(getDbXrefs());
     }
 
-    private void processRemovedAnnotationEvent(Annotation removed) {
-        if (url != null && url.equals(removed)){
-            url = AnnotationUtils.collectFirstAnnotationWithTopic(getAnnotations(), Annotation.URL_MI, Annotation.URL);
-        }
-        else if (postalAddress != null && postalAddress.equals(removed)){
-            postalAddress = AnnotationUtils.collectFirstAnnotationWithTopic(getAnnotations(), null, Annotation.POSTAL_ADDRESS);
-        }
+    @Transient
+    public boolean areSynonymsInitialized(){
+        return Hibernate.isInitialized(getSynonyms());
+    }
+
+    @Transient
+    public boolean areAnnotationsInitialized(){
+        return Hibernate.isInitialized(getDbAnnotations());
     }
 
 
-    private class SourceAnnotationList extends CvTermAnnotationList {
+    private class SourceAnnotationList extends AbstractListHavingProperties<Annotation> {
         public SourceAnnotationList(Collection<Annotation> annots){
             super();
         }
 
         @Override
         protected void processAddedObjectEvent(Annotation added) {
-            super.processAddedObjectEvent(added);
-            processAddedAnnotationEvent(added);
+            persistentAnnotations.add(added);
+            processAddedAnnotations(added);
         }
 
         @Override
         protected void processRemovedObjectEvent(Annotation removed) {
-            super.processRemovedObjectEvent(removed);
-            processRemovedAnnotationEvent(removed);
+            persistentAnnotations.remove(removed);
+            if (url != null && url.equals(removed)){
+                url = AnnotationUtils.collectFirstAnnotationWithTopic(getAnnotations(), Annotation.URL_MI, Annotation.URL);
+            }
+            else if (postalAddress != null && postalAddress.equals(removed)){
+                postalAddress = AnnotationUtils.collectFirstAnnotationWithTopic(getAnnotations(), null, Annotation.POSTAL_ADDRESS);
+            }
         }
 
         @Override
         protected void clearProperties() {
-            super.clearProperties();
+            persistentAnnotations.clear();
             url = null;
             postalAddress = null;
+        }
+    }
+
+    protected class SourcePersistentAnnotationList extends AbstractCollectionWrapper<Annotation> {
+
+        public SourcePersistentAnnotationList(Collection<Annotation> persistentBag){
+            super(persistentBag);
+        }
+
+        @Override
+        protected boolean needToPreProcessElementToAdd(Annotation added) {
+            return false;
+        }
+
+        @Override
+        protected Annotation processOrWrapElementToAdd(Annotation added) {
+            return added;
+        }
+
+        @Override
+        protected void processElementToRemove(Object o) {
+            // nothing to do
+        }
+
+        @Override
+        protected boolean needToPreProcessElementToRemove(Object o) {
+            return false;
         }
     }
 }
