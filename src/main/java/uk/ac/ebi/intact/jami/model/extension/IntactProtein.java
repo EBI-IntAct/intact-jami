@@ -114,6 +114,16 @@ public class IntactProtein extends IntactPolymer implements Protein{
         return uniprotkb != null ? uniprotkb : (refseq != null ? refseq : super.getPreferredIdentifier());
     }
 
+    /**
+     * Overrides the method in IntactInteractor to give back protein preferred name.
+     * @return
+     */
+    @Override
+    @Transient
+    public String getPreferredName(){
+        return this.getGeneName();
+    }
+
     @Transient
     public String getUniprotkb() {
         // initialise identifiers if not done yet
