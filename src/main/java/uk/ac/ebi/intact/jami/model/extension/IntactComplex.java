@@ -351,6 +351,16 @@ public class IntactComplex extends IntactInteractor implements Complex,Releasabl
         return this.correctionComment != null ? this.correctionComment.getValue() : null;
     }
 
+    /**
+     * Overrides the method in IntactInteractor to give back complex preferred name.
+     * @return
+     */
+    @Override
+    @Transient
+    public String getPreferredName(){
+        return this.getShortName();
+    }
+
     @Override
     public void onCorrectionComment(String message) {
         Collection<Annotation> complexAnnotationList = getAnnotations();
