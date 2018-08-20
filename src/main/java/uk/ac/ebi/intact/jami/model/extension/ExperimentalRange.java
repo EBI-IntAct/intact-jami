@@ -69,7 +69,7 @@ public class ExperimentalRange extends AbstractIntactRange<psidev.psi.mi.jami.mo
 
     @ManyToOne(targetEntity = IntactModelledParticipant.class)
     @JoinColumn(name = "experimental_participant_ac", referencedColumnName = "ac")
-    @Target(IntactModelledParticipant.class)
+    @Target(IntactParticipantEvidence.class)
     protected ExperimentalEntity getExperimentalParticipant() {
         psidev.psi.mi.jami.model.Entity target = getParticipant();
         return target instanceof ExperimentalEntity ? (ExperimentalEntity)target : null;
