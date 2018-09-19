@@ -4,14 +4,13 @@ import psidev.psi.mi.jami.model.*;
 import uk.ac.ebi.intact.jami.context.SynchronizerContext;
 import uk.ac.ebi.intact.jami.dao.ComplexDao;
 import uk.ac.ebi.intact.jami.model.extension.IntactComplex;
-import uk.ac.ebi.intact.jami.model.extension.IntactCooperativityEvidence;
-import uk.ac.ebi.intact.jami.model.extension.IntactInteractionEvidence;
 import uk.ac.ebi.intact.jami.model.lifecycle.LifeCycleEvent;
 import uk.ac.ebi.intact.jami.synchronizer.IntactDbSynchronizer;
 
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
 import java.util.Collection;
+import java.util.Iterator;
 
 /**
  * Implementation of complexDao
@@ -29,6 +28,45 @@ public class ComplexDaoImpl extends InteractorDaoImpl<Complex,IntactComplex> imp
     @Override
     public IntactDbSynchronizer<Complex, IntactComplex> getDbSynchronizer() {
         return getSynchronizerContext().getComplexSynchronizer();
+    }
+
+    @Override
+    public IntactComplex getLatestComplexVersionByComplexAc(String complexAc) {
+
+        Collection<IntactComplex> complexes = getByComplexAc(complexAc);
+        IntactComplex complex = null;
+        IntactComplex aux = null;
+
+        // We look for the higher number version
+        if (complexes != null && !complexes.isEmpty()){
+            Iterator<IntactComplex> it = complexes.iterator();
+            complex = it.next();
+            while (it.hasNext()) {
+                aux = it.next();
+                // The version are number and they precede lexicographically in order so no need for the conversion.
+                if ((aux.getComplexVersion().compareTo(complex.getComplexVersion()) > 0)){
+                    complex = aux;
+                }
+            }
+        }
+
+        return complex;
+    }
+
+    @Override
+    public IntactComplex getByComplexAcAndVersion(String complexAc, String version) {
+        Collection<IntactComplex> complexes = getByXref(Xref.COMPLEX_PORTAL, Xref.COMPLEX_PORTAL_MI, complexAc, version, Xref.COMPLEX_PRIMARY, Xref.COMPLEX_PRIMARY_MI);
+
+        if (complexes != null && !complexes.isEmpty() && complexes.size() == 1) {
+            return complexes.iterator().next();
+        }
+
+        return null;
+    }
+
+    @Override
+    public Collection<IntactComplex> getByComplexAc(String complexAc) {
+        return super.getByXrefQualifier(Xref.COMPLEX_PRIMARY, Xref.COMPLEX_PRIMARY_MI, complexAc);
     }
 
     public Collection<IntactComplex> getByInteractionType(String typeName, String typeMI, int first, int max) {
@@ -468,7 +506,8 @@ public class ComplexDaoImpl extends InteractorDaoImpl<Complex,IntactComplex> imp
                         "join i.modelledParameters as p " +
                         "join p.type as t " +
                         "where t.shortName = :confName " +
-                        "and p.unit is null");
+                        "and p.unit is null " +
+                        "and t.shortName = :typeName");
                 query.setParameter("typeName", typeName);
             }
             else if (unitMI != null){

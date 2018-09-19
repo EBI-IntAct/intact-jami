@@ -14,12 +14,13 @@ import uk.ac.ebi.intact.jami.context.IntactContext;
 import uk.ac.ebi.intact.jami.context.SynchronizerContext;
 import uk.ac.ebi.intact.jami.merger.CvTermMergerEnrichOnly;
 import uk.ac.ebi.intact.jami.merger.IntactDbMerger;
-import uk.ac.ebi.intact.jami.model.extension.*;
+import uk.ac.ebi.intact.jami.model.extension.CvTermAlias;
+import uk.ac.ebi.intact.jami.model.extension.CvTermAnnotation;
+import uk.ac.ebi.intact.jami.model.extension.CvTermXref;
+import uk.ac.ebi.intact.jami.model.extension.IntactCvTerm;
 import uk.ac.ebi.intact.jami.sequence.SequenceManager;
 import uk.ac.ebi.intact.jami.synchronizer.*;
-import uk.ac.ebi.intact.jami.synchronizer.listener.IntactCvEnricherListener;
 import uk.ac.ebi.intact.jami.synchronizer.listener.impl.DbCvEnricherListener;
-import uk.ac.ebi.intact.jami.utils.IntactEnricherUtils;
 import uk.ac.ebi.intact.jami.utils.IntactUtils;
 import uk.ac.ebi.intact.jami.utils.comparator.IntactComparator;
 import uk.ac.ebi.intact.jami.utils.comparator.IntactCvTermComparator;
@@ -83,10 +84,10 @@ public class CvTermSynchronizer extends AbstractIntactDbSynchronizer<CvTerm, Int
                 return fetchByIdentifier(term.getMIIdentifier(), CvTerm.PSI_MI, false);
             }
             else if (term.getMODIdentifier() != null){
-                return fetchByIdentifier(term.getMIIdentifier(), CvTerm.PSI_MOD, false);
+                return fetchByIdentifier(term.getMODIdentifier(), CvTerm.PSI_MOD, false);
             }
             else if (term.getPARIdentifier() != null){
-                return fetchByIdentifier(term.getMIIdentifier(), CvTerm.PSI_PAR, false);
+                return fetchByIdentifier(term.getPARIdentifier(), CvTerm.PSI_PAR, false);
             }
             else if (!term.getIdentifiers().isEmpty()){
                 boolean foundSeveral = false;
@@ -129,10 +130,10 @@ public class CvTermSynchronizer extends AbstractIntactDbSynchronizer<CvTerm, Int
             return fetchAllByIdentifier(term.getMIIdentifier(), CvTerm.PSI_MI, false);
         }
         else if (term.getMODIdentifier() != null){
-            return fetchAllByIdentifier(term.getMIIdentifier(), CvTerm.PSI_MOD, false);
+            return fetchAllByIdentifier(term.getMODIdentifier(), CvTerm.PSI_MOD, false);
         }
         else if (term.getPARIdentifier() != null){
-            return fetchAllByIdentifier(term.getMIIdentifier(), CvTerm.PSI_PAR, false);
+            return fetchAllByIdentifier(term.getPARIdentifier(), CvTerm.PSI_PAR, false);
         }
         else if (!term.getIdentifiers().isEmpty()){
             Collection<IntactCvTerm> fetchedTerms = new ArrayList<IntactCvTerm>();
@@ -161,10 +162,10 @@ public class CvTermSynchronizer extends AbstractIntactDbSynchronizer<CvTerm, Int
             return fetchAllAcsByIdentifier(term.getMIIdentifier(), CvTerm.PSI_MI, false);
         }
         else if (term.getMODIdentifier() != null){
-            return fetchAllAcsByIdentifier(term.getMIIdentifier(), CvTerm.PSI_MOD, false);
+            return fetchAllAcsByIdentifier(term.getMODIdentifier(), CvTerm.PSI_MOD, false);
         }
         else if (term.getPARIdentifier() != null){
-            return fetchAllAcsByIdentifier(term.getMIIdentifier(), CvTerm.PSI_PAR, false);
+            return fetchAllAcsByIdentifier(term.getPARIdentifier(), CvTerm.PSI_PAR, false);
         }
         else if (!term.getIdentifiers().isEmpty()){
             Collection<String> fetchedTerms = new ArrayList<String>();
@@ -712,7 +713,7 @@ public class CvTermSynchronizer extends AbstractIntactDbSynchronizer<CvTerm, Int
         Collection<Alias> cvAliases = new ArrayList<Alias>(existingInstance.getSynonyms());
         existingInstance.getSynonyms().clear();
         Collection<Annotation> cvAnnotations = new ArrayList<Annotation>(existingInstance.getDbAnnotations());
-        existingInstance.getAnnotations().clear();
+        existingInstance.getDbAnnotations().clear();
         Collection<Xref> cvRefs = new ArrayList<Xref>(existingInstance.getDbXrefs());
         existingInstance.getDbXrefs().clear();
         Collection<OntologyTerm> children = new ArrayList<OntologyTerm>(existingInstance.getChildren());

@@ -31,7 +31,7 @@ public interface SynchronizerContext {
 
     /**
      * The entity manager associated with this context. It cannot be null
-     * @return
+     * @return The entity manager
      */
     public EntityManager getEntityManager();
 

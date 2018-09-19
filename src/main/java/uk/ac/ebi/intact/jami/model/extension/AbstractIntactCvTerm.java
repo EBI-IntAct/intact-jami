@@ -44,14 +44,12 @@ public abstract class AbstractIntactCvTerm extends AbstractIntactPrimaryObject i
     private String shortName;
     private String fullName;
     private transient CvTermXrefList xrefs;
-    private transient  CvTermIdentifierList identifiers;
+    private transient CvTermIdentifierList identifiers;
     private transient Xref miIdentifier;
     private transient Xref modIdentifier;
     private transient Xref parIdentifier;
 
     private transient PersistentXrefList persistentXrefs;
-    private transient CvTermAnnotationList annotations;
-    private transient PersistentAnnotationList persistentAnnotations;
     private Collection<Alias> synonyms;
 
     private transient Xref acRef;
@@ -128,7 +126,32 @@ public abstract class AbstractIntactCvTerm extends AbstractIntactPrimaryObject i
         this.fullName = name;
     }
 
-    @javax.persistence.Transient
+    @Transient
+    public abstract Collection<Annotation> getAnnotations();
+
+    @Transient
+    protected abstract Collection<Annotation> getDbAnnotations();
+
+    protected abstract void setDbAnnotations(Collection<Annotation> annotations);
+
+    protected abstract boolean processAddedAnnotations(Annotation annot);
+
+    protected abstract void resetFieldsLinkedToAnnotations();
+
+
+    @Transient
+    public Collection<Alias> getSynonyms() {
+        if (synonyms == null){
+            this.synonyms = new ArrayList<Alias>();
+        }
+        return this.synonyms;
+    }
+
+    protected void setSynonyms(Collection<Alias> aliases){
+        this.synonyms = aliases;
+    }
+
+    @Transient
     public Collection<Xref> getIdentifiers() {
         if (identifiers == null){
             initialiseXrefs();
@@ -136,7 +159,7 @@ public abstract class AbstractIntactCvTerm extends AbstractIntactPrimaryObject i
         return identifiers;
     }
 
-    @javax.persistence.Transient
+    @Transient
     public String getMIIdentifier() {
         if (this.identifiers == null){
             initialiseXrefs();
@@ -144,7 +167,7 @@ public abstract class AbstractIntactCvTerm extends AbstractIntactPrimaryObject i
         return this.miIdentifier != null ? this.miIdentifier.getId() : null;
     }
 
-    @javax.persistence.Transient
+    @Transient
     public String getMODIdentifier() {
         if (this.identifiers == null){
             initialiseXrefs();
@@ -152,7 +175,7 @@ public abstract class AbstractIntactCvTerm extends AbstractIntactPrimaryObject i
         return this.modIdentifier != null ? this.modIdentifier.getId() : null;
     }
 
-    @javax.persistence.Transient
+    @Transient
     public String getPARIdentifier() {
         if (this.identifiers == null){
             initialiseXrefs();
@@ -168,7 +191,7 @@ public abstract class AbstractIntactCvTerm extends AbstractIntactPrimaryObject i
             CvTerm psiMiDatabase = IntactUtils.createPsiMiDatabase();
             CvTerm identityQualifier = IntactUtils.createIdentityQualifier(psiMiDatabase);
             // first remove old psi mi if not null
-            if (this.miIdentifier != null && !mi.equals(this.miIdentifier)){
+            if (this.miIdentifier != null && !mi.equals(this.miIdentifier.getId())){
                 if (this.miIdentifier instanceof AbstractIntactXref){
                    ((AbstractIntactXref) this.miIdentifier).setId(mi);
                 }
@@ -199,7 +222,7 @@ public abstract class AbstractIntactCvTerm extends AbstractIntactPrimaryObject i
             CvTerm psiModDatabase = IntactUtils.createMIDatabase(CvTerm.PSI_MOD, CvTerm.PSI_MOD_MI);
             CvTerm identityQualifier = IntactUtils.createIdentityQualifier();
             // first remove old psi mod if not null
-            if (this.modIdentifier != null && !mod.equals(this.modIdentifier)){
+            if (this.modIdentifier != null && !mod.equals(this.modIdentifier.getId())){
                 if (this.modIdentifier instanceof AbstractIntactXref){
                     ((AbstractIntactXref) this.modIdentifier).setId(mod);
                 }
@@ -227,21 +250,21 @@ public abstract class AbstractIntactCvTerm extends AbstractIntactPrimaryObject i
         // add new mod if not null
         if (par != null){
 
-            CvTerm psiModDatabase = IntactUtils.createMIDatabase(CvTerm.PSI_PAR, null);
+            CvTerm psiParDatabase = IntactUtils.createMIDatabase(CvTerm.PSI_PAR, null);
             CvTerm identityQualifier = IntactUtils.createIdentityQualifier();
             // first remove old psi mod if not null
-            if (this.parIdentifier != null && !par.equals(this.parIdentifier)){
+            if (this.parIdentifier != null && !par.equals(this.parIdentifier.getId())){
                 if (this.parIdentifier instanceof AbstractIntactXref){
                     ((AbstractIntactXref) this.parIdentifier).setId(par);
                 }
                 else{
                     cvTermIdentifiers.remove(this.parIdentifier);
-                    this.parIdentifier = new CvTermXref(psiModDatabase, par, identityQualifier);
+                    this.parIdentifier = new CvTermXref(psiParDatabase, par, identityQualifier);
                     cvTermIdentifiers.add(this.parIdentifier);
                 }
             }
             else if (this.parIdentifier == null){
-                this.parIdentifier = new CvTermXref(psiModDatabase, par, identityQualifier);
+                this.parIdentifier = new CvTermXref(psiParDatabase, par, identityQualifier);
                 cvTermIdentifiers.add(this.parIdentifier);
             }
         }
@@ -252,51 +275,12 @@ public abstract class AbstractIntactCvTerm extends AbstractIntactPrimaryObject i
         }
     }
 
-    @javax.persistence.Transient
+    @Transient
     public Collection<Xref> getXrefs() {
         if (xrefs == null){
             initialiseXrefs();
         }
         return this.xrefs;
-    }
-
-    @javax.persistence.Transient
-    public Collection<Annotation> getAnnotations() {
-        if (annotations == null){
-            initialiseAnnotations();
-        }
-        return this.annotations;
-    }
-
-    @javax.persistence.Transient
-    public Collection<Alias> getSynonyms() {
-        if (synonyms == null){
-            initialiseSynonyms();
-        }
-        return this.synonyms;
-    }
-
-    @Override
-    public int hashCode() {
-        return UnambiguousCvTermComparator.hashCode(this);
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o){
-            return true;
-        }
-
-        if (!(o instanceof CvTerm)){
-            return false;
-        }
-
-        return UnambiguousCvTermComparator.areEquals(this, (CvTerm) o);
-    }
-
-    @Override
-    public String toString() {
-        return (miIdentifier != null ? miIdentifier.getId() : (modIdentifier != null ? modIdentifier.getId() : (parIdentifier != null ? parIdentifier.getId() : "-"))) + " ("+shortName+")";
     }
 
     protected void initialiseXrefs(){
@@ -335,20 +319,12 @@ public abstract class AbstractIntactCvTerm extends AbstractIntactPrimaryObject i
         // nothing to do
     }
 
-    @javax.persistence.Transient
+    @Transient
     protected Collection<Xref> getDbXrefs() {
         if (this.persistentXrefs == null){
             this.persistentXrefs = new PersistentXrefList(null);
         }
         return this.persistentXrefs.getWrappedList();
-    }
-
-    @javax.persistence.Transient
-    protected Collection<Annotation> getDbAnnotations() {
-        if (this.persistentAnnotations == null){
-            this.persistentAnnotations = new PersistentAnnotationList(null);
-        }
-        return this.persistentAnnotations.getWrappedList();
     }
 
     protected void setDbXrefs(Collection<Xref> persistentXrefs){
@@ -362,54 +338,6 @@ public abstract class AbstractIntactCvTerm extends AbstractIntactPrimaryObject i
         }
     }
 
-    protected void initialiseAnnotations(){
-        instantiateAnnotations();
-
-        // initialise persistent annotations and content
-        if (this.persistentAnnotations != null){
-            for (Annotation annot : this.persistentAnnotations){
-                if (!processAddedAnnotations(annot)){
-                    this.annotations.addOnly(annot);
-                }
-            }
-        }
-        else{
-            this.persistentAnnotations = new PersistentAnnotationList(null);
-        }
-    }
-
-    protected void instantiateAnnotations() {
-        this.annotations = new CvTermAnnotationList();
-    }
-
-    protected abstract boolean processAddedAnnotations(Annotation annot);
-
-    protected void initialiseSynonyms(){
-        this.synonyms = new ArrayList<Alias>();
-    }
-
-    protected void initialiseAnnotationsWith(CvTermAnnotationList annotations){
-        this.annotations = annotations;
-    }
-
-    protected void setDbAnnotations(Collection<Annotation> annotations){
-        if (annotations instanceof PersistentAnnotationList){
-            this.persistentAnnotations = (PersistentAnnotationList)annotations;
-            resetFieldsLinkedToAnnotations();
-        }
-        else{
-            this.persistentAnnotations = new PersistentAnnotationList(annotations);
-            resetFieldsLinkedToAnnotations();
-        }
-    }
-
-    protected void resetFieldsLinkedToAnnotations(){
-        this.annotations = null;
-    }
-
-    protected void setSynonyms(Collection<Alias> aliases){
-        this.synonyms = aliases;
-    }
 
     protected void processAddedIdentifierEvent(Xref added) {
 
@@ -512,6 +440,29 @@ public abstract class AbstractIntactCvTerm extends AbstractIntactPrimaryObject i
     public void resetCachedDbProperties(){
         resetXrefs();
         resetFieldsLinkedToAnnotations();
+    }
+
+    @Override
+    public String toString() {
+        return (miIdentifier != null ? miIdentifier.getId() : (modIdentifier != null ? modIdentifier.getId() : (parIdentifier != null ? parIdentifier.getId() : "-"))) + " ("+shortName+")";
+    }
+
+    @Override
+    public int hashCode() {
+        return UnambiguousCvTermComparator.hashCode(this);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o){
+            return true;
+        }
+
+        if (!(o instanceof CvTerm)){
+            return false;
+        }
+
+        return UnambiguousCvTermComparator.areEquals(this, (CvTerm) o);
     }
 
     /**
@@ -631,51 +582,4 @@ public abstract class AbstractIntactCvTerm extends AbstractIntactPrimaryObject i
         }
     }
 
-    protected class CvTermAnnotationList extends AbstractListHavingProperties<Annotation> {
-        public CvTermAnnotationList(){
-            super();
-        }
-
-        @Override
-        protected void processAddedObjectEvent(Annotation added) {
-            persistentAnnotations.add(added);
-        }
-
-        @Override
-        protected void processRemovedObjectEvent(Annotation removed) {
-            persistentAnnotations.remove(removed);
-        }
-
-        @Override
-        protected void clearProperties() {
-            persistentAnnotations.retainAll(getIdentifiers());
-        }
-    }
-
-    protected class PersistentAnnotationList extends AbstractCollectionWrapper<Annotation> {
-
-        public PersistentAnnotationList(Collection<Annotation> persistentBag){
-            super(persistentBag);
-        }
-
-        @Override
-        protected boolean needToPreProcessElementToAdd(Annotation added) {
-            return false;
-        }
-
-        @Override
-        protected Annotation processOrWrapElementToAdd(Annotation added) {
-            return added;
-        }
-
-        @Override
-        protected void processElementToRemove(Object o) {
-            // nothing to do
-        }
-
-        @Override
-        protected boolean needToPreProcessElementToRemove(Object o) {
-            return false;
-        }
-    }
 }

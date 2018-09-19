@@ -95,16 +95,11 @@ public class GlobalStatus {
      * @param reason an optional comment
      */
     public void changeOwnership(Releasable releasable, User newOwner, String reason) {
-        User currentUser = null;
-        UserContext userContext = ApplicationContextProvider.getBean("jamiUserContext", UserContext.class);
-        if (userContext != null && userContext.getUserId() != null) {
-            currentUser = userContext.getUser();
-        }
 
         User previousOwner = releasable.getCurrentOwner();
         releasable.setCurrentOwner( newOwner );
 
-        addLifecycleEvent(releasable, LifeCycleEventType.OWNER_CHANGED,  "New owner: "+newOwner.getLogin()+" - "+reason, currentUser);
+        addLifecycleEvent(releasable, LifeCycleEventType.OWNER_CHANGED,  "New owner: "+newOwner.getLogin()+" - "+reason, newOwner);
 
         // Notify listeners
         for ( LifecycleEventListener listener : getListeners() ) {

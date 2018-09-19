@@ -9,8 +9,8 @@ import uk.ac.ebi.intact.jami.synchronizer.FinderException;
 import uk.ac.ebi.intact.jami.utils.comparator.IntactPolymerComparator;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 
 /**
  * Synchronizer for IntAct polymers
@@ -27,7 +27,7 @@ public class PolymerSynchronizerTemplate<T extends Polymer, P extends IntactPoly
 
     @Override
     protected P postFilter(T term, Collection<P> results) throws FinderException {
-        Collection<P> filteredResults = new ArrayList<P>(results.size());
+        Collection<P> filteredResults = new HashSet<P>();
         for (P interactor : results){
             if (term.getSequence() != null && term.getSequence().equalsIgnoreCase(interactor.getSequence())){
                 filteredResults.add(interactor);
@@ -42,7 +42,10 @@ public class PolymerSynchronizerTemplate<T extends Polymer, P extends IntactPoly
             return filteredResults.iterator().next();
         }
         else if (filteredResults.size() > 1){
-            throw new FinderException("The interactor "+term + " can match "+filteredResults.size()+" interactors in the database and we cannot determine which one is valid: "+filteredResults);
+            for (P filteredResult : filteredResults) {
+                System.out.println(filteredResult.getAc() +" " + filteredResult.toString());
+            }
+            throw new FinderException("The interactor "+term + " can match "+filteredResults.size()+" interactors in the database and we cannot determine which one is valid: \n" + filteredResults.toString() + "\n");
         }
         else{
             return null;
@@ -51,7 +54,7 @@ public class PolymerSynchronizerTemplate<T extends Polymer, P extends IntactPoly
 
     @Override
     protected Collection<P> postFilterAll(T term, Collection<P> results) {
-        Collection<P> filteredResults = new ArrayList<P>(results.size());
+        Collection<P> filteredResults = new HashSet<P>();
         for (P interactor : results){
             if (term.getSequence() != null && term.getSequence().equalsIgnoreCase(interactor.getSequence())){
                 filteredResults.add(interactor);
@@ -67,7 +70,7 @@ public class PolymerSynchronizerTemplate<T extends Polymer, P extends IntactPoly
 
     @Override
     protected Collection<String> postFilterAllAcs(T term, Collection<P> results) {
-        Collection<String> filteredResults = new ArrayList<String>(results.size());
+        Collection<String> filteredResults = new HashSet<String>();
         for (P interactor : results){
             if (term.getSequence() != null && term.getSequence().equalsIgnoreCase(interactor.getSequence())
                     && interactor.getAc() != null){

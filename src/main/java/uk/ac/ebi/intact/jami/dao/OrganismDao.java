@@ -29,8 +29,8 @@ public interface OrganismDao extends IntactBaseDao<IntactOrganism>{
 
     /**
      * Biosources with only a taxid, no celltype or tissue
-     * @param taxid
-     * @return
+     * @param taxid Organism taxon identifier
+     * @return the IntAct organism representation
      */
     public IntactOrganism getByTaxidOnly(int taxid);
 

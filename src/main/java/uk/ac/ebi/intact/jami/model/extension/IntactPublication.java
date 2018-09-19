@@ -189,7 +189,7 @@ public class IntactPublication extends AbstractIntactPrimaryObject implements Pu
             CvTerm pubmedDatabase = IntactUtils.createMIDatabase(Xref.PUBMED, Xref.PUBMED_MI);
             CvTerm identityQualifier = IntactUtils.createMIQualifier(Xref.PRIMARY, Xref.PRIMARY_MI);
             // first remove old pubmed if not null
-            if (this.pubmedId != null && !pubmedId.equals(this.pubmedId)){
+            if (this.pubmedId != null && !pubmedId.equals(this.pubmedId.getId())){
                 if (this.pubmedId instanceof AbstractIntactXref){
                     ((AbstractIntactXref) this.pubmedId).setId(pubmedId);
                 }
@@ -227,7 +227,7 @@ public class IntactPublication extends AbstractIntactPrimaryObject implements Pu
             CvTerm identityQualifier = IntactUtils.createMIQualifier(Xref.PRIMARY, Xref.PRIMARY_MI);
             // first remove old doi if not null
 
-            if (this.doi != null && !doi.equals(this.doi)){
+            if (this.doi != null && !doi.equals(this.doi.getId())){
                 if (this.doi instanceof AbstractIntactXref){
                     ((AbstractIntactXref) this.doi).setId(doi);
                 }
@@ -272,7 +272,7 @@ public class IntactPublication extends AbstractIntactPrimaryObject implements Pu
             CvTerm imexDatabase = IntactUtils.createMIDatabase(Xref.IMEX, Xref.IMEX_MI);
             CvTerm imexPrimaryQualifier = IntactUtils.createMIQualifier(Xref.IMEX_PRIMARY, Xref.IMEX_PRIMARY_MI);
             // first remove old imex if not null
-            if (this.imexId != null && !identifier.equals(this.imexId)){
+            if (this.imexId != null && !identifier.equals(this.imexId.getId())){
                 if (this.imexId instanceof AbstractIntactXref){
                     ((AbstractIntactXref) this.imexId).setId(identifier);
                 }
@@ -1013,7 +1013,6 @@ public class IntactPublication extends AbstractIntactPrimaryObject implements Pu
     }
 
     protected void processAddedXrefEvent(Xref added) {
-
         // the added identifier is imex and the current imex is not set
         if (imexId == null && XrefUtils.isXrefFromDatabase(added, Xref.IMEX_MI, Xref.IMEX)){
             // the added xref is imex-primary
@@ -1024,7 +1023,7 @@ public class IntactPublication extends AbstractIntactPrimaryObject implements Pu
     }
 
     protected void processRemovedXrefEvent(Xref removed) {
-        // the removed identifier is pubmed
+        // the removed identifier is imex
         if (imexId != null && imexId.equals(removed)){
             Collection<Xref> existingImex = XrefUtils.collectAllXrefsHavingDatabaseAndQualifier(getXrefs(), Xref.IMEX_MI, Xref.IMEX, Xref.IMEX_PRIMARY_MI, Xref.IMEX_PRIMARY);
             if (!existingImex.isEmpty()){
@@ -1160,70 +1159,6 @@ public class IntactPublication extends AbstractIntactPrimaryObject implements Pu
         else{
             return false;
         }
-    }
-
-    protected void processAddedAnnotation(Annotation added) {
-        if (toBeReviewed == null &&
-                AnnotationUtils.doesAnnotationHaveTopic(added, null, Releasable.TO_BE_REVIEWED)){
-            toBeReviewed = added;
-        }
-        else if (accepted == null &&
-                AnnotationUtils.doesAnnotationHaveTopic(added, null, Releasable.ACCEPTED)){
-            accepted = added;
-        }
-        else if (onHold == null &&
-                AnnotationUtils.doesAnnotationHaveTopic(added, null, Releasable.ON_HOLD)){
-            onHold = added;
-        }
-        else if (correctionComment == null &&
-                AnnotationUtils.doesAnnotationHaveTopic(added, null, Releasable.CORRECTION_COMMENT)){
-            correctionComment = added;
-        }
-    }
-
-    protected void processRemovedAnnotation(Annotation removed) {
-        if (toBeReviewed != null && toBeReviewed.equals(removed)){
-            toBeReviewed = AnnotationUtils.collectFirstAnnotationWithTopic(getAnnotations(),
-                    null, Releasable.TO_BE_REVIEWED);
-        }
-        if (accepted != null && accepted.equals(removed)){
-            accepted = AnnotationUtils.collectFirstAnnotationWithTopic(getAnnotations(),
-                    null, Releasable.ACCEPTED);
-        }
-        if (onHold != null && onHold.equals(removed)){
-            onHold = AnnotationUtils.collectFirstAnnotationWithTopic(getAnnotations(),
-                    null, Releasable.ON_HOLD);
-        }
-        if (correctionComment != null && correctionComment.equals(removed)){
-            correctionComment = AnnotationUtils.collectFirstAnnotationWithTopic(getAnnotations(),
-                    null, Releasable.CORRECTION_COMMENT);
-        }
-    }
-
-    protected void clearPropertiesLinkedToAnnotations() {
-        Annotation authorList = AnnotationUtils.collectFirstAnnotationWithTopic(getDbAnnotations(), Annotation.AUTHOR_MI, Annotation.AUTHOR);
-        Annotation publicationJournal = AnnotationUtils.collectFirstAnnotationWithTopic(getDbAnnotations(), Annotation.PUBLICATION_JOURNAL_MI, Annotation.PUBLICATION_JOURNAL);
-        Annotation publicationYear = AnnotationUtils.collectFirstAnnotationWithTopic(getDbAnnotations(), Annotation.PUBLICATION_YEAR_MI, Annotation.PUBLICATION_YEAR);
-        Annotation curationDepth = AnnotationUtils.collectFirstAnnotationWithTopic(getDbAnnotations(), Annotation.CURATION_DEPTH_MI, Annotation.CURATION_DEPTH);
-        this.persistentAnnotations.clear();
-
-        if (authorList != null){
-            this.persistentAnnotations.add(authorList);
-        }
-        if (publicationJournal != null){
-            this.persistentAnnotations.add(publicationJournal);
-        }
-        if (publicationYear != null){
-            this.persistentAnnotations.add(publicationYear);
-        }
-        if (curationDepth != null){
-            this.persistentAnnotations.add(curationDepth);
-        }
-
-        this.onHold = null;
-        this.toBeReviewed = null;
-        this.accepted = null;
-        this.correctionComment = null;
     }
 
     private void initialiseReleasedDate() {
@@ -1396,25 +1331,78 @@ public class IntactPublication extends AbstractIntactPrimaryObject implements Pu
     }
 
     protected class PublicationAnnotationList extends AbstractListHavingProperties<Annotation> {
-        public PublicationAnnotationList(){
+        public PublicationAnnotationList() {
             super();
         }
 
         @Override
         protected void processAddedObjectEvent(Annotation added) {
-            processAddedAnnotation(added);
+            if (toBeReviewed == null &&
+                    AnnotationUtils.doesAnnotationHaveTopic(added, null, Releasable.TO_BE_REVIEWED)){
+                toBeReviewed = added;
+            }
+            else if (accepted == null &&
+                    AnnotationUtils.doesAnnotationHaveTopic(added, null, Releasable.ACCEPTED)){
+                accepted = added;
+            }
+            else if (onHold == null &&
+                    AnnotationUtils.doesAnnotationHaveTopic(added, null, Releasable.ON_HOLD)){
+                onHold = added;
+            }
+            else if (correctionComment == null &&
+                    AnnotationUtils.doesAnnotationHaveTopic(added, null, Releasable.CORRECTION_COMMENT)){
+                correctionComment = added;
+            }
             persistentAnnotations.add(added);
         }
 
         @Override
         protected void processRemovedObjectEvent(Annotation removed) {
-            processRemovedAnnotation(removed);
+            if (toBeReviewed != null && toBeReviewed.equals(removed)){
+                toBeReviewed = AnnotationUtils.collectFirstAnnotationWithTopic(getAnnotations(),
+                        null, Releasable.TO_BE_REVIEWED);
+            }
+            if (accepted != null && accepted.equals(removed)){
+                accepted = AnnotationUtils.collectFirstAnnotationWithTopic(getAnnotations(),
+                        null, Releasable.ACCEPTED);
+            }
+            if (onHold != null && onHold.equals(removed)){
+                onHold = AnnotationUtils.collectFirstAnnotationWithTopic(getAnnotations(),
+                        null, Releasable.ON_HOLD);
+            }
+            if (correctionComment != null && correctionComment.equals(removed)){
+                correctionComment = AnnotationUtils.collectFirstAnnotationWithTopic(getAnnotations(),
+                        null, Releasable.CORRECTION_COMMENT);
+            }
             persistentAnnotations.remove(removed);
         }
 
         @Override
         protected void clearProperties() {
-            clearPropertiesLinkedToAnnotations();
+            Annotation authorList = AnnotationUtils.collectFirstAnnotationWithTopic(getDbAnnotations(), Annotation.AUTHOR_MI, Annotation.AUTHOR);
+            Annotation publicationJournal = AnnotationUtils.collectFirstAnnotationWithTopic(getDbAnnotations(), Annotation.PUBLICATION_JOURNAL_MI, Annotation.PUBLICATION_JOURNAL);
+            Annotation publicationYear = AnnotationUtils.collectFirstAnnotationWithTopic(getDbAnnotations(), Annotation.PUBLICATION_YEAR_MI, Annotation.PUBLICATION_YEAR);
+            Annotation curationDepth = AnnotationUtils.collectFirstAnnotationWithTopic(getDbAnnotations(), Annotation.CURATION_DEPTH_MI, Annotation.CURATION_DEPTH);
+            persistentAnnotations.clear();
+
+            if (authorList != null){
+                persistentAnnotations.add(authorList);
+            }
+            if (publicationJournal != null){
+                persistentAnnotations.add(publicationJournal);
+            }
+            if (publicationYear != null){
+                persistentAnnotations.add(publicationYear);
+            }
+            if (curationDepth != null){
+                persistentAnnotations.add(curationDepth);
+            }
+
+            onHold = null;
+            toBeReviewed = null;
+            accepted = null;
+            correctionComment = null;
+
         }
     }
 

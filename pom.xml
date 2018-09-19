@@ -11,21 +11,23 @@
 
     <groupId>uk.ac.ebi.intact.jami</groupId>
     <artifactId>intact-jami</artifactId>
-    <version>1.2.22-SNAPSHOT</version>
+    <version>2.0.1-SNAPSHOT</version>
+
 
     <name>INTACT :: JAMI - Core interfaces, default implementations of IntAct API based on JAMI interfaces</name>
 
     <scm>
-        <connection>scm:git:https://bitbucket.org/intact-ebi/intact-jami.git</connection>
-        <developerConnection>scm:git:https://bitbucket.org/intact-ebi/intact-jami.git</developerConnection>
-        <url>https://bitbucket.org/intact-ebi/intact-jami</url>
+        <connection>scm:git:https://github.com/EBI-IntAct/intact-jami.git</connection>
+        <developerConnection>scm:git:https://github.com/EBI-IntAct/intact-ebi/intact-jami.git</developerConnection>
+        <url>https://github.com/EBI-IntAct/intact-ebi/intact-jami</url>
         <tag>HEAD</tag>
     </scm>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
         <spring.version>4.3.11.RELEASE</spring.version>
-        <jami.version>3.0.19-SNAPSHOT</jami.version>
+        <jami.version>3.0.20</jami.version>
     </properties>
 
     <build>
@@ -40,6 +42,14 @@
         </resources>
         <plugins>
             <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>1.8</source>
+                    <target>1.8</target>
+                </configuration>
+            </plugin>
+            <plugin>
                 <groupId>external.atlassian.jgitflow</groupId>
                 <artifactId>jgitflow-maven-plugin</artifactId>
                 <version>1.0-m5.1</version>
@@ -52,8 +62,15 @@
                         <hotfixBranchPrefix>hotfix-</hotfixBranchPrefix>
                         <versionTagPrefix>${project.artifactId}-</versionTagPrefix>
                     </flowInitContext>
+                    <username>${git.user}</username>
+                    <password>${git.password}</password>
                     <!-- see goals wiki page for configuration options -->
                     <allowUntracked>true</allowUntracked>
+                    <pullMaster>true</pullMaster>
+                    <pullDevelop>true</pullDevelop>
+                    <pushReleases>true</pushReleases>
+                    <pushHotfixes>true</pushHotfixes>
+                    <pushFeatures>true</pushFeatures>
                 </configuration>
             </plugin>
         </plugins>

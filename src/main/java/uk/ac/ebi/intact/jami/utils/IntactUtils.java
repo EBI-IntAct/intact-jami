@@ -29,7 +29,7 @@ public class IntactUtils {
     public static final int MAX_SHORT_LABEL_LEN = 255;
     public static final int MAX_FULL_NAME_LEN = 1000;
     public static final int MAX_DESCRIPTION_LEN = 4000;
-    public static final int MAX_ALIAS_NAME_LEN = 256;
+    public static final int MAX_ALIAS_NAME_LEN = 4000;
     public static final int MAX_SECONDARY_ID_LEN = 256;
     public static final int MAX_ID_LEN = 50;
     public static final int MAX_DB_RELEASE_LEN = 10;

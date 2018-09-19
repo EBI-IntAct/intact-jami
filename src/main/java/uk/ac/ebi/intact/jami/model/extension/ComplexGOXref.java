@@ -42,6 +42,7 @@ public class ComplexGOXref extends InteractorXref{
         super(IntactUtils.createMIDatabase(Xref.GO, Xref.GO_MI), id);
     }
 
+/*
     @Override
     public void setDatabase(CvTerm cvDatabase) {
         if (cvDatabase != null && !CvTermUtils.isCvTerm(cvDatabase, Xref.GO_MI, Xref.GO)){
@@ -49,6 +50,7 @@ public class ComplexGOXref extends InteractorXref{
         }
         super.setDatabase(cvDatabase);
     }
+*/
 
     @ManyToOne(targetEntity = IntactCvTerm.class)
     @JoinColumn( name = "evidencetype_ac" )
