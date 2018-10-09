@@ -103,7 +103,7 @@ public class IntactAcGenerator extends SequenceStyleGenerator {
     }*/
     @Override
     public Serializable generate(SessionImplementor sessionImplementor, Object object) throws HibernateException {
-
+        //TODO... Change the logic
         String prefix = "UNK";
         String stringId = null;
         IntactContext intactContext = ApplicationContextProvider.getBean("intactJamiContext");
