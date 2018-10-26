@@ -1,13 +1,24 @@
 package uk.ac.ebi.intact.jami.model.extension;
 
+import org.hibernate.Hibernate;
 import org.hibernate.annotations.Target;
+import org.hibernate.validator.constraints.NotBlank;
+import org.junit.After;
+import org.junit.AfterClass;
 import psidev.psi.mi.jami.model.CvTerm;
 import psidev.psi.mi.jami.model.Xref;
 import psidev.psi.mi.jami.utils.CvTermUtils;
+import uk.ac.ebi.intact.jami.constraints.CGXValidator;
 import uk.ac.ebi.intact.jami.utils.IntactUtils;
 
+import javax.annotation.PostConstruct;
 import javax.persistence.*;
+import javax.validation.ConstraintViolation;
+import javax.validation.Validation;
+import javax.validation.Validator;
+import javax.validation.ValidatorFactory;
 import javax.validation.constraints.Size;
+import java.util.Set;
 
 /**
  * Implementation of xref for interactors
@@ -18,6 +29,7 @@ import javax.validation.constraints.Size;
  */
 @Entity
 @DiscriminatorValue( "go" )
+@CGXValidator
 public class ComplexGOXref extends InteractorXref{
 
     private CvTerm evidenceType;
@@ -25,6 +37,13 @@ public class ComplexGOXref extends InteractorXref{
 
     protected ComplexGOXref() {
     }
+
+/*    @PostLoad
+    public void validity() {
+        ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
+        Validator validator = factory.getValidator();
+        Set<ConstraintViolation<ComplexGOXref>> constraintViolations=validator.validate(this);
+    }*/
 
     public ComplexGOXref(String id, CvTerm qualifier) {
         super(IntactUtils.createMIDatabase(Xref.GO, Xref.GO_MI), id, qualifier);
@@ -42,15 +61,10 @@ public class ComplexGOXref extends InteractorXref{
         super(IntactUtils.createMIDatabase(Xref.GO, Xref.GO_MI), id);
     }
 
-/*
     @Override
     public void setDatabase(CvTerm cvDatabase) {
-        if (cvDatabase != null && !CvTermUtils.isCvTerm(cvDatabase, Xref.GO_MI, Xref.GO)){
-           throw new IllegalArgumentException("A Complex GO cross reference can only have GO as a database.");
-        }
         super.setDatabase(cvDatabase);
     }
-*/
 
     @ManyToOne(targetEntity = IntactCvTerm.class)
     @JoinColumn( name = "evidencetype_ac" )
