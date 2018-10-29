@@ -25,7 +25,7 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-
+        <el.jsr341.version>2.2.4</el.jsr341.version>
         <spring.version>4.3.11.RELEASE</spring.version>
         <jami.version>3.0.20</jami.version>
     </properties>
@@ -189,6 +189,20 @@
             <artifactId>h2</artifactId>
             <version>1.4.192</version>
         </dependency>
+
+        <!--When running in container (for eg. Editor) have following dependency snippet as provided-->
+        <!--Snippet Start-->
+        <dependency>
+            <groupId>javax.el</groupId>
+            <artifactId>javax.el-api</artifactId>
+            <version>${el.jsr341.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.glassfish.web</groupId>
+            <artifactId>javax.el</artifactId>
+            <version>${el.jsr341.version}</version>
+        </dependency>
+        <!--Snippet End-->
     </dependencies>
 
     <repositories>
