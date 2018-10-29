@@ -38,13 +38,6 @@ public class ComplexGOXref extends InteractorXref{
     protected ComplexGOXref() {
     }
 
-/*    @PostLoad
-    public void validity() {
-        ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
-        Validator validator = factory.getValidator();
-        Set<ConstraintViolation<ComplexGOXref>> constraintViolations=validator.validate(this);
-    }*/
-
     public ComplexGOXref(String id, CvTerm qualifier) {
         super(IntactUtils.createMIDatabase(Xref.GO, Xref.GO_MI), id, qualifier);
     }
