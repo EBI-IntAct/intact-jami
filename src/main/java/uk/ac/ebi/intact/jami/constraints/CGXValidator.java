@@ -1,11 +1,9 @@
 package uk.ac.ebi.intact.jami.constraints;
 
 
-import uk.ac.ebi.intact.jami.constraints.groups.ComplexGroup;
 
 import javax.validation.Constraint;
 import javax.validation.Payload;
-import javax.validation.ReportAsSingleViolation;
 import java.lang.annotation.*;
 
 /**
