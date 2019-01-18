@@ -375,4 +375,16 @@ public abstract class AbstractIntactParticipant<I extends Interaction, F extends
     protected void setShortLabel(String shortName) {
         this.shortName = shortName;
     }
+
+    @Transient
+    @Override
+    public CvTerm getBiologicalEffect() {
+        //TODO
+        return null;
+    }
+
+    @Override
+    public void setBiologicalEffect(CvTerm biologicalEffect) {
+        //TODO
+    }
 }

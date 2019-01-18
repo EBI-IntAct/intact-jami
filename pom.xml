@@ -24,7 +24,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <spring.version>3.2.9.RELEASE</spring.version>
-        <jami.version>3.1.0</jami.version>
+        <jami.version>3.2.0</jami.version>
     </properties>
 
     <build>
@@ -172,7 +172,7 @@
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <version>4.10</version>
+            <version>4.12</version>
             <optional>true</optional>
         </dependency>
         <dependency>

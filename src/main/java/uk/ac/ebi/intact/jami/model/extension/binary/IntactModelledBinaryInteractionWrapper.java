@@ -10,6 +10,7 @@ import uk.ac.ebi.intact.jami.model.extension.IntactComplex;
 import uk.ac.ebi.intact.jami.model.lifecycle.LifeCycleStatus;
 import uk.ac.ebi.intact.jami.model.user.User;
 
+import javax.persistence.Transient;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -281,5 +282,18 @@ public class IntactModelledBinaryInteractionWrapper implements ModelledBinaryInt
     @Override
     public void setLocalUserContext(UserContext context) {
         this.wrappedInteraction.setLocalUserContext(context);
+    }
+
+
+    @Transient
+    @Override
+    public CvTerm getCausalRegulatoryMechanism() {
+        //TODO
+        return null;
+    }
+
+    @Override
+    public void setCausalRegulatoryMechanism(CvTerm causalRegulatoryMechanism) {
+        //TODO
     }
 }
