@@ -7,6 +7,7 @@ import uk.ac.ebi.intact.jami.context.UserContext;
 import uk.ac.ebi.intact.jami.model.IntactPrimaryObject;
 import uk.ac.ebi.intact.jami.model.extension.IntactInteractionEvidence;
 
+import javax.persistence.Transient;
 import java.util.Collection;
 import java.util.Date;
 
@@ -261,5 +262,17 @@ public class IntactBinaryInteractionEvidenceWrapper implements BinaryInteraction
     @Override
     public void setLocalUserContext(UserContext context) {
         this.wrappedInteraction.setLocalUserContext(context);
+    }
+
+    @Transient
+    @Override
+    public CvTerm getCausalRegulatoryMechanism() {
+        //TODO
+        return null;
+    }
+
+    @Override
+    public void setCausalRegulatoryMechanism(CvTerm causalRegulatoryMechanism) {
+        //TODO
     }
 }
