@@ -439,8 +439,54 @@ public abstract class AbstractIntactDbSynchronizer<I, T extends Auditable> imple
             }
             // persist object if allowed
             if (persist){
-                persistObject(persistentObject);
+                //it is possible to persist the same object that we are trying to save before it finish the checks
+                // (e.g. pubmed cv has an annotation with a xref that contains pubmed too and it gets saved),
+                // so we check if we find it again to avoid duplicates
+                //TODO review this code to remove the duplication and try to see if it can be organised in a better way
+                existingInstance = find((I)persistentObject);
+                if(existingInstance!= null){
+                    // we merge the existing instance with the new instance if possible
+                    if (getIntactMerger() != null){
+                        // store object and intact object in a identity cache so no lazy properties can be called before synchronization
+                        registerObjectBeforeProcessing(originalObject, persistentObject, existingInstance);
+
+                        // merge
+                        T mergedObject = getIntactMerger().merge(persistentObject, existingInstance);
+
+                        // remove object and intact object from identity cache as not dirty anymore
+                        unregisterObjectAfterProcessing(originalObject, persistentObject, existingInstance);
+
+                        // cache object to persist if allowed
+                        // cache object to persist if necessary
+                        storeInCache(originalObject, persistentObject, mergedObject);
+                        storeInCache((I)mergedObject, persistentObject, mergedObject);
+
+                        // then set userContext
+                        mergedObject.setLocalUserContext(getContext().getUserContext());
+
+                        if (listener != null
+                                && persistentObject instanceof IntactPrimaryObject){
+                            if (((IntactPrimaryObject)persistentObject).getAc() == null
+                                    && ((IntactPrimaryObject)existingInstance).getAc() != null){
+                                listener.onTransientMergedWithDbInstance((IntactPrimaryObject)persistentObject, (IntactPrimaryObject)existingInstance);
+                            }
+                        }
+
+                        return mergedObject;
+                    }
+                    // cache object to persist if necessary
+                    storeInCache(originalObject, persistentObject, existingInstance);
+                    if (listener != null
+                            && persistentObject instanceof IntactPrimaryObject){
+                        listener.onReplacedWithDbInstance((IntactPrimaryObject)persistentObject, (IntactPrimaryObject)existingInstance);
+                    }
+                    // we only return the existing instance if no merge allowed
+                    return existingInstance;                }
+                else {
+                    persistObject(persistentObject);
+                }
             }
+
             // cache object to persist if necessary
             storeInCache(originalObject, persistentObject, existingInstance);
             return persistentObject;
