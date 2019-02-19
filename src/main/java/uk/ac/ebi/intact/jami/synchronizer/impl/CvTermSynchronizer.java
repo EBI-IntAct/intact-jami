@@ -183,6 +183,8 @@ public class CvTermSynchronizer extends AbstractIntactDbSynchronizer<CvTerm, Int
     public void synchronizeProperties(IntactCvTerm intactCv) throws FinderException, PersisterException, SynchronizerException {
         // first set objclass
         initialiseObjClass(intactCv);
+        // then check shortlabel/synchronize
+        prepareAndSynchronizeShortLabel(intactCv);
         // then check aliases
         prepareAliases(intactCv, true);
         // then check annotations
@@ -193,9 +195,6 @@ public class CvTermSynchronizer extends AbstractIntactDbSynchronizer<CvTerm, Int
         prepareXrefs(intactCv, true);
         // do synchronize parent but not children
         prepareParents(intactCv, true);
-        // then check shortlabel/synchronize
-        prepareAndSynchronizeShortLabel(intactCv);
-
         // rest all cached properties after synchronization
         intactCv.resetCachedDbProperties();
     }
