@@ -33,7 +33,7 @@ import java.util.*;
 public class ExperimentSynchronizer extends AbstractIntactDbSynchronizer<Experiment, IntactExperiment>
 implements IntactExperimentSynchronizer{
 
-private Map<Experiment, IntactExperiment> persistedObjects;
+    private Map<Experiment, IntactExperiment> persistedObjects;
     private Map<Experiment, IntactExperiment> convertedObjects;
 
     private CollectionComparator<Annotation> annotationCollectionComparator;
