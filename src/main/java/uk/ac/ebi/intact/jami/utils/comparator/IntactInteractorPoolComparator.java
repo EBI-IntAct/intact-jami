@@ -4,6 +4,7 @@ import psidev.psi.mi.jami.model.Interactor;
 import psidev.psi.mi.jami.model.InteractorPool;
 import psidev.psi.mi.jami.model.Organism;
 import psidev.psi.mi.jami.utils.comparator.interactor.InteractorPoolComparator;
+import psidev.psi.mi.jami.utils.comparator.interactor.UnambiguousExactInteractorComparator;
 import uk.ac.ebi.intact.jami.model.extension.IntactCvTerm;
 import uk.ac.ebi.intact.jami.model.extension.IntactInteractor;
 
@@ -20,7 +21,14 @@ public class IntactInteractorPoolComparator extends InteractorPoolComparator
 implements IntactComparator<InteractorPool>{
 
     public IntactInteractorPoolComparator() {
-        super(new IntactInteractorComparator());
+        // Temporary fix to solve a problem while comparing two interactor sets.
+
+        // Because the only identifier available for the InteractorPool is the
+        // intact identifier we need to use the UnambiguousExactInteractorComparator
+        // instead of IntactInteractorComparator (the last one ignores the EBI- accs)
+        // This fix can be reverted when the members of the sets are properly present
+        // in the database and those members can be used in the comparison
+        super(new UnambiguousExactInteractorComparator());
     }
 
     public IntactInteractorPoolComparator(IntactInteractorComparator interactorComparator) {
