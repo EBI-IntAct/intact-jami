@@ -3,8 +3,10 @@ package uk.ac.ebi.intact.jami.synchronizer.impl;
 import org.apache.commons.collections.map.IdentityMap;
 import psidev.psi.mi.jami.model.VariableParameterValue;
 import psidev.psi.mi.jami.model.VariableParameterValueSet;
+import psidev.psi.mi.jami.utils.comparator.experiment.VariableParameterValueComparator;
 import uk.ac.ebi.intact.jami.context.SynchronizerContext;
-import uk.ac.ebi.intact.jami.merger.IntactDbMergerIgnoringPersistentObject;
+import uk.ac.ebi.intact.jami.merger.IntactDbMergerIgnoringLocalObject;
+import uk.ac.ebi.intact.jami.model.extension.IntactVariableParameter;
 import uk.ac.ebi.intact.jami.model.extension.IntactVariableParameterValue;
 import uk.ac.ebi.intact.jami.synchronizer.AbstractIntactDbSynchronizer;
 import uk.ac.ebi.intact.jami.synchronizer.FinderException;
@@ -12,11 +14,9 @@ import uk.ac.ebi.intact.jami.synchronizer.PersisterException;
 import uk.ac.ebi.intact.jami.synchronizer.SynchronizerException;
 import uk.ac.ebi.intact.jami.utils.IntactUtils;
 
+import javax.persistence.Query;
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Synchronizer for variable parameter value
@@ -27,12 +27,19 @@ import java.util.Map;
  */
 
 public class VariableParameterValueSynchronizer extends AbstractIntactDbSynchronizer<VariableParameterValue, IntactVariableParameterValue> {
+
     private Map<VariableParameterValue, IntactVariableParameterValue> persistedObjects;
     private Map<VariableParameterValue, IntactVariableParameterValue> convertedObjects;
 
+    private VariableParameterValueComparator variableParameterValueComparator;
+
+
     public VariableParameterValueSynchronizer(SynchronizerContext context) {
         super(context, IntactVariableParameterValue.class);
-        this.persistedObjects = new IdentityMap();
+
+        this.variableParameterValueComparator = new VariableParameterValueComparator();
+
+        this.persistedObjects = new TreeMap<VariableParameterValue, IntactVariableParameterValue>(variableParameterValueComparator);
         this.convertedObjects = new IdentityMap();
     }
 
@@ -83,7 +90,7 @@ public class VariableParameterValueSynchronizer extends AbstractIntactDbSynchron
 
     @Override
     protected void convertPersistableProperties(IntactVariableParameterValue object) throws SynchronizerException, PersisterException, FinderException {
-        // nothing to do
+        synchronizeVariableParameter(object, false);
     }
 
     @Override
@@ -100,25 +107,93 @@ public class VariableParameterValueSynchronizer extends AbstractIntactDbSynchron
         if (this.persistedObjects.containsKey(object)){
             return this.persistedObjects.get(object);
         }
-        // only retrieve an object in the cache, otherwise return null
         else {
+            IntactVariableParameter fetchedVariableParameter = null;
+            if (object.getVariableParameter() != null) {
+                fetchedVariableParameter = getContext().getVariableParameterSynchronizer().find(object.getVariableParameter());
+                // the variable parameter does not exist so the object does not exist
+                if (fetchedVariableParameter == null || fetchedVariableParameter.getId() == null) {
+                    return null;
+                }
+            }
+
+            Query query = getEntityManager().createQuery(
+                    "select vpv from IntactVariableParameterValue vpv " +
+                            (fetchedVariableParameter != null ? "join vpv.variableParameter as vp " : "") +
+                            "where "+
+                            (object.getValue() != null ? "vpv.value = :vpvValue " : "") +
+                            (object.getOrder() != null ? "and vpv.persistentOrder = :vpvOrder " : "") +
+                            (fetchedVariableParameter != null ? "and vp.id = :vpId " : "and vpv.variableParameter is null ")
+            );
+
+            if (object.getValue() != null) {
+                query.setParameter("vpvValue", object.getValue());
+            }
+            if (object.getOrder() != null) {
+                query.setParameter("vpvOrder", object.getOrder());
+            }
+            if (fetchedVariableParameter != null) {
+                query.setParameter("vpId", fetchedVariableParameter.getId());
+            }
+
+            Collection<IntactVariableParameterValue> results = query.getResultList();
+            if (!results.isEmpty()) {
+                //No filtering for the moment
+                if (results.size() == 1) {
+                    return results.iterator().next();
+                } else { //if (results.size() > 1)
+                    throw new FinderException("The variable parameter value " + object.toString() + " can match " + results.size() +
+                            " variable parameter values in the database and we cannot determine which one is valid: " + results);
+                }
+            }
             return null;
         }
     }
 
     @Override
     public Collection<IntactVariableParameterValue> findAll(VariableParameterValue object) {
+        //TODO as in experiment
         if (this.persistedObjects.containsKey(object)){
             return Collections.singleton(this.persistedObjects.get(object));
         }
         // only retrieve an object in the cache, otherwise return null
         else {
-            return Collections.EMPTY_LIST;
+            Collection<String> fetchedVariableParameters = Collections.EMPTY_LIST;
+            if (object.getVariableParameter() != null) {
+                fetchedVariableParameters = getContext().getVariableParameterSynchronizer().findAllMatchingAcs(object.getVariableParameter());
+                // the variable parameter does not exist so the object does not exist
+                if (fetchedVariableParameters.isEmpty()) {
+                    return Collections.EMPTY_LIST;
+                }
+            }
+
+            Query query = getEntityManager().createQuery(
+                    "select vpv from IntactVariableParameterValue vpv " +
+                            (fetchedVariableParameters != null ? "join vpv.variableParameter as vp " : "") +
+                            "where "+
+                            (object.getValue() != null ? "vpv.value = :vpvValue " : "") +
+                            (object.getOrder() != null ? "and vpv.persistentOrder = :vpvOrder " : "") +
+                            (fetchedVariableParameters != null ? "and vp.id in (:vpId) " : "and vpv.variableParameter is null ")
+            );
+
+            if (object.getValue() != null) {
+                query.setParameter("vpvValue", object.getValue());
+            }
+            if (object.getOrder() != null) {
+                query.setParameter("vpvOrder", object.getOrder());
+            }
+            if (fetchedVariableParameters != null) {
+                query.setParameter("vpId", fetchedVariableParameters);
+            }
+
+            Collection<IntactVariableParameterValue> results = query.getResultList();
+            return results;
         }
     }
 
     @Override
     public Collection<String> findAllMatchingAcs(VariableParameterValue object) {
+        //TODO as in experiment
         if (this.persistedObjects.containsKey(object)){
             IntactVariableParameterValue fetched = this.persistedObjects.get(object);
             if (fetched.getId() != null){
@@ -128,6 +203,43 @@ public class VariableParameterValueSynchronizer extends AbstractIntactDbSynchron
         }
         // only retrieve an object in the cache, otherwise return null
         else {
+            Collection<String> fetchedVariableParameters = Collections.EMPTY_LIST;
+            if (object.getVariableParameter() != null) {
+                fetchedVariableParameters = getContext().getVariableParameterSynchronizer().findAllMatchingAcs(object.getVariableParameter());
+                // the variable parameter does not exist so the object does not exist
+                if (fetchedVariableParameters.isEmpty()) {
+                    return Collections.EMPTY_LIST;
+                }
+            }
+
+            Query query = getEntityManager().createQuery(
+                    "select distinct vpv from IntactVariableParameterValue vpv " +
+                            (fetchedVariableParameters != null ? "join vpv.variableParameter as vp " : "") +
+                            "where "+
+                            (object.getValue() != null ? "vpv.value = :vpvValue " : "") +
+                            (object.getOrder() != null ? "and vpv.persistentOrder = :vpvOrder " : "") +
+                            (fetchedVariableParameters != null ? "and vp.id in (:vpId) " : "and vpv.variableParameter is null ")
+            );
+
+            if (object.getValue() != null) {
+                query.setParameter("vpvValue", object.getValue());
+            }
+            if (object.getOrder() != null) {
+                query.setParameter("vpvOrder", object.getOrder());
+            }
+            if (fetchedVariableParameters != null) {
+                query.setParameter("vpId", fetchedVariableParameters);
+            }
+
+            Collection<IntactVariableParameterValue> results = query.getResultList();
+            if (!results.isEmpty()) {
+                Collection<String> filteredResults = new HashSet<>(results.size());
+                for (IntactVariableParameterValue result : results) {
+                    filteredResults.add(Long.toString(result.getId()));
+                }
+                return filteredResults;
+            }
+
             return Collections.EMPTY_LIST;
         }
     }
@@ -137,6 +249,15 @@ public class VariableParameterValueSynchronizer extends AbstractIntactDbSynchron
         if (object.getValue() != null && IntactUtils.MAX_DESCRIPTION_LEN < object.getValue().length()){
             object.setValue(object.getValue().substring(0, IntactUtils.MAX_DESCRIPTION_LEN));
         }
+
+        synchronizeVariableParameter(object, true);
+
+    }
+
+    private void synchronizeVariableParameter(IntactVariableParameterValue object, boolean enableSynchronization) throws FinderException, PersisterException, SynchronizerException {
+        object.setVariableParameter( enableSynchronization ?
+            getContext().getVariableParameterSynchronizer().synchronize(object.getVariableParameter(), true) :
+            getContext().getVariableParameterSynchronizer().convertToPersistentObject(object.getVariableParameter()));
     }
 
     public void clearCache() {
@@ -164,6 +285,6 @@ public class VariableParameterValueSynchronizer extends AbstractIntactDbSynchron
 
     @Override
     protected void initialiseDefaultMerger() {
-        super.setIntactMerger(new IntactDbMergerIgnoringPersistentObject<VariableParameterValue, IntactVariableParameterValue>(this));
+        super.setIntactMerger(new IntactDbMergerIgnoringLocalObject<VariableParameterValue, IntactVariableParameterValue>(this));
     }
 }
