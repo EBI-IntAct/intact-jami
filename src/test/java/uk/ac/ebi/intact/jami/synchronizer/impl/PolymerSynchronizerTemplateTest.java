@@ -1,6 +1,6 @@
 package uk.ac.ebi.intact.jami.synchronizer.impl;
 
-import junit.framework.Assert;
+import org.junit.Assert;
 import org.hibernate.Hibernate;
 import org.junit.Test;
 import org.springframework.test.annotation.DirtiesContext;
