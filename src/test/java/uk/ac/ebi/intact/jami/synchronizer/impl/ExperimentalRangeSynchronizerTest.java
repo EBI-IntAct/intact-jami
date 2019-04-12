@@ -1,6 +1,6 @@
 package uk.ac.ebi.intact.jami.synchronizer.impl;
 
-import junit.framework.Assert;
+import org.junit.Assert;
 import psidev.psi.mi.jami.model.Range;
 import psidev.psi.mi.jami.model.impl.DefaultPosition;
 import psidev.psi.mi.jami.model.impl.DefaultResultingSequence;

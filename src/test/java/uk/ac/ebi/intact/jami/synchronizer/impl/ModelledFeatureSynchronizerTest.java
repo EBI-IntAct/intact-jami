@@ -1,6 +1,6 @@
 package uk.ac.ebi.intact.jami.synchronizer.impl;
 
-import junit.framework.Assert;
+import org.junit.Assert;
 import psidev.psi.mi.jami.model.Feature;
 import psidev.psi.mi.jami.model.ModelledFeature;
 import psidev.psi.mi.jami.utils.XrefUtils;

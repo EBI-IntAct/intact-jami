@@ -55,7 +55,7 @@ public interface IntactDbSynchronizer<I, T extends Auditable> {
 
     /**
      * Synchronize all the properties of this object with the database.
-     * It will persist transcient properties that are not managed with hibernate cascades.
+     * It will persist transient properties that are not managed with hibernate cascades.
      * @param object
      * @throws FinderException
      * @throws PersisterException

@@ -140,7 +140,7 @@ public class IntactProtein extends IntactPolymer implements Protein{
             CvTerm identityQualifier = IntactUtils.createMIQualifier(Xref.IDENTITY, Xref.IDENTITY_MI);
             // first remove old uniprotkb if not null
 
-            if (this.uniprotkb != null && !ac.equals(this.uniprotkb)){
+            if (this.uniprotkb != null && !ac.equals(this.uniprotkb.getId())){
                 if (this.uniprotkb instanceof AbstractIntactXref){
                     ((AbstractIntactXref) this.uniprotkb).setId(ac);
                 }
@@ -177,7 +177,7 @@ public class IntactProtein extends IntactPolymer implements Protein{
             CvTerm refseqDatabase = IntactUtils.createMIDatabase(Xref.REFSEQ, Xref.REFSEQ_MI);
             CvTerm identityQualifier = IntactUtils.createMIQualifier(Xref.IDENTITY, Xref.IDENTITY_MI);
             // first remove old refseq if not null
-            if (this.refseq != null && !ac.equals(this.refseq)){
+            if (this.refseq != null && !ac.equals(this.refseq.getId())){
                 if (this.refseq instanceof AbstractIntactXref){
                     ((AbstractIntactXref) this.refseq).setId(ac);
                 }
@@ -213,7 +213,7 @@ public class IntactProtein extends IntactPolymer implements Protein{
         if (name != null){
             CvTerm geneNameType = IntactUtils.createMIAliasType(Alias.GENE_NAME, Alias.GENE_NAME_MI);
             // first remove old gene name if not null
-            if (this.geneName != null && !name.equals(this.geneName)){
+            if (this.geneName != null && !name.equals(this.geneName.getName())){
                 if (this.geneName instanceof AbstractIntactAlias){
                     ((AbstractIntactAlias) this.geneName).setName(name);
                 }
