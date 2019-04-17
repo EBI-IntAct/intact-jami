@@ -64,7 +64,7 @@ public class ComplexSynchronizer extends InteractorSynchronizerTemplate<Complex,
                 if (term instanceof IntactComplex) {
                     IntactComplex intactComplex = (IntactComplex) term;
                     if (intactComplex.getComplexAcXref() != null && complex.getComplexAcXref() != null) {
-                        if (!intactComplex.getComplexAcXref().getId().equalsIgnoreCase(complex.getComplexAcXref().getId())){
+                        if (!intactComplex.getComplexAcXref().getId().equalsIgnoreCase(complex.getComplexAcXref().getId())) {
                             filteredResults.add(complex);
                         } else if (intactComplex.getComplexAcXref().getVersion().equalsIgnoreCase(complex.getComplexAcXref().getVersion())) {
                             filteredResults.add(complex);
@@ -121,7 +121,7 @@ public class ComplexSynchronizer extends InteractorSynchronizerTemplate<Complex,
                 if (term instanceof IntactComplex) {
                     IntactComplex intactComplex = (IntactComplex) term;
                     if (intactComplex.getComplexAcXref() != null && complex.getComplexAcXref() != null) {
-                        if (!intactComplex.getComplexAcXref().getId().equalsIgnoreCase(complex.getComplexAcXref().getId())){
+                        if (!intactComplex.getComplexAcXref().getId().equalsIgnoreCase(complex.getComplexAcXref().getId())) {
                             filteredResults.add(complex);
                         } else if (intactComplex.getComplexAcXref().getVersion().equalsIgnoreCase(complex.getComplexAcXref().getVersion())) {
                             filteredResults.add(complex);
@@ -146,7 +146,7 @@ public class ComplexSynchronizer extends InteractorSynchronizerTemplate<Complex,
                 if (term instanceof IntactComplex) {
                     IntactComplex intactComplex = (IntactComplex) term;
                     if (intactComplex.getComplexAcXref() != null && complex.getComplexAcXref() != null) {
-                        if (!intactComplex.getComplexAcXref().getId().equalsIgnoreCase(complex.getComplexAcXref().getId())){
+                        if (!intactComplex.getComplexAcXref().getId().equalsIgnoreCase(complex.getComplexAcXref().getId())) {
                             filteredResults.add(complex.getAc());
                         } else if (intactComplex.getComplexAcXref().getVersion().equalsIgnoreCase(complex.getComplexAcXref().getVersion())) {
                             filteredResults.add(complex.getAc());
@@ -279,7 +279,7 @@ public class ComplexSynchronizer extends InteractorSynchronizerTemplate<Complex,
     protected void prepareAnnotations(IntactComplex intactInteractor, boolean enableSynchronization) throws FinderException, PersisterException, SynchronizerException {
         if (intactInteractor.areAnnotationsInitialized()) {
             if (AnnotationUtils.collectFirstAnnotationWithTopic(intactInteractor.getAnnotations(), null, "curated-complex") == null) {
-                intactInteractor.getAnnotations().add(new InteractorAnnotation(IntactUtils.createMITopic("curated-complex", null)));
+                intactInteractor.getAnnotations().add(new InteractorAnnotation(IntactUtils.getCvTopicByShortName("curated-complex", null)));
             }
         }
         super.prepareAnnotations(intactInteractor, enableSynchronization);

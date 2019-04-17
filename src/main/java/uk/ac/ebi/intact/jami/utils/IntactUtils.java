@@ -6,9 +6,12 @@ import psidev.psi.mi.jami.utils.AliasUtils;
 import psidev.psi.mi.jami.utils.ExperimentUtils;
 import psidev.psi.mi.jami.utils.ParticipantUtils;
 import psidev.psi.mi.jami.utils.comparator.IntegerComparator;
+import uk.ac.ebi.intact.jami.ApplicationContextProvider;
+import uk.ac.ebi.intact.jami.context.IntactContext;
 import uk.ac.ebi.intact.jami.model.extension.*;
 
 import javax.persistence.EntityManager;
+import javax.persistence.FlushModeType;
 import javax.persistence.Query;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -1304,7 +1307,7 @@ public class IntactUtils {
         }
     }
 
-    public static void initialisePublication(IntactPublication publication,boolean loadSiblingInteractionEvidences) {
+    public static void initialisePublication(IntactPublication publication, boolean loadSiblingInteractionEvidences) {
         // initialise xrefs
         for (Object ref : publication.getDbXrefs()) {
             initialiseXref((AbstractIntactXref) ref);
@@ -1319,7 +1322,7 @@ public class IntactUtils {
         }
         // initialise experiment
         for (Experiment exp : publication.getExperiments()) {
-            initialiseExperiment((IntactExperiment) exp, false,loadSiblingInteractionEvidences);
+            initialiseExperiment((IntactExperiment) exp, false, loadSiblingInteractionEvidences);
         }
     }
 
@@ -1359,7 +1362,7 @@ public class IntactUtils {
     public static void initialiseExperiment(IntactExperiment experiment, boolean initPublication, boolean loadSiblingInteractionEvidences) {
         if (initPublication && experiment.getPublication() != null) {
             // initialise publication
-            initialisePublication((IntactPublication) experiment.getPublication(),loadSiblingInteractionEvidences);
+            initialisePublication((IntactPublication) experiment.getPublication(), loadSiblingInteractionEvidences);
         }
         // initialise xrefs
         for (Object ref : experiment.getXrefs()) {
@@ -1538,5 +1541,77 @@ public class IntactUtils {
 
     public static void initialiseComplex(IntactComplex complex) {
         initialiseInteractor(complex);
+    }
+
+    public static CvTerm getCvTopicByShortName(String shortName, String miTerm) {
+        IntactContext intactContext = ApplicationContextProvider.getBean("intactJamiContext");
+        CvTerm topic = null;
+        try {
+            FlushModeType mode = initialiseEntityManagerFlushType(intactContext.getIntactDao().getEntityManager());
+            topic = intactContext.getIntactDao().getCvTermDao().getByShortName(shortName, IntactUtils.TOPIC_OBJCLASS);
+            resetEntityManagerFlushType(intactContext.getIntactDao().getEntityManager(), mode);
+        } catch (Exception e) {
+        }
+
+        if (topic == null) {
+            topic = IntactUtils.createMITopic(shortName, miTerm);
+        }
+
+        return topic;
+    }
+
+    public static CvTerm getCvTopicByMITerm(String shortName, String miTerm) {
+        IntactContext intactContext = ApplicationContextProvider.getBean("intactJamiContext");
+        CvTerm topic = null;
+        try {
+            FlushModeType mode = initialiseEntityManagerFlushType(intactContext.getIntactDao().getEntityManager());
+            topic = intactContext.getIntactDao().getCvTermDao().getByMIIdentifier(miTerm, IntactUtils.TOPIC_OBJCLASS);
+            resetEntityManagerFlushType(intactContext.getIntactDao().getEntityManager(), mode);
+        } catch (Exception e) {
+        }
+
+        if (topic == null) {
+            topic = IntactUtils.createMITopic(shortName, miTerm);
+        }
+
+        return topic;
+    }
+
+    public static CvTerm getCvByMITerm(String miTerm, String ObjClass) {
+        IntactContext intactContext = ApplicationContextProvider.getBean("intactJamiContext");
+        CvTerm cvTerm = null;
+        if (intactContext != null) {
+            FlushModeType mode = initialiseEntityManagerFlushType(intactContext.getIntactDao().getEntityManager());
+            cvTerm = intactContext.getIntactDao().getCvTermDao().getByMIIdentifier(miTerm, ObjClass);
+            resetEntityManagerFlushType(intactContext.getIntactDao().getEntityManager(), mode);
+        }
+        return cvTerm;
+    }
+
+    /**
+     * If the flushmode of the entity manager is not null, it will set the mode to COMMIT to avoid flushing the changes when doing queries.
+     * The objects need to be fully synchronized before the entity manager can be flushed
+     *
+     * @return the original flushmode of the entity manager
+     */
+    protected static FlushModeType initialiseEntityManagerFlushType(EntityManager entityManager) {
+        // set flush mode to commit so queries do not trigger flush
+        FlushModeType mode = entityManager.getFlushMode();
+        // set flushmode if not readonly. Do not set flushmode if readonly because of hibernate assertion failure!!!!
+        if (mode != null) {
+            entityManager.setFlushMode(FlushModeType.COMMIT);
+        }
+        return mode;
+    }
+
+    /**
+     * Reset the flushmode type of the entity manager if the provided mode is not null
+     *
+     * @param mode
+     */
+    protected static void resetEntityManagerFlushType(EntityManager entityManager, FlushModeType mode) {
+        if (mode != null) {
+            entityManager.setFlushMode(mode);
+        }
     }
 }

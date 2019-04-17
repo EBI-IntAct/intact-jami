@@ -20,7 +20,7 @@ import java.util.List;
 
 /**
  * IntAct implementation of polymer
- *
+ * <p>
  * NOTE: for backward compatibility with intact-core, the crc64 property is persistent.
  * We may want to remove this column in the future and this property in the future so we should avoid using this method
  * NOTE: for backward compatibility with intact-core, the sequence property is not persistent and the getSequenceChunks is how the sequence is persisted in
@@ -31,9 +31,9 @@ import java.util.List;
  * @since <pre>17/01/14</pre>
  */
 @Entity
-@DiscriminatorValue( "polymer" )
+@DiscriminatorValue("polymer")
 @Where(clause = "category = 'protein' or category = 'polymer' or category = 'nucleic_acid'")
-public class IntactPolymer extends IntactMolecule implements Polymer{
+public class IntactPolymer extends IntactMolecule implements Polymer {
 
     private transient String sequence;
 
@@ -45,7 +45,7 @@ public class IntactPolymer extends IntactMolecule implements Polymer{
 
     private transient Checksum crc64;
 
-    protected IntactPolymer(){
+    protected IntactPolymer() {
         super();
     }
 
@@ -119,7 +119,7 @@ public class IntactPolymer extends IntactMolecule implements Polymer{
      * when intact-core is removed and remove the sequence chunks
      */
     public String getSequence() {
-        if (this.sequence == null){
+        if (this.sequence == null) {
             initialiseSequence();
         }
         return this.sequence;
@@ -138,6 +138,7 @@ public class IntactPolymer extends IntactMolecule implements Polymer{
 
     /**
      * Overrides serialization for xrefs and annotations (inner classes not serializable)
+     *
      * @param oos
      * @throws java.io.IOException
      */
@@ -151,6 +152,7 @@ public class IntactPolymer extends IntactMolecule implements Polymer{
 
     /**
      * Overrides serialization for xrefs and annotations (inner classes not serializable)
+     *
      * @param ois
      * @throws ClassNotFoundException
      * @throws IOException
@@ -160,7 +162,7 @@ public class IntactPolymer extends IntactMolecule implements Polymer{
         // default deserialization
         ois.defaultReadObject();
         // read default crc64
-        setCrc64((String)ois.readObject());
+        setCrc64((String) ois.readObject());
     }
 
     @Deprecated
@@ -179,13 +181,14 @@ public class IntactPolymer extends IntactMolecule implements Polymer{
      * It will be removed when intact-core is removed
      * @deprecated look at checksums instead. Only kept for bacward compatibility with intact-core
      */
-    protected void setCrc64( String crc64 ) {
+    protected void setCrc64(String crc64) {
         Collection<Checksum> polymerChecksums = getChecksums();
 
-        if (crc64 != null){
-            CvTerm crc64Method = IntactUtils.createMITopic("crc64", null);
+        if (crc64 != null) {
+            CvTerm crc64Method = IntactUtils.getCvTopicByShortName("crc64", null);
+
             // first remove old crc64
-            if (this.crc64 != null){
+            if (this.crc64 != null) {
                 polymerChecksums.remove(this.crc64);
             }
             this.crc64 = new DefaultChecksum(crc64Method, crc64);
@@ -198,55 +201,54 @@ public class IntactPolymer extends IntactMolecule implements Polymer{
         }
     }
 
-    protected String convertToSequence(Collection<SequenceChunk> sequenceChunks){
-        if (sequenceChunks.isEmpty()){
+    protected String convertToSequence(Collection<SequenceChunk> sequenceChunks) {
+        if (sequenceChunks.isEmpty()) {
             return null;
         }
         StringBuilder sequence = new StringBuilder();
-        for ( SequenceChunk sequenceChunk : sequenceChunks ) {
-            sequence.append( sequenceChunk.getSequenceChunk() );
+        for (SequenceChunk sequenceChunk : sequenceChunks) {
+            sequence.append(sequenceChunk.getSequenceChunk());
         }
         return sequence.toString();
     }
 
-    protected void convertSequence( String aSequence, Collection<SequenceChunk> chunks ) {
-        if (aSequence == null){
+    protected void convertSequence(String aSequence, Collection<SequenceChunk> chunks) {
+        if (aSequence == null) {
             chunks.clear();
-        }
-        else{
+        } else {
             // Save work if the new sequence is identical to the old one.
             // The container to hold redundant chunks.
             ArrayList<SequenceChunk> chunkPool = null;
 
             // All old data are kept, we try to recycle as much chunk as possible
-            if ( !chunks.isEmpty() ) {
+            if (!chunks.isEmpty()) {
                 // There is existing chunk ... prepare them for recycling.
-                chunkPool = new ArrayList<SequenceChunk>( chunks.size() );
-                chunkPool.addAll( chunks );
+                chunkPool = new ArrayList<SequenceChunk>(chunks.size());
+                chunkPool.addAll(chunks);
                 int count = chunkPool.size();
 
                 // clean chunk to recycle
-                for ( int i = 0; i < count; i++ ) {
-                    SequenceChunk sc = chunkPool.get( i );
+                for (int i = 0; i < count; i++) {
+                    SequenceChunk sc = chunkPool.get(i);
                     chunks.remove(sc);
                 }
             }
 
             // Note the use of integer operations
             int chunkCount = aSequence.length() / IntactUtils.MAX_SEQ_LENGTH_PER_CHUNK;
-            if ( aSequence.length() % IntactUtils.MAX_SEQ_LENGTH_PER_CHUNK > 0 ) {
+            if (aSequence.length() % IntactUtils.MAX_SEQ_LENGTH_PER_CHUNK > 0) {
                 chunkCount++;
             }
 
-            for ( int i = 0; i < chunkCount; i++ ) {
-                String chunk = aSequence.substring( i * IntactUtils.MAX_SEQ_LENGTH_PER_CHUNK,
-                        Math.min( ( i + 1 ) * IntactUtils.MAX_SEQ_LENGTH_PER_CHUNK,
-                                aSequence.length() ) );
+            for (int i = 0; i < chunkCount; i++) {
+                String chunk = aSequence.substring(i * IntactUtils.MAX_SEQ_LENGTH_PER_CHUNK,
+                        Math.min((i + 1) * IntactUtils.MAX_SEQ_LENGTH_PER_CHUNK,
+                                aSequence.length()));
 
-                if ( chunkPool != null && chunkPool.size() > 0 ) {
+                if (chunkPool != null && chunkPool.size() > 0) {
                     // recycle chunk
-                    SequenceChunk sc = chunkPool.remove( 0 );
-                    sc.setSequenceChunk( chunk );
+                    SequenceChunk sc = chunkPool.remove(0);
+                    sc.setSequenceChunk(chunk);
                     sc.setSequenceIndex(i);
                     chunks.add(sc);
                 } else {
@@ -257,10 +259,10 @@ public class IntactPolymer extends IntactMolecule implements Polymer{
         }
     }
 
-    @OneToMany( orphanRemoval = true, cascade = {CascadeType.ALL})
-    @Cascade( value = {org.hibernate.annotations.CascadeType.SAVE_UPDATE} )
-    @JoinColumn(name="parent_ac", referencedColumnName="ac")
-    @IndexColumn( name = "sequence_index" )
+    @OneToMany(orphanRemoval = true, cascade = {CascadeType.ALL})
+    @Cascade(value = {org.hibernate.annotations.CascadeType.SAVE_UPDATE})
+    @JoinColumn(name = "parent_ac", referencedColumnName = "ac")
+    @IndexColumn(name = "sequence_index")
     @LazyCollection(LazyCollectionOption.FALSE)
     @Deprecated
     /**
@@ -269,14 +271,19 @@ public class IntactPolymer extends IntactMolecule implements Polymer{
      * @deprecated only for backward compatibility with intact-core. Use getSequence instead
      */
     protected List<SequenceChunk> getDbSequenceChunks() {
-        if (this.sequenceChunks == null){
+        if (this.sequenceChunks == null) {
             this.sequenceChunks = new ArrayList<SequenceChunk>();
         }
         return sequenceChunks;
     }
 
-    protected void initialiseSequence(){
-        if (!getDbSequenceChunks().isEmpty()){
+    protected void setDbSequenceChunks(List<SequenceChunk> sequenceChunks) {
+        this.sequenceChunks = sequenceChunks;
+        this.sequence = null;
+    }
+
+    protected void initialiseSequence() {
+        if (!getDbSequenceChunks().isEmpty()) {
             this.sequence = convertToSequence(sequenceChunks);
         }
     }
@@ -291,24 +298,19 @@ public class IntactPolymer extends IntactMolecule implements Polymer{
         super.setInteractorType(IntactUtils.createIntactMITerm(Polymer.POLYMER, Polymer.POLYMER_MI, IntactUtils.INTERACTOR_TYPE_OBJCLASS));
     }
 
-    protected void setDbSequenceChunks( List<SequenceChunk> sequenceChunks ) {
-        this.sequenceChunks = sequenceChunks;
-        this.sequence = null;
-    }
-
     @Override
     protected void initialiseChecksums() {
         super.initialiseChecksumsWith(new PolymerChecksumList());
     }
 
     protected void processAddedChecksumEvent(Checksum added) {
-        if (crc64 == null && ChecksumUtils.doesChecksumHaveMethod(added, null, "crc64")){
+        if (crc64 == null && ChecksumUtils.doesChecksumHaveMethod(added, null, "crc64")) {
             crc64 = added;
         }
     }
 
     protected void processRemovedChecksumEvent(Checksum removed) {
-        if (crc64 != null && crc64.equals(removed)){
+        if (crc64 != null && crc64.equals(removed)) {
             crc64 = ChecksumUtils.collectFirstChecksumWithMethod(getChecksums(), null, "crc64");
         }
     }
@@ -318,7 +320,7 @@ public class IntactPolymer extends IntactMolecule implements Polymer{
     }
 
     protected class PolymerChecksumList extends AbstractListHavingProperties<Checksum> {
-        public PolymerChecksumList(){
+        public PolymerChecksumList() {
             super();
         }
 

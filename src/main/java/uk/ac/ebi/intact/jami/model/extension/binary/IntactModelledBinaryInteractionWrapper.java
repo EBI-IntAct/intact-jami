@@ -5,11 +5,12 @@ import psidev.psi.mi.jami.binary.impl.ModelledBinaryInteractionWrapper;
 import psidev.psi.mi.jami.model.*;
 import uk.ac.ebi.intact.jami.context.UserContext;
 import uk.ac.ebi.intact.jami.model.IntactPrimaryObject;
-import uk.ac.ebi.intact.jami.model.lifecycle.LifeCycleEvent;
 import uk.ac.ebi.intact.jami.model.extension.IntactComplex;
+import uk.ac.ebi.intact.jami.model.lifecycle.LifeCycleEvent;
 import uk.ac.ebi.intact.jami.model.lifecycle.LifeCycleStatus;
 import uk.ac.ebi.intact.jami.model.user.User;
 
+import javax.persistence.Transient;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -22,16 +23,16 @@ import java.util.List;
  * @since <pre>05/06/13</pre>
  */
 
-public class IntactModelledBinaryInteractionWrapper implements ModelledBinaryInteraction, IntactPrimaryObject{
+public class IntactModelledBinaryInteractionWrapper implements ModelledBinaryInteraction, IntactPrimaryObject {
     private IntactComplex wrappedInteraction;
     private ModelledBinaryInteractionWrapper binaryWrapper;
 
-    public IntactModelledBinaryInteractionWrapper(IntactComplex interaction){
+    public IntactModelledBinaryInteractionWrapper(IntactComplex interaction) {
         this.wrappedInteraction = interaction;
         this.binaryWrapper = new ModelledBinaryInteractionWrapper(interaction);
     }
 
-    public IntactModelledBinaryInteractionWrapper(IntactComplex interaction, CvTerm complexExpansion){
+    public IntactModelledBinaryInteractionWrapper(IntactComplex interaction, CvTerm complexExpansion) {
         this(interaction);
         this.binaryWrapper = new ModelledBinaryInteractionWrapper(interaction, complexExpansion);
     }
@@ -40,12 +41,12 @@ public class IntactModelledBinaryInteractionWrapper implements ModelledBinaryInt
         return this.binaryWrapper.getParticipantA();
     }
 
-    public ModelledParticipant getParticipantB() {
-        return this.binaryWrapper.getParticipantB();
-    }
-
     public void setParticipantA(ModelledParticipant participantA) {
         this.binaryWrapper.setParticipantA(participantA);
+    }
+
+    public ModelledParticipant getParticipantB() {
+        return this.binaryWrapper.getParticipantB();
     }
 
     public void setParticipantB(ModelledParticipant participantB) {
@@ -63,6 +64,7 @@ public class IntactModelledBinaryInteractionWrapper implements ModelledBinaryInt
     /**
      * The collection of participants for this binary interaction.
      * It cannot be changed.
+     *
      * @return
      */
     public Collection<ModelledParticipant> getParticipants() {
@@ -72,6 +74,7 @@ public class IntactModelledBinaryInteractionWrapper implements ModelledBinaryInt
     /**
      * Adds a new Participant and set the Interaction of this participant if added.
      * If the participant B and A are null, it will first set the participantA. If the participantA is set, it will set the ParticipantB
+     *
      * @param part
      * @return
      * @throws IllegalArgumentException if this Binary interaction already contains two participants
@@ -82,6 +85,7 @@ public class IntactModelledBinaryInteractionWrapper implements ModelledBinaryInt
 
     /**
      * Removes the Participant from this binary interaction
+     *
      * @param part
      * @return
      */
@@ -92,6 +96,7 @@ public class IntactModelledBinaryInteractionWrapper implements ModelledBinaryInt
     /**
      * Adds the participants and set the Interaction of this participant if added.
      * If the participant B and A are null, it will first set the participantA. If the participantA is set, it will set the ParticipantB
+     *
      * @param participants
      * @return
      * @throws IllegalArgumentException if this Binary interaction already contains two participants or the given participants contains more than two participants
@@ -249,7 +254,7 @@ public class IntactModelledBinaryInteractionWrapper implements ModelledBinaryInt
         return this.wrappedInteraction.getStatus();
     }
 
-    public void setStatus( LifeCycleStatus status ) {
+    public void setStatus(LifeCycleStatus status) {
         this.wrappedInteraction.setStatus(status);
     }
 
@@ -261,7 +266,7 @@ public class IntactModelledBinaryInteractionWrapper implements ModelledBinaryInt
         return this.wrappedInteraction.getCurrentOwner();
     }
 
-    public void setCurrentOwner( User currentOwner ) {
+    public void setCurrentOwner(User currentOwner) {
         this.wrappedInteraction.setCurrentOwner(currentOwner);
     }
 
@@ -269,7 +274,7 @@ public class IntactModelledBinaryInteractionWrapper implements ModelledBinaryInt
         return this.wrappedInteraction.getCurrentReviewer();
     }
 
-    public void setCurrentReviewer( User currentReviewer ) {
+    public void setCurrentReviewer(User currentReviewer) {
         this.wrappedInteraction.setCurrentReviewer(currentReviewer);
     }
 
@@ -281,5 +286,18 @@ public class IntactModelledBinaryInteractionWrapper implements ModelledBinaryInt
     @Override
     public void setLocalUserContext(UserContext context) {
         this.wrappedInteraction.setLocalUserContext(context);
+    }
+
+
+    @Transient
+    @Override
+    public CvTerm getCausalRegulatoryMechanism() {
+        //TODO
+        return null;
+    }
+
+    @Override
+    public void setCausalRegulatoryMechanism(CvTerm causalRegulatoryMechanism) {
+        //TODO
     }
 }
