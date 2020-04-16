@@ -7,9 +7,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import psidev.psi.mi.jami.model.Complex;
-import psidev.psi.mi.jami.model.Source;
 import uk.ac.ebi.intact.jami.ApplicationContextProvider;
 import uk.ac.ebi.intact.jami.lifecycle.ComplexBCLifecycleEventListener;
+import uk.ac.ebi.intact.jami.model.ComplexAcValue;
 import uk.ac.ebi.intact.jami.model.extension.IntactComplex;
 import uk.ac.ebi.intact.jami.model.extension.IntactSource;
 import uk.ac.ebi.intact.jami.synchronizer.FinderException;
@@ -17,6 +17,7 @@ import uk.ac.ebi.intact.jami.synchronizer.PersisterException;
 import uk.ac.ebi.intact.jami.synchronizer.SynchronizerException;
 import uk.ac.ebi.intact.jami.utils.IntactUtils;
 
+import javax.persistence.EntityManager;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -30,8 +31,8 @@ import java.util.logging.Logger;
  */
 @Service(value = "complexService")
 @Lazy
-@Scope( BeanDefinition.SCOPE_PROTOTYPE )
-public class ComplexService extends AbstractReleasableLifeCycleService<IntactComplex> implements IntactService<Complex>{
+@Scope(BeanDefinition.SCOPE_PROTOTYPE)
+public class ComplexService extends AbstractReleasableLifeCycleService<IntactComplex> implements IntactService<Complex> {
     private static final Logger LOGGER = Logger.getLogger("ComplexService");
 
     private ComplexBCLifecycleEventListener complexBCListener = new ComplexBCLifecycleEventListener();
@@ -59,7 +60,7 @@ public class ComplexService extends AbstractReleasableLifeCycleService<IntactCom
     @Transactional(propagation = Propagation.REQUIRED, value = "jamiTransactionManager", readOnly = true)
     public Iterator<Complex> iterateAll(String queryCount, String query, Map<String, Object> parameters) {
         // use proxy and not this for transactional annotations to work
-        return new IntactQueryResultIterator<Complex>((ComplexService)ApplicationContextProvider.getBean("complexService"), query, queryCount, parameters);
+        return new IntactQueryResultIterator<Complex>((ComplexService) ApplicationContextProvider.getBean("complexService"), query, queryCount, parameters);
     }
 
     @Transactional(propagation = Propagation.REQUIRED, value = "jamiTransactionManager", readOnly = true)
@@ -75,7 +76,7 @@ public class ComplexService extends AbstractReleasableLifeCycleService<IntactCom
     @Transactional(propagation = Propagation.REQUIRED, value = "jamiTransactionManager", readOnly = true)
     public Iterator<Complex> iterateAll(boolean loadLazyCollections) {
         // use proxy and not this for transactional annotations to work
-        return new IntactQueryResultIterator<Complex>((ComplexService)ApplicationContextProvider.getBean("complexService"), loadLazyCollections);
+        return new IntactQueryResultIterator<Complex>((ComplexService) ApplicationContextProvider.getBean("complexService"), loadLazyCollections);
     }
 
     @Transactional(propagation = Propagation.REQUIRED, value = "jamiTransactionManager", readOnly = true)
@@ -88,7 +89,7 @@ public class ComplexService extends AbstractReleasableLifeCycleService<IntactCom
     @Transactional(propagation = Propagation.REQUIRED, value = "jamiTransactionManager", readOnly = true)
     public Iterator<Complex> iterateAll(String countQuery, String query, Map<String, Object> parameters, boolean loadLazyCollections) {
         // use proxy and not this for transactional annotations to work
-        return new IntactQueryResultIterator<Complex>((ComplexService)ApplicationContextProvider.getBean("complexService"), query, countQuery, parameters, loadLazyCollections);
+        return new IntactQueryResultIterator<Complex>((ComplexService) ApplicationContextProvider.getBean("complexService"), query, countQuery, parameters, loadLazyCollections);
     }
 
     @Transactional(propagation = Propagation.REQUIRED, value = "jamiTransactionManager", readOnly = true)
@@ -156,7 +157,7 @@ public class ComplexService extends AbstractReleasableLifeCycleService<IntactCom
     @Transactional(propagation = Propagation.REQUIRED, value = "jamiTransactionManager")
     public void saveOrUpdate(Collection<? extends Complex> objects) throws SynchronizerException, PersisterException, FinderException {
         getAfterCommitExecutor().registerDaoForSynchronization(getIntactDao());
-        for (Complex interaction : objects){
+        for (Complex interaction : objects) {
             // we can synchronize the complex with the database now
             getIntactDao().getSynchronizerContext().getComplexSynchronizer().synchronize(interaction, true);
         }
@@ -173,11 +174,18 @@ public class ComplexService extends AbstractReleasableLifeCycleService<IntactCom
     @Transactional(propagation = Propagation.REQUIRED, value = "jamiTransactionManager")
     public void delete(Collection<? extends Complex> objects) throws SynchronizerException, PersisterException, FinderException {
         getAfterCommitExecutor().registerDaoForSynchronization(getIntactDao());
-        for (Complex interaction : objects){
+        for (Complex interaction : objects) {
             getIntactDao().getSynchronizerContext().getComplexSynchronizer().delete(interaction);
         }
         getIntactDao().getSynchronizerContext().getComplexSynchronizer().flush();
     }
+
+    @Transactional(propagation = Propagation.REQUIRED, value = "jamiTransactionManager")
+    public String retrieveNextComplexAc() {
+        EntityManager em = getIntactDao().getEntityManager();
+        return ComplexAcValue.getNextComplexAcValue(em);
+    }
+
 
     @Override
     protected IntactComplex loadReleasableByAc(String ac) {
@@ -189,7 +197,7 @@ public class ComplexService extends AbstractReleasableLifeCycleService<IntactCom
         try {
             getIntactDao().getComplexDao().update(releasable);
         } catch (FinderException e) {
-            LOGGER.log(Level.SEVERE, "Cannot update complex "+releasable.getAc(), e);
+            LOGGER.log(Level.SEVERE, "Cannot update complex " + releasable.getAc(), e);
         } catch (SynchronizerException e) {
             LOGGER.log(Level.SEVERE, "Cannot update complex " + releasable.getAc(), e);
         } catch (PersisterException e) {
@@ -203,8 +211,8 @@ public class ComplexService extends AbstractReleasableLifeCycleService<IntactCom
     }
 
     private void initialiseLazyComplex(boolean loadLazyCollections, List<Complex> results) {
-        if (loadLazyCollections){
-            for (Complex complex : results){
+        if (loadLazyCollections) {
+            for (Complex complex : results) {
                 IntactUtils.initialiseComplex((IntactComplex) complex);
             }
         }

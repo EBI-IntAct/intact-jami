@@ -64,7 +64,7 @@ public class ComplexSynchronizer extends InteractorSynchronizerTemplate<Complex,
                 if (term instanceof IntactComplex) {
                     IntactComplex intactComplex = (IntactComplex) term;
                     if (intactComplex.getComplexAcXref() != null && complex.getComplexAcXref() != null) {
-                        if (!intactComplex.getComplexAcXref().getId().equalsIgnoreCase(complex.getComplexAcXref().getId())){
+                        if (!intactComplex.getComplexAcXref().getId().equalsIgnoreCase(complex.getComplexAcXref().getId())) {
                             filteredResults.add(complex);
                         } else if (intactComplex.getComplexAcXref().getVersion().equalsIgnoreCase(complex.getComplexAcXref().getVersion())) {
                             filteredResults.add(complex);
@@ -121,7 +121,7 @@ public class ComplexSynchronizer extends InteractorSynchronizerTemplate<Complex,
                 if (term instanceof IntactComplex) {
                     IntactComplex intactComplex = (IntactComplex) term;
                     if (intactComplex.getComplexAcXref() != null && complex.getComplexAcXref() != null) {
-                        if (!intactComplex.getComplexAcXref().getId().equalsIgnoreCase(complex.getComplexAcXref().getId())){
+                        if (!intactComplex.getComplexAcXref().getId().equalsIgnoreCase(complex.getComplexAcXref().getId())) {
                             filteredResults.add(complex);
                         } else if (intactComplex.getComplexAcXref().getVersion().equalsIgnoreCase(complex.getComplexAcXref().getVersion())) {
                             filteredResults.add(complex);
@@ -146,7 +146,7 @@ public class ComplexSynchronizer extends InteractorSynchronizerTemplate<Complex,
                 if (term instanceof IntactComplex) {
                     IntactComplex intactComplex = (IntactComplex) term;
                     if (intactComplex.getComplexAcXref() != null && complex.getComplexAcXref() != null) {
-                        if (!intactComplex.getComplexAcXref().getId().equalsIgnoreCase(complex.getComplexAcXref().getId())){
+                        if (!intactComplex.getComplexAcXref().getId().equalsIgnoreCase(complex.getComplexAcXref().getId())) {
                             filteredResults.add(complex.getAc());
                         } else if (intactComplex.getComplexAcXref().getVersion().equalsIgnoreCase(complex.getComplexAcXref().getVersion())) {
                             filteredResults.add(complex.getAc());
@@ -191,6 +191,9 @@ public class ComplexSynchronizer extends InteractorSynchronizerTemplate<Complex,
 
     @Override
     public void synchronizeProperties(IntactComplex intactComplex) throws FinderException, PersisterException, SynchronizerException {
+
+        //prepare interaction type
+        prepareInteractionType(intactComplex, true);
         // prepare evidence type
         prepareEvidenceType(intactComplex, true);
         super.synchronizeProperties(intactComplex);
@@ -212,6 +215,15 @@ public class ComplexSynchronizer extends InteractorSynchronizerTemplate<Complex,
         prepareExperiments(intactComplex, true);
         // then prepare source
         prepareSource(intactComplex, true);
+    }
+
+    protected void prepareInteractionType(IntactComplex intactComplex, boolean enableSynchronization) throws PersisterException, FinderException, SynchronizerException {
+        CvTerm type = intactComplex.getInteractionType();
+        if (type != null) {
+            intactComplex.setInteractionType(enableSynchronization ?
+                    getContext().getInteractionTypeSynchronizer().synchronize(type, true) :
+                    getContext().getInteractionTypeSynchronizer().convertToPersistentObject(type));
+        }
     }
 
     @Override
@@ -237,6 +249,9 @@ public class ComplexSynchronizer extends InteractorSynchronizerTemplate<Complex,
 
     @Override
     public void convertPersistableProperties(IntactComplex intactComplex) throws FinderException, PersisterException, SynchronizerException {
+
+        //prepare interaction type
+        prepareInteractionType(intactComplex, false);
         // prepare evidence type
         prepareEvidenceType(intactComplex, false);
         super.convertPersistableProperties(intactComplex);
