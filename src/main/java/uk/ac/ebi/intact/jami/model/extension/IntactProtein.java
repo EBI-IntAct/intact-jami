@@ -123,6 +123,9 @@ public class IntactProtein extends IntactPolymer implements Protein {
     @Override
     @Transient
     public String getPreferredName() {
+        if (this.getGeneName() == null) {
+            return super.getPreferredName();
+        }
         return this.getGeneName();
     }
 
