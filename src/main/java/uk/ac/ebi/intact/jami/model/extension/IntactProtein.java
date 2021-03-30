@@ -120,8 +120,21 @@ public class IntactProtein extends IntactPolymer implements Protein{
      */
     @Override
     @Transient
-    public String getPreferredName(){
-        return this.getGeneName();
+    public String getPreferredName() {
+        String preferredName = super.getPreferredName();
+
+        //The prefer the name has been adjusted for complex viewer
+        if (getPreferredIdentifier() != null && getPreferredIdentifier().getId().contains("-PRO")) {
+            //If a post process chain, we keep the short label to make explicit instead of the gene name
+            preferredName = getShortName().toUpperCase();
+
+        } else {
+            if (this.getGeneName() != null) {
+                preferredName = this.getGeneName();
+            }
+        }
+
+        return preferredName;
     }
 
     @Transient
