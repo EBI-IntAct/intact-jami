@@ -2,6 +2,7 @@ package uk.ac.ebi.intact.jami.synchronizer.impl;
 
 import psidev.psi.mi.jami.model.*;
 import psidev.psi.mi.jami.utils.AnnotationUtils;
+import psidev.psi.mi.jami.utils.CvTermUtils;
 import psidev.psi.mi.jami.utils.XrefUtils;
 import psidev.psi.mi.jami.utils.clone.InteractorCloner;
 import psidev.psi.mi.jami.utils.comparator.CollectionComparator;
@@ -59,7 +60,7 @@ public class ComplexSynchronizer extends InteractorSynchronizerTemplate<Complex,
             if (term.getParticipants().isEmpty()) {
                 filteredResults.add(complex);
             }
-            // same participants but same complex_ac with different version to exclude the new versions as duplicates and allow then to be saved in the database
+            // for only intact complexes, same participants but same complex_ac with different version to exclude the new versions as duplicates and allow then to be saved in the database
             else if (this.participantsComparator.compare(term.getParticipants(), complex.getParticipants()) == 0) {
                 if (term instanceof IntactComplex) {
                     IntactComplex intactComplex = (IntactComplex) term;
@@ -70,6 +71,8 @@ public class ComplexSynchronizer extends InteractorSynchronizerTemplate<Complex,
                             filteredResults.add(complex);
                         }
                     }
+                } else {
+                    filteredResults.add(complex); // for the case of an xml complex
                 }
             }
         }
@@ -116,7 +119,7 @@ public class ComplexSynchronizer extends InteractorSynchronizerTemplate<Complex,
             if (term.getParticipants().isEmpty()) {
                 filteredResults.add(complex);
             }
-            // same participants but same complex_ac with different version to exclude the new versions as duplicates and allow then to be saved in the database
+            // for only intact complexes,same participants but same complex_ac with different version to exclude the new versions as duplicates and allow then to be saved in the database
             else if (this.participantsComparator.compare(term.getParticipants(), complex.getParticipants()) == 0) {
                 if (term instanceof IntactComplex) {
                     IntactComplex intactComplex = (IntactComplex) term;
@@ -127,6 +130,8 @@ public class ComplexSynchronizer extends InteractorSynchronizerTemplate<Complex,
                             filteredResults.add(complex);
                         }
                     }
+                } else {
+                    filteredResults.add(complex); // for the case of an xml complex
                 }
             }
         }
@@ -141,7 +146,7 @@ public class ComplexSynchronizer extends InteractorSynchronizerTemplate<Complex,
             if (term.getParticipants().isEmpty() && complex.getAc() != null) {
                 filteredResults.add(complex.getAc());
             }
-            // same participants but same complex_ac with different version to exclude the new versions as duplicates and allow then to be saved in the database
+            // for only intact complexes, same participants but same complex_ac with different version to exclude the new versions as duplicates and allow then to be saved in the database
             else if (this.participantsComparator.compare(term.getParticipants(), complex.getParticipants()) == 0) {
                 if (term instanceof IntactComplex) {
                     IntactComplex intactComplex = (IntactComplex) term;
@@ -152,6 +157,8 @@ public class ComplexSynchronizer extends InteractorSynchronizerTemplate<Complex,
                             filteredResults.add(complex.getAc());
                         }
                     }
+                } else {
+                    filteredResults.add(complex.getAc()); // for the case of an xml complex
                 }
             }
         }
@@ -231,11 +238,20 @@ public class ComplexSynchronizer extends InteractorSynchronizerTemplate<Complex,
         if (intactInteractor.areXrefsInitialized()) {
             List<Xref> xrefsToPersist = new ArrayList<Xref>(intactInteractor.getDbXrefs());
             Set<Xref> goReferences = new TreeSet<Xref>(new IntactComplexGoXrefComparator());
+            Xref cvXref = null;
             for (Xref xref : xrefsToPersist) {
-                // do not persist or merge xrefs because of cascades
-                Xref cvXref = enableSynchronization ?
-                        getContext().getComplexXrefSynchronizer().synchronize(xref, false) :
-                        getContext().getComplexXrefSynchronizer().convertToPersistentObject(xref);
+                // check if goxrefs
+                if (CvTermUtils.isCvTerm(xref.getDatabase(), Xref.GO_MI, Xref.GO)) {
+                    // do not persist or merge xrefs because of cascades
+                    cvXref = enableSynchronization ?
+                            getContext().getComplexGOXrefSynchronizer().synchronize(xref, false) :
+                            getContext().getComplexGOXrefSynchronizer().convertToPersistentObject(xref);
+                } else {
+                    // do not persist or merge xrefs because of cascades
+                    cvXref = enableSynchronization ?
+                            getContext().getComplexXrefSynchronizer().synchronize(xref, false) :
+                            getContext().getComplexXrefSynchronizer().convertToPersistentObject(xref);
+                }
                 // we have a different instance because needed to be synchronized
                 if (cvXref != xref) {
                     intactInteractor.getDbXrefs().remove(xref);
