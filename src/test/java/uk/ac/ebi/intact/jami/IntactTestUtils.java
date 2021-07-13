@@ -13,6 +13,7 @@ import uk.ac.ebi.intact.jami.utils.IntactUtils;
 
 import java.lang.reflect.InvocationTargetException;
 import java.math.BigDecimal;
+import java.util.Collection;
 
 /**
  * Utility class for testing
@@ -538,6 +539,12 @@ public class IntactTestUtils {
         interactor.assignComplexAc(complexAc, version);
 
         return interactor;
+    }
+
+    public static IntactComplex createIntactComplexWithParticipants(String complexAc, String version, Collection<IntactModelledParticipant> intactModelledParticipant) throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException{
+        IntactComplex intactComplex= createIntactComplex(complexAc,version);
+        intactComplex.getParticipants().addAll(intactModelledParticipant);
+        return intactComplex;
     }
 
     private static CvTerm createEvidenceType() {

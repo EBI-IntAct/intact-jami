@@ -1,5 +1,7 @@
 package uk.ac.ebi.intact.jami.synchronizer.impl;
 
+import psidev.psi.mi.jami.listener.comparator.ComplexComparatorListener;
+import psidev.psi.mi.jami.listener.comparator.event.ComplexComparisonEvent;
 import psidev.psi.mi.jami.model.*;
 import psidev.psi.mi.jami.utils.AnnotationUtils;
 import psidev.psi.mi.jami.utils.CvTermUtils;
@@ -40,6 +42,7 @@ public class ComplexSynchronizer extends InteractorSynchronizerTemplate<Complex,
 
     private CollectionComparator<ModelledParticipant> participantsComparator;
     private ComplexExperimentBCSynchronizer experimentBCSynchronizer;
+    private ComplexComparatorListener complexComparatorListener;
 
     public ComplexSynchronizer(SynchronizerContext context) {
         super(context, IntactComplex.class);
@@ -74,6 +77,16 @@ public class ComplexSynchronizer extends InteractorSynchronizerTemplate<Complex,
                 } else {
                     filteredResults.add(complex); // for the case of an xml complex
                 }
+            } else if(this.complexComparatorListener!=null) { // check if different only because of stoichiometry difference
+                IntactModelledParticipantComparator intactModelledParticipantComparator=
+                        (IntactModelledParticipantComparator) this.participantsComparator.getObjectComparator();
+                intactModelledParticipantComparator.getParticipantPoolComparator().getParticipantBaseComparator().setIgnoreStoichiometry(true);
+                if (this.participantsComparator.compare(term.getParticipants(), complex.getParticipants()) == 0) {
+                    ComplexComparisonEvent complexComparisonEvent =
+                            new ComplexComparisonEvent(term, complex, ComplexComparisonEvent.EventType.ONLY_STOICHIOMETRY_DIFFERENT);
+                    this.complexComparatorListener.onDifferentValue(complexComparisonEvent);
+                }
+                intactModelledParticipantComparator.getParticipantPoolComparator().getParticipantBaseComparator().setIgnoreStoichiometry(false);
             }
         }
 
@@ -133,6 +146,16 @@ public class ComplexSynchronizer extends InteractorSynchronizerTemplate<Complex,
                 } else {
                     filteredResults.add(complex); // for the case of an xml complex
                 }
+            } else if(this.complexComparatorListener!=null) { // check if different only because of stoichiometry difference
+                IntactModelledParticipantComparator intactModelledParticipantComparator=
+                        (IntactModelledParticipantComparator) this.participantsComparator.getObjectComparator();
+                intactModelledParticipantComparator.getParticipantPoolComparator().getParticipantBaseComparator().setIgnoreStoichiometry(true);
+                if (this.participantsComparator.compare(term.getParticipants(), complex.getParticipants()) == 0) {
+                    ComplexComparisonEvent complexComparisonEvent =
+                            new ComplexComparisonEvent(term, complex, ComplexComparisonEvent.EventType.ONLY_STOICHIOMETRY_DIFFERENT);
+                    this.complexComparatorListener.onDifferentValue(complexComparisonEvent);
+                }
+                intactModelledParticipantComparator.getParticipantPoolComparator().getParticipantBaseComparator().setIgnoreStoichiometry(false);
             }
         }
         return filteredResults;
@@ -160,6 +183,17 @@ public class ComplexSynchronizer extends InteractorSynchronizerTemplate<Complex,
                 } else {
                     filteredResults.add(complex.getAc()); // for the case of an xml complex
                 }
+            } else if(this.complexComparatorListener!=null) { // check if different only because of stoichiometry difference if the listener is listening
+
+                IntactModelledParticipantComparator intactModelledParticipantComparator=
+                        (IntactModelledParticipantComparator) this.participantsComparator.getObjectComparator();
+                intactModelledParticipantComparator.getParticipantPoolComparator().getParticipantBaseComparator().setIgnoreStoichiometry(true);
+                if (this.participantsComparator.compare(term.getParticipants(), complex.getParticipants()) == 0) {
+                    ComplexComparisonEvent complexComparisonEvent =
+                            new ComplexComparisonEvent(term, complex, ComplexComparisonEvent.EventType.ONLY_STOICHIOMETRY_DIFFERENT);
+                    this.complexComparatorListener.onDifferentValue(complexComparisonEvent);
+                }
+                intactModelledParticipantComparator.getParticipantPoolComparator().getParticipantBaseComparator().setIgnoreStoichiometry(false);
             }
         }
 
@@ -587,5 +621,13 @@ public class ComplexSynchronizer extends InteractorSynchronizerTemplate<Complex,
     public void clearCache() {
         super.clearCache();
         this.experimentBCSynchronizer.clearCache();
+    }
+
+    public ComplexComparatorListener getComplexComparatorListener() {
+        return complexComparatorListener;
+    }
+
+    public void setComplexComparatorListener(ComplexComparatorListener complexComparatorListener) {
+        this.complexComparatorListener = complexComparatorListener;
     }
 }
