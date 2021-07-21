@@ -9,6 +9,8 @@ import org.springframework.transaction.annotation.Transactional;
 import psidev.psi.mi.jami.listener.comparator.event.ComplexComparisonEvent;
 import psidev.psi.mi.jami.listener.comparator.impl.ComplexComparatorListenerImpl;
 import psidev.psi.mi.jami.listener.comparator.observer.ComplexComparatorObserver;
+import psidev.psi.mi.jami.model.impl.DefaultProtein;
+import psidev.psi.mi.jami.utils.XrefUtils;
 import uk.ac.ebi.intact.jami.IntactTestUtils;
 import uk.ac.ebi.intact.jami.context.DefaultSynchronizerContext;
 import uk.ac.ebi.intact.jami.model.extension.IntactComplex;
@@ -46,6 +48,8 @@ public class ComplexSynchronizerTest extends InteractorSynchronizerTemplateTest 
 
         IntactModelledParticipant intactModelledParticipant1 = IntactTestUtils.createIntactModelledParticipant();
         intactModelledParticipant1.setStoichiometry(new IntactStoichiometry(2));
+        intactModelledParticipant1.setInteractor(new DefaultProtein("test protein",
+                XrefUtils.createUniprotIdentity("UNIPROT_ID_1")));
         List<IntactModelledParticipant> intactModelledParticipantList1 = new ArrayList<>();
         intactModelledParticipantList1.add(intactModelledParticipant1);
         IntactComplex objectToTest = createComplexWithParticipants(intactModelledParticipantList1);
@@ -56,6 +60,8 @@ public class ComplexSynchronizerTest extends InteractorSynchronizerTemplateTest 
         // with same stoichiometry
         IntactModelledParticipant intactModelledParticipant2 = IntactTestUtils.createIntactModelledParticipant();
         intactModelledParticipant2.setStoichiometry(new IntactStoichiometry(2));
+        intactModelledParticipant2.setInteractor(new DefaultProtein("test protein",
+                XrefUtils.createUniprotIdentity("UNIPROT_ID_1")));
         List<IntactModelledParticipant> intactModelledParticipantList2 = new ArrayList<>();
         intactModelledParticipantList2.add(intactModelledParticipant2);
         IntactComplex newObject1 = createComplexWithParticipants(intactModelledParticipantList2);
@@ -69,6 +75,8 @@ public class ComplexSynchronizerTest extends InteractorSynchronizerTemplateTest 
         // with different stoichiometry
         IntactModelledParticipant intactModelledParticipant3 = IntactTestUtils.createIntactModelledParticipant();
         intactModelledParticipant3.setStoichiometry(new IntactStoichiometry(3));
+        intactModelledParticipant3.setInteractor(new DefaultProtein("test protein",
+                XrefUtils.createUniprotIdentity("UNIPROT_ID_1")));
         List<IntactModelledParticipant> intactModelledParticipantList3 = new ArrayList<>();
         intactModelledParticipantList3.add(intactModelledParticipant3);
         IntactComplex newObject2 = createComplexWithParticipants(intactModelledParticipantList3);
@@ -98,12 +106,16 @@ public class ComplexSynchronizerTest extends InteractorSynchronizerTemplateTest 
 
         IntactModelledParticipant intactModelledParticipant1 = IntactTestUtils.createIntactModelledParticipant();
         intactModelledParticipant1.setStoichiometry(new IntactStoichiometry(2));
+        intactModelledParticipant1.setInteractor(new DefaultProtein("test protein",
+                XrefUtils.createUniprotIdentity("UNIPROT_ID_1")));
         List<IntactModelledParticipant> intactModelledParticipantList1 = new ArrayList<>();
         intactModelledParticipantList1.add(intactModelledParticipant1);
         IntactComplex objectToTest1 = createComplexWithParticipants(intactModelledParticipantList1);
 
         IntactModelledParticipant intactModelledParticipant4 = IntactTestUtils.createIntactModelledParticipant();
         intactModelledParticipant4.setStoichiometry(new IntactStoichiometry(2));
+        intactModelledParticipant4.setInteractor(new DefaultProtein("test protein",
+                XrefUtils.createUniprotIdentity("UNIPROT_ID_1")));
         List<IntactModelledParticipant> intactModelledParticipantList4 = new ArrayList<>();
         intactModelledParticipantList4.add(intactModelledParticipant4);
         IntactComplex objectToTest2 = createComplexWithParticipants(intactModelledParticipantList4);
@@ -115,6 +127,8 @@ public class ComplexSynchronizerTest extends InteractorSynchronizerTemplateTest 
         // with same stoichiometry
         IntactModelledParticipant intactModelledParticipant2 = IntactTestUtils.createIntactModelledParticipant();
         intactModelledParticipant2.setStoichiometry(new IntactStoichiometry(2));
+        intactModelledParticipant2.setInteractor(new DefaultProtein("test protein",
+                XrefUtils.createUniprotIdentity("UNIPROT_ID_1")));
         List<IntactModelledParticipant> intactModelledParticipantList2 = new ArrayList<>();
         intactModelledParticipantList2.add(intactModelledParticipant2);
         IntactComplex newObject1 = createComplexWithParticipants(intactModelledParticipantList2);
@@ -130,6 +144,8 @@ public class ComplexSynchronizerTest extends InteractorSynchronizerTemplateTest 
         // with different stoichiometry
         IntactModelledParticipant intactModelledParticipant3 = IntactTestUtils.createIntactModelledParticipant();
         intactModelledParticipant3.setStoichiometry(new IntactStoichiometry(3));
+        intactModelledParticipant3.setInteractor(new DefaultProtein("test protein",
+                XrefUtils.createUniprotIdentity("UNIPROT_ID_1")));
         List<IntactModelledParticipant> intactModelledParticipantList3 = new ArrayList<>();
         intactModelledParticipantList3.add(intactModelledParticipant3);
         IntactComplex newObject2 = createComplexWithParticipants(intactModelledParticipantList3);
@@ -169,12 +185,16 @@ public class ComplexSynchronizerTest extends InteractorSynchronizerTemplateTest 
 
         IntactModelledParticipant intactModelledParticipant1 = IntactTestUtils.createIntactModelledParticipant();
         intactModelledParticipant1.setStoichiometry(new IntactStoichiometry(2));
+        intactModelledParticipant1.setInteractor(new DefaultProtein("test protein",
+                XrefUtils.createUniprotIdentity("UNIPROT_ID_1")));
         List<IntactModelledParticipant> intactModelledParticipantList1 = new ArrayList<>();
         intactModelledParticipantList1.add(intactModelledParticipant1);
         IntactComplex objectToTest1 = createComplexWithParticipants(intactModelledParticipantList1);
 
         IntactModelledParticipant intactModelledParticipant4 = IntactTestUtils.createIntactModelledParticipant();
         intactModelledParticipant4.setStoichiometry(new IntactStoichiometry(2));
+        intactModelledParticipant4.setInteractor(new DefaultProtein("test protein",
+                XrefUtils.createUniprotIdentity("UNIPROT_ID_1")));
         List<IntactModelledParticipant> intactModelledParticipantList4 = new ArrayList<>();
         intactModelledParticipantList4.add(intactModelledParticipant4);
         IntactComplex objectToTest2 = createComplexWithParticipants(intactModelledParticipantList4);
@@ -186,6 +206,8 @@ public class ComplexSynchronizerTest extends InteractorSynchronizerTemplateTest 
         // with same stoichiometry
         IntactModelledParticipant intactModelledParticipant2 = IntactTestUtils.createIntactModelledParticipant();
         intactModelledParticipant2.setStoichiometry(new IntactStoichiometry(2));
+        intactModelledParticipant2.setInteractor(new DefaultProtein("test protein",
+                XrefUtils.createUniprotIdentity("UNIPROT_ID_1")));
         List<IntactModelledParticipant> intactModelledParticipantList2 = new ArrayList<>();
         intactModelledParticipantList2.add(intactModelledParticipant2);
         IntactComplex newObject1 = createComplexWithParticipants(intactModelledParticipantList2);
@@ -201,6 +223,8 @@ public class ComplexSynchronizerTest extends InteractorSynchronizerTemplateTest 
         // with different stoichiometry
         IntactModelledParticipant intactModelledParticipant3 = IntactTestUtils.createIntactModelledParticipant();
         intactModelledParticipant3.setStoichiometry(new IntactStoichiometry(3));
+        intactModelledParticipant3.setInteractor(new DefaultProtein("test protein",
+                XrefUtils.createUniprotIdentity("UNIPROT_ID_1")));
         List<IntactModelledParticipant> intactModelledParticipantList3 = new ArrayList<>();
         intactModelledParticipantList3.add(intactModelledParticipant3);
         IntactComplex newObject2 = createComplexWithParticipants(intactModelledParticipantList3);
