@@ -629,4 +629,39 @@ public class ComplexSynchronizer extends InteractorSynchronizerTemplate<Complex,
     public void setComplexComparatorListener(ComplexComparatorListener complexComparatorListener) {
         this.complexComparatorListener = complexComparatorListener;
     }
+
+    public Collection<String> findAllMatchingComplexAcs(Complex term) {
+        Query query;
+        if (term == null) {
+            return Collections.EMPTY_LIST;
+        }
+
+        Collection<String> existingTypes = getContext().getInteractorTypeSynchronizer().findAllMatchingAcs(term.getInteractorType());
+        // could not retrieve the interactor type so this interactor does not exist in IntAct
+        if (existingTypes.isEmpty()) {
+            return Collections.EMPTY_LIST;
+        }
+        Collection<String> existingOrganisms = Collections.EMPTY_LIST;
+        if (term.getOrganism() != null) {
+            existingOrganisms = getContext().getOrganismSynchronizer().findAllMatchingAcs(term.getOrganism());
+            // could not retrieve the organism so this interactor does not exist in IntAct
+            if (existingOrganisms.isEmpty()) {
+                return Collections.EMPTY_LIST;
+            }
+        }
+
+        // try to fetch interactor using identifiers
+        Collection<IntactComplex> results = findByIdentifiers(term, existingOrganisms, existingTypes);
+        // if no identifiers and no results, look at other properties
+        if (results.isEmpty() && term.getIdentifiers().isEmpty()) {
+            // fetch using other properties
+            results = findByOtherProperties(term, existingTypes, existingOrganisms);
+            if (results.isEmpty()) {
+                // fetch using shortname
+                query = findByName(term, existingTypes, existingOrganisms);
+                results = query.getResultList();
+            }
+        }
+        return postFilterAllAcs(term, results);
+    }
 }
