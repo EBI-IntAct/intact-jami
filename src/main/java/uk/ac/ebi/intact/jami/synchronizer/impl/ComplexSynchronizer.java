@@ -9,7 +9,6 @@ import psidev.psi.mi.jami.utils.CvTermUtils;
 import psidev.psi.mi.jami.utils.XrefUtils;
 import psidev.psi.mi.jami.utils.clone.InteractorCloner;
 import psidev.psi.mi.jami.utils.comparator.CollectionComparator;
-import psidev.psi.mi.jami.utils.comparator.interactor.InteractorComparator;
 import psidev.psi.mi.jami.utils.comparator.participant.ModelledComparableParticipantComparator;
 import uk.ac.ebi.intact.jami.context.SynchronizerContext;
 import uk.ac.ebi.intact.jami.merger.ComplexMergerEnrichOnly;
@@ -24,7 +23,7 @@ import uk.ac.ebi.intact.jami.synchronizer.listener.impl.DbInteractorEnricherList
 import uk.ac.ebi.intact.jami.utils.IntactUtils;
 import uk.ac.ebi.intact.jami.utils.comparator.IntactComplexComparator;
 import uk.ac.ebi.intact.jami.utils.comparator.IntactComplexGoXrefComparator;
-import uk.ac.ebi.intact.jami.utils.comparator.IntactInteractorComparator;
+import uk.ac.ebi.intact.jami.utils.comparator.IntactModelledParticipantComparator;
 
 import javax.persistence.Query;
 import java.lang.reflect.InvocationTargetException;
@@ -43,14 +42,15 @@ import java.util.*;
 
 public class ComplexSynchronizer extends InteractorSynchronizerTemplate<Complex, IntactComplex> {
 
-    private CollectionComparator<ModelledComparableParticipant> participantsComparator;
+    private CollectionComparator<ModelledParticipant> participantsComparator;
+    private CollectionComparator<ModelledComparableParticipant> comparableParticipantsComparator;
     private ComplexExperimentBCSynchronizer experimentBCSynchronizer;
     private ComplexComparatorListener complexComparatorListener;
 
     public ComplexSynchronizer(SynchronizerContext context) {
         super(context, IntactComplex.class);
-        InteractorComparator interactorComparator = new IntactInteractorComparator();
-        this.participantsComparator = new CollectionComparator<ModelledComparableParticipant>(new ModelledComparableParticipantComparator());
+        this.participantsComparator = new CollectionComparator<ModelledParticipant>(new IntactModelledParticipantComparator());
+        this.comparableParticipantsComparator = new CollectionComparator<ModelledComparableParticipant>(new ModelledComparableParticipantComparator());
         this.experimentBCSynchronizer = new ComplexExperimentBCSynchronizer(context);
     }
 
@@ -68,7 +68,7 @@ public class ComplexSynchronizer extends InteractorSynchronizerTemplate<Complex,
                 filteredResults.add(complex);
             }
             // for only intact complexes, same participants but same complex_ac with different version to exclude the new versions as duplicates and allow then to be saved in the database
-            else if (this.participantsComparator.compare(term.getComparableParticipants(), complex.getComparableParticipants()) == 0) {
+            else if (this.participantsComparator.compare(term.getParticipants(), complex.getParticipants()) == 0) {
                 if (term instanceof IntactComplex) {
                     IntactComplex intactComplex = (IntactComplex) term;
                     if (intactComplex.getComplexAcXref() != null && complex.getComplexAcXref() != null) {
@@ -81,15 +81,6 @@ public class ComplexSynchronizer extends InteractorSynchronizerTemplate<Complex,
                 } else {
                     filteredResults.add(complex); // for the case of an xml complex
                 }
-            } else if (this.complexComparatorListener != null) { // check if different only because of stoichiometry difference
-                ModelledComparableParticipantComparator modelledComparableParticipantComparator = (ModelledComparableParticipantComparator) this.participantsComparator.getObjectComparator();
-                modelledComparableParticipantComparator.setIgnoreStoichiometry(true);
-                if (this.participantsComparator.compare(term.getComparableParticipants(), complex.getComparableParticipants()) == 0) {
-                    ComplexComparisonEvent complexComparisonEvent =
-                            new ComplexComparisonEvent(term, complex, ComplexComparisonEvent.EventType.ONLY_STOICHIOMETRY_DIFFERENT);
-                    this.complexComparatorListener.onDifferentValue(complexComparisonEvent);
-                }
-                modelledComparableParticipantComparator.setIgnoreStoichiometry(false);
             }
         }
 
@@ -136,7 +127,7 @@ public class ComplexSynchronizer extends InteractorSynchronizerTemplate<Complex,
                 filteredResults.add(complex);
             }
             // for only intact complexes,same participants but same complex_ac with different version to exclude the new versions as duplicates and allow then to be saved in the database
-            else if (this.participantsComparator.compare(term.getComparableParticipants(), complex.getComparableParticipants()) == 0) {
+            else if (this.participantsComparator.compare(term.getParticipants(), complex.getParticipants()) == 0) {
                 if (term instanceof IntactComplex) {
                     IntactComplex intactComplex = (IntactComplex) term;
                     if (intactComplex.getComplexAcXref() != null && complex.getComplexAcXref() != null) {
@@ -149,15 +140,6 @@ public class ComplexSynchronizer extends InteractorSynchronizerTemplate<Complex,
                 } else {
                     filteredResults.add(complex); // for the case of an xml complex
                 }
-            } else if (this.complexComparatorListener != null) { // check if different only because of stoichiometry difference
-                ModelledComparableParticipantComparator modelledComparableParticipantComparator = (ModelledComparableParticipantComparator) this.participantsComparator.getObjectComparator();
-                modelledComparableParticipantComparator.setIgnoreStoichiometry(true);
-                if (this.participantsComparator.compare(term.getComparableParticipants(), complex.getComparableParticipants()) == 0) {
-                    ComplexComparisonEvent complexComparisonEvent =
-                            new ComplexComparisonEvent(term, complex, ComplexComparisonEvent.EventType.ONLY_STOICHIOMETRY_DIFFERENT);
-                    this.complexComparatorListener.onDifferentValue(complexComparisonEvent);
-                }
-                modelledComparableParticipantComparator.setIgnoreStoichiometry(false);
             }
         }
         return filteredResults;
@@ -165,6 +147,33 @@ public class ComplexSynchronizer extends InteractorSynchronizerTemplate<Complex,
 
     @Override
     protected Collection<String> postFilterAllAcs(Complex term, Collection<IntactComplex> results) {
+        Collection<String> filteredResults = new ArrayList<String>(results.size());
+        for (IntactComplex complex : results) {
+            // we accept empty participants when finding complexes
+            if (term.getParticipants().isEmpty() && complex.getAc() != null) {
+                filteredResults.add(complex.getAc());
+            }
+            // for only intact complexes, same participants but same complex_ac with different version to exclude the new versions as duplicates and allow then to be saved in the database
+            else if (this.participantsComparator.compare(term.getParticipants(), complex.getParticipants()) == 0) {
+                if (term instanceof IntactComplex) {
+                    IntactComplex intactComplex = (IntactComplex) term;
+                    if (intactComplex.getComplexAcXref() != null && complex.getComplexAcXref() != null) {
+                        if (!intactComplex.getComplexAcXref().getId().equalsIgnoreCase(complex.getComplexAcXref().getId())) {
+                            filteredResults.add(complex.getAc());
+                        } else if (intactComplex.getComplexAcXref().getVersion().equalsIgnoreCase(complex.getComplexAcXref().getVersion())) {
+                            filteredResults.add(complex.getAc());
+                        }
+                    }
+                } else {
+                    filteredResults.add(complex.getAc()); // for the case of an xml complex
+                }
+            }
+        }
+
+        return filteredResults;
+    }
+
+    protected Collection<String> postFilterComplexes(Complex term, Collection<IntactComplex> results) {
         Collection<String> filteredResults = new HashSet<String>(results.size());
         for (IntactComplex complex : results) {
             // we accept empty participants when finding complexes
@@ -172,7 +181,7 @@ public class ComplexSynchronizer extends InteractorSynchronizerTemplate<Complex,
                 filteredResults.add(complex.getAc());
             }
             // for only intact complexes, same participants but same complex_ac with different version to exclude the new versions as duplicates and allow then to be saved in the database
-            else if (this.participantsComparator.compare(term.getComparableParticipants(), complex.getComparableParticipants()) == 0) {
+            else if (this.comparableParticipantsComparator.compare(term.getComparableParticipants(), complex.getComparableParticipants()) == 0) {
                 if (term instanceof IntactComplex) {
                     IntactComplex intactComplex = (IntactComplex) term;
                     if (intactComplex.getComplexAcXref() != null && complex.getComplexAcXref() != null) {
@@ -186,9 +195,9 @@ public class ComplexSynchronizer extends InteractorSynchronizerTemplate<Complex,
                     filteredResults.add(complex.getAc()); // for the case of an xml complex
                 }
             } else if (this.complexComparatorListener != null) { // check if different only because of stoichiometry difference if the listener is listening
-                ModelledComparableParticipantComparator modelledComparableParticipantComparator = (ModelledComparableParticipantComparator) this.participantsComparator.getObjectComparator();
+                ModelledComparableParticipantComparator modelledComparableParticipantComparator = (ModelledComparableParticipantComparator) this.comparableParticipantsComparator.getObjectComparator();
                 modelledComparableParticipantComparator.setIgnoreStoichiometry(true);
-                if (this.participantsComparator.compare(term.getComparableParticipants(), complex.getComparableParticipants()) == 0) {
+                if (this.comparableParticipantsComparator.compare(term.getComparableParticipants(), complex.getComparableParticipants()) == 0) {
                     ComplexComparisonEvent complexComparisonEvent =
                             new ComplexComparisonEvent(term, complex, ComplexComparisonEvent.EventType.ONLY_STOICHIOMETRY_DIFFERENT);
                     this.complexComparatorListener.onDifferentValue(complexComparisonEvent);
@@ -666,14 +675,19 @@ public class ComplexSynchronizer extends InteractorSynchronizerTemplate<Complex,
         if (results.isEmpty() && (term.getIdentifiers().isEmpty() || onlyMirrorIdentifier)) {
             // fetch using other properties
             results = findByOtherProperties(term, existingTypes, existingOrganisms);
+            if (termAc != null) {
+                results.removeIf(x -> termAc.equals(x.getAc())); // removing mirror complex
+            }
             if (results.isEmpty()) {
                 // fetch using shortname
                 query = findByName(term, existingTypes, existingOrganisms);
                 results = query.getResultList();
+                if (termAc != null) {
+                    results.removeIf(x -> termAc.equals(x.getAc())); // removing mirror complex
+                }
             }
         }
-
-        return postFilterAllAcs(term, results);
+        return postFilterComplexes(term, results);
     }
 
     protected Collection<IntactComplex> findComplexesByIdentifiers(Complex term, Collection<String> existingOrganisms, Collection<String> existingTypes) {
