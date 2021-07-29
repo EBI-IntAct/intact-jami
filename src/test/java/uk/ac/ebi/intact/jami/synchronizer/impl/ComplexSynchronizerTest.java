@@ -137,7 +137,7 @@ public class ComplexSynchronizerTest extends InteractorSynchronizerTemplateTest 
         complexSynchronizer.setComplexComparatorListener(complexComparatorListener1);
 
         // post filter test
-        Assert.assertEquals(2, complexSynchronizer.postFilterAllAcs(newObject1, persistableIntactComplexes).size());
+        Assert.assertEquals(2, complexSynchronizer.postFilterAll(newObject1, persistableIntactComplexes).size());
 
         Assert.assertEquals(0, complexComparatorListener1.getComplexComparatorObservations().size());
 
@@ -190,6 +190,7 @@ public class ComplexSynchronizerTest extends InteractorSynchronizerTemplateTest 
         List<IntactModelledParticipant> intactModelledParticipantList1 = new ArrayList<>();
         intactModelledParticipantList1.add(intactModelledParticipant1);
         IntactComplex objectToTest1 = createComplexWithParticipants(intactModelledParticipantList1);
+        objectToTest1.setAc("EBI-1");
 
         IntactModelledParticipant intactModelledParticipant4 = IntactTestUtils.createIntactModelledParticipant();
         intactModelledParticipant4.setStoichiometry(new IntactStoichiometry(2));
@@ -198,7 +199,7 @@ public class ComplexSynchronizerTest extends InteractorSynchronizerTemplateTest 
         List<IntactModelledParticipant> intactModelledParticipantList4 = new ArrayList<>();
         intactModelledParticipantList4.add(intactModelledParticipant4);
         IntactComplex objectToTest2 = createComplexWithParticipants(intactModelledParticipantList4);
-
+        objectToTest2.setAc("EBI-2");
         List<IntactComplex> persistableIntactComplexes = new ArrayList();
         persistableIntactComplexes.add(objectToTest1);
         persistableIntactComplexes.add(objectToTest2);
