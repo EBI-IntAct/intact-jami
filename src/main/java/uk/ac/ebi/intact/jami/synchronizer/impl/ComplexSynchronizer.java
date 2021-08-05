@@ -28,6 +28,7 @@ import uk.ac.ebi.intact.jami.utils.comparator.IntactModelledParticipantComparato
 import javax.persistence.Query;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Default synchronizer for complexes
@@ -176,12 +177,8 @@ public class ComplexSynchronizer extends InteractorSynchronizerTemplate<Complex,
     protected Collection<String> postFilterComplexes(Complex term, Collection<IntactComplex> results) {
         Collection<String> filteredResults = new HashSet<String>(results.size());
         for (IntactComplex complex : results) {
-            // we accept empty participants when finding complexes
-            if (term.getParticipants().isEmpty() && complex.getAc() != null) {
-                filteredResults.add(complex.getAc());
-            }
             // for only intact complexes, same participants but same complex_ac with different version to exclude the new versions as duplicates and allow then to be saved in the database
-            else if (this.comparableParticipantsComparator.compare(term.getComparableParticipants(), complex.getComparableParticipants()) == 0) {
+            if (this.comparableParticipantsComparator.compare(term.getComparableParticipants(), complex.getComparableParticipants()) == 0) {
                 if (term instanceof IntactComplex) {
                     IntactComplex intactComplex = (IntactComplex) term;
                     if (intactComplex.getComplexAcXref() != null && complex.getComplexAcXref() != null) {
@@ -232,6 +229,50 @@ public class ComplexSynchronizer extends InteractorSynchronizerTemplate<Complex,
             query.setParameter("typeAc", existingTypes);
         }
         return query.getResultList();
+    }
+
+    protected Collection<IntactComplex> findComplexesByProteins(Complex term) {
+        Query query;
+        if (term.getComparableParticipants() != null && !term.getComparableParticipants().isEmpty()) {
+            List<String> proteinIdList =
+                    term.getComparableParticipants().stream()
+                            .map(ModelledComparableParticipant::getProteinId)
+                            .collect(Collectors.toList());
+
+
+            query = getEntityManager().createNativeQuery("select cpx.ac as complex_ac from ia_interactor cpx join " +
+                    "ia_component part on part.interaction_ac=cpx.ac " +
+                    "join ia_interactor itor on (itor.ac=part.interactor_ac and itor.category in ('protein','interactor_pool','complex')) " +
+                    "" +
+                    "left outer join ia_interactor itorProtein on (itorProtein.ac=itor.ac and itor.category in ('protein')) " +
+                    "left outer join ia_interactor_xref itorProteinXref on (itorProteinXref.parent_ac=itorProtein.ac and " +
+                    "                         (itorProteinXref.primaryid in (:proteinIds))) " +
+                    "" +
+                    "left outer join ia_component itorPart on itorPart.interaction_ac=itor.ac " +
+                    "left outer join ia_interactor itorCpx on (itorCpx.ac=itorPart.interactor_ac and itorCpx.category in ('protein')) " +
+                    "left outer join ia_interactor_xref itorCpxXref on (itorCpxXref.parent_ac=itorCpx.ac and " +
+                    "                         (itorCpxXref.primaryid in (:proteinIds))) " +
+                    "" +
+                    "left outer join ia_pool2interactor itorPool on itorPool.interactor_pool_ac=itor.ac " +
+                    "left outer join ia_interactor itorSet on (itorSet.ac=itorPool.interactor_ac and itorSet.category in ('protein')) " +
+                    "left outer join ia_interactor_xref itorSetXref on (itorSetXref.parent_ac=itorSet.ac and " +
+                    "                         (itorSetXref.primaryid in (:proteinIds))) " +
+                    "" +
+                    "where cpx.category='complex' " +
+                    "group by cpx.ac " +
+                    "having (count(distinct concat(itorProtein.ac,concat(itorCpx.ac,itorSet.ac)))=:proteinSize " +
+                    "and count(distinct concat(itorProteinXref.primaryid,concat(itorCpxXref.primaryid,itorSetXref.primaryid)))=:proteinSize)");
+
+            query.setParameter("proteinIds", proteinIdList);
+            query.setParameter("proteinSize", proteinIdList.size());
+            List<Object> complexAcList = query.getResultList();
+
+            Query complexQuery = getEntityManager().createQuery("select distinct i from  IntactComplex i where i.ac in (:complexAcs)");
+            complexQuery.setParameter("complexAcs", complexAcList);
+            return complexQuery.getResultList();
+        } else {
+            return Collections.EMPTY_LIST;
+        }
     }
 
     @Override
@@ -646,47 +687,14 @@ public class ComplexSynchronizer extends InteractorSynchronizerTemplate<Complex,
             return Collections.EMPTY_LIST;
         }
 
-        Collection<String> existingTypes = getContext().getInteractorTypeSynchronizer().findAllMatchingAcs(term.getInteractorType());
-        // could not retrieve the interactor type so this interactor does not exist in IntAct
-        if (existingTypes.isEmpty()) {
-            return Collections.EMPTY_LIST;
-        }
-        Collection<String> existingOrganisms = Collections.EMPTY_LIST;
-        if (term.getOrganism() != null) {
-            existingOrganisms = getContext().getOrganismSynchronizer().findAllMatchingAcs(term.getOrganism());
-            // could not retrieve the organism so this interactor does not exist in IntAct
-            if (existingOrganisms.isEmpty()) {
-                return Collections.EMPTY_LIST;
-            }
-        }
-
-        // try to fetch interactor using identifiers
-        Collection<IntactComplex> results = findComplexesByIdentifiers(term, existingOrganisms, existingTypes);
+        // try to fetch complexes using term proteins
+        Collection<IntactComplex> results = findComplexesByProteins(term);
 
         String termAc = CommonUtils.extractIntactAcFromIdentifier(term.getIdentifiers());
-        boolean onlyMirrorIdentifier = false;
-
         if (termAc != null) {
-            boolean mirrorComplexRemoved = results.removeIf(x -> termAc.equals(x.getAc())); // removing mirror complex
-            // check if only complex ac and complex ebi ac are present
-            onlyMirrorIdentifier = (mirrorComplexRemoved && term.getIdentifiers().size() == 2) ? true : false;
+            results.removeIf(x -> termAc.equals(x.getAc())); // removing mirror complex
         }
-        // fetch using other properties
-        if (results.isEmpty() && (term.getIdentifiers().isEmpty() || onlyMirrorIdentifier)) {
-            // fetch using other properties
-            results = findByOtherProperties(term, existingTypes, existingOrganisms);
-            if (termAc != null) {
-                results.removeIf(x -> termAc.equals(x.getAc())); // removing mirror complex
-            }
-            if (results.isEmpty()) {
-                // fetch using shortname
-                query = findByName(term, existingTypes, existingOrganisms);
-                results = query.getResultList();
-                if (termAc != null) {
-                    results.removeIf(x -> termAc.equals(x.getAc())); // removing mirror complex
-                }
-            }
-        }
+
         return postFilterComplexes(term, results);
     }
 

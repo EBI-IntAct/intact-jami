@@ -122,6 +122,8 @@ public class ComplexSynchronizerTest extends InteractorSynchronizerTemplateTest 
         Assert.assertEquals(0, complexSynchronizer.postFilterAllAcs(newObject2, persistableIntactComplexes).size());
     }
 
+
+
     @Override
     protected IntactInteractor createDefaultObject() throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
         return IntactTestUtils.createIntactComplex("COMPLEX-AC-" + (++complexAcGenerator), "1");
@@ -153,8 +155,40 @@ public class ComplexSynchronizerTest extends InteractorSynchronizerTemplateTest 
     @Test
     @DirtiesContext
     @Override
-    @Ignore
     public void test_find() throws PersisterException, FinderException, SynchronizerException, InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
+        find_local_cache_complex(false);
+    }
+
+    public void find_local_cache_complex(boolean identityComparison) throws PersisterException, FinderException, SynchronizerException, NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException {
+        ComplexSynchronizer complexSynchronizer = (ComplexSynchronizer) this.synchronizer;
+
+        IntactModelledParticipant intactModelledParticipant1 = IntactTestUtils.createIntactModelledParticipant();
+        intactModelledParticipant1.setStoichiometry(new IntactStoichiometry(2));
+        intactModelledParticipant1.setInteractor(new DefaultProtein("test protein",
+                XrefUtils.createUniprotIdentity("UNIPROT_ID_1")));
+        List<IntactModelledParticipant> intactModelledParticipantList1 = new ArrayList<>();
+        intactModelledParticipantList1.add(intactModelledParticipant1);
+        IntactComplex objectToTest1 = createComplexWithParticipants(intactModelledParticipantList1);
+        //objectToTest1.setAc("EBI-1");
+
+        this.synchronizer.persist(objectToTest1);
+
+        //new object
+        IntactModelledParticipant intactModelledParticipant2 = IntactTestUtils.createIntactModelledParticipant();
+        intactModelledParticipant2.setStoichiometry(new IntactStoichiometry(2));
+        intactModelledParticipant2.setInteractor(new DefaultProtein("test protein",
+                XrefUtils.createUniprotIdentity("UNIPROT_ID_1")));
+        List<IntactModelledParticipant> intactModelledParticipantList2 = new ArrayList<>();
+        intactModelledParticipantList2.add(intactModelledParticipant2);
+        IntactComplex newObject1 = createComplexWithParticipants(intactModelledParticipantList2);
+        // test cache if any
+     //   complexSynchronizer.find(newObject1);
+        Assert.assertNotNull(complexSynchronizer.findAllMatchingComplexAcs(newObject1));
+
+        this.synchronizer.clearCache();
+        this.entityManager.flush();
+     //   complexSynchronizer.find(newObject1);
+        Assert.assertEquals(1,complexSynchronizer.findAllMatchingComplexAcs(newObject1).size());
 
     }
 
