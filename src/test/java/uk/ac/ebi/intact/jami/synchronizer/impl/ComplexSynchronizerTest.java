@@ -9,14 +9,15 @@ import org.springframework.transaction.annotation.Transactional;
 import psidev.psi.mi.jami.listener.comparator.event.ComplexComparisonEvent;
 import psidev.psi.mi.jami.listener.comparator.impl.ComplexComparatorListenerImpl;
 import psidev.psi.mi.jami.listener.comparator.observer.ComplexComparatorObserver;
-import psidev.psi.mi.jami.model.impl.DefaultProtein;
+import psidev.psi.mi.jami.model.Complex;
+import psidev.psi.mi.jami.model.InteractorPool;
+import psidev.psi.mi.jami.model.ModelledParticipant;
+import psidev.psi.mi.jami.model.Stoichiometry;
+import psidev.psi.mi.jami.model.impl.*;
 import psidev.psi.mi.jami.utils.XrefUtils;
 import uk.ac.ebi.intact.jami.IntactTestUtils;
 import uk.ac.ebi.intact.jami.context.DefaultSynchronizerContext;
-import uk.ac.ebi.intact.jami.model.extension.IntactComplex;
-import uk.ac.ebi.intact.jami.model.extension.IntactInteractor;
-import uk.ac.ebi.intact.jami.model.extension.IntactModelledParticipant;
-import uk.ac.ebi.intact.jami.model.extension.IntactStoichiometry;
+import uk.ac.ebi.intact.jami.model.extension.*;
 import uk.ac.ebi.intact.jami.synchronizer.FinderException;
 import uk.ac.ebi.intact.jami.synchronizer.PersisterException;
 import uk.ac.ebi.intact.jami.synchronizer.SynchronizerException;
@@ -156,19 +157,25 @@ public class ComplexSynchronizerTest extends InteractorSynchronizerTemplateTest 
     @DirtiesContext
     @Override
     public void test_find() throws PersisterException, FinderException, SynchronizerException, InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
-        find_local_cache_complex(false);
+
     }
 
-    public void find_local_cache_complex(boolean identityComparison) throws PersisterException, FinderException, SynchronizerException, NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException {
+    @Transactional
+    @Test
+    @DirtiesContext
+    public void find_duplicate_complex_1() throws PersisterException, FinderException, SynchronizerException, NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException {
         ComplexSynchronizer complexSynchronizer = (ComplexSynchronizer) this.synchronizer;
 
         IntactModelledParticipant intactModelledParticipant1 = IntactTestUtils.createIntactModelledParticipant();
         intactModelledParticipant1.setStoichiometry(new IntactStoichiometry(2));
-        intactModelledParticipant1.setInteractor(new DefaultProtein("test protein",
-                XrefUtils.createUniprotIdentity("UNIPROT_ID_1")));
+
+        intactModelledParticipant1.setInteractor(new IntactProtein("test protein",
+                IntactTestUtils.createUniprotXref(InteractorXref.class,"UNIPROT_ID_1")));
+
         List<IntactModelledParticipant> intactModelledParticipantList1 = new ArrayList<>();
         intactModelledParticipantList1.add(intactModelledParticipant1);
         IntactComplex objectToTest1 = createComplexWithParticipants(intactModelledParticipantList1);
+        objectToTest1.setShortName("persistable complex");
         //objectToTest1.setAc("EBI-1");
 
         this.synchronizer.persist(objectToTest1);
@@ -181,14 +188,110 @@ public class ComplexSynchronizerTest extends InteractorSynchronizerTemplateTest 
         List<IntactModelledParticipant> intactModelledParticipantList2 = new ArrayList<>();
         intactModelledParticipantList2.add(intactModelledParticipant2);
         IntactComplex newObject1 = createComplexWithParticipants(intactModelledParticipantList2);
+
         // test cache if any
-     //   complexSynchronizer.find(newObject1);
         Assert.assertNotNull(complexSynchronizer.findAllMatchingComplexAcs(newObject1));
+
+        //clear cache
+        this.synchronizer.clearCache();
+        this.entityManager.flush();
+
+        Assert.assertEquals(1,complexSynchronizer.findComplexesByProteins(newObject1).size());
+        Assert.assertEquals(1,complexSynchronizer.findAllMatchingComplexAcs(newObject1).size());
+    }
+
+    @Transactional
+    @Test
+    @DirtiesContext
+    public void find_duplicate_complex_2()throws PersisterException, FinderException, SynchronizerException, NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException{
+        ComplexSynchronizer complexSynchronizer = (ComplexSynchronizer) this.synchronizer;
+
+        // creation of persistable complex1
+        IntactModelledParticipant intactModelledParticipant1 = IntactTestUtils.createIntactModelledParticipant();
+        intactModelledParticipant1.setInteractor(new IntactProtein("test protein1",
+                IntactTestUtils.createUniprotXref(InteractorXref.class,"UNIPROT_ID_1")));
+        List<IntactModelledParticipant> intactModelledParticipantList1 = new ArrayList<>();
+        intactModelledParticipantList1.add(intactModelledParticipant1);
+        IntactComplex persistableComplex1 = createComplexWithParticipants(intactModelledParticipantList1);
+        persistableComplex1.setShortName("persistable complex1");
+
+        // creation of common protein
+        IntactProtein commonProtein=new IntactProtein("test protein3",
+                IntactTestUtils.createUniprotXref(InteractorXref.class,"P12345"));
+
+        // creation of persistable complex2
+        IntactModelledParticipant intactModelledParticipant2 = IntactTestUtils.createIntactModelledParticipant();
+        intactModelledParticipant2.setInteractor(new IntactProtein("test protein2",
+                IntactTestUtils.createUniprotXref(InteractorXref.class,"P12346")));
+        intactModelledParticipant2.setStoichiometry(0);// we do not want to compare stoichiometry in this test
+
+        IntactModelledParticipant intactModelledParticipant3 = IntactTestUtils.createIntactModelledParticipant();
+        intactModelledParticipant3.setInteractor(commonProtein);
+        intactModelledParticipant3.setStoichiometry(0);
+
+        IntactModelledParticipant intactModelledParticipant4 = IntactTestUtils.createIntactModelledParticipant();
+        intactModelledParticipant4.setInteractor(new IntactNucleicAcid("test"));
+        intactModelledParticipant4.setStoichiometry(0);
+
+        //creating complex as an interactor
+        IntactModelledParticipant complexParticipant1 = IntactTestUtils.createIntactModelledParticipant();
+        complexParticipant1.setInteractor(commonProtein);
+
+        IntactModelledParticipant complexParticipant2 = IntactTestUtils.createIntactModelledParticipant();
+        complexParticipant2.setInteractor(new IntactProtein("test protein4",
+                IntactTestUtils.createUniprotXref(InteractorXref.class,"P12347")));
+
+        List<IntactModelledParticipant> complexParticipants = new ArrayList<>();
+        complexParticipants.add(complexParticipant1);
+        complexParticipants.add(complexParticipant2);
+        IntactComplex complexAsAnInteractor1 = createComplexWithParticipants(complexParticipants);
+        complexAsAnInteractor1.setShortName("complex as an interactor");
+        IntactModelledParticipant intactModelledParticipant5 = IntactTestUtils.createIntactModelledParticipant();
+        intactModelledParticipant5.setInteractor(complexAsAnInteractor1);
+        intactModelledParticipant5.setStoichiometry(0);
+
+        //creating pool as an interactor
+        IntactInteractorPool pool=IntactTestUtils.createEmptyIntactInteractorPool();
+        pool.setShortName("pool");
+        pool.add(commonProtein);
+
+        IntactModelledParticipant intactModelledParticipant6 = IntactTestUtils.createIntactModelledParticipant();
+        intactModelledParticipant6.setInteractor(pool);
+        intactModelledParticipant6.setStoichiometry(0);
+
+        List<IntactModelledParticipant> intactModelledParticipantList2 = new ArrayList<>();
+        intactModelledParticipantList2.add(intactModelledParticipant2);
+        intactModelledParticipantList2.add(intactModelledParticipant3);
+        intactModelledParticipantList2.add(intactModelledParticipant4);
+        intactModelledParticipantList2.add(intactModelledParticipant5);
+        intactModelledParticipantList2.add(intactModelledParticipant6);
+
+        IntactComplex persistableComplex2 = createComplexWithParticipants(intactModelledParticipantList2);
+        persistableComplex2.setShortName("persistable complex2");
+
+        complexSynchronizer.persist(persistableComplex1);
+        complexSynchronizer.persist(persistableComplex2);
+
+         //creation of new complex object
+
+        Complex newComplex = new DefaultComplex("complex_interactor", new DefaultCvTerm("protein complex"));
+        newComplex.setInteractionType(new DefaultCvTerm("phosphorylation"));
+        newComplex.addParticipant(new DefaultModelledParticipant(new DefaultProtein("test1 protein",
+                XrefUtils.createUniprotIdentity("P12345")),new DefaultStoichiometry(0)));
+        newComplex.addParticipant(new DefaultModelledParticipant(new DefaultProtein("test2 protein",
+                XrefUtils.createUniprotIdentity("P12347")),new DefaultStoichiometry(0)));
+        newComplex.addParticipant(new DefaultModelledParticipant(new DefaultProtein("test1 protein",
+                XrefUtils.createUniprotIdentity("P12346")),new DefaultStoichiometry(0)));
 
         this.synchronizer.clearCache();
         this.entityManager.flush();
-     //   complexSynchronizer.find(newObject1);
-        Assert.assertEquals(1,complexSynchronizer.findAllMatchingComplexAcs(newObject1).size());
+
+        Collection<IntactComplex> complexCollection=complexSynchronizer.findComplexesByProteins(newComplex);
+        Assert.assertEquals(1,complexCollection.size());
+        Assert.assertEquals("persistable complex2",complexCollection.iterator().next().getShortName());
+        Collection<String> duplicateAcs=complexSynchronizer.findAllMatchingComplexAcs(newComplex);
+        Assert.assertEquals(1,duplicateAcs.size());
+        Assert.assertEquals(persistableComplex2.getAc(),duplicateAcs.iterator().next());
 
     }
 
