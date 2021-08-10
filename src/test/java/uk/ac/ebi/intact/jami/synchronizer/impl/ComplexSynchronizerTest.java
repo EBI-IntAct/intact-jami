@@ -156,6 +156,7 @@ public class ComplexSynchronizerTest extends InteractorSynchronizerTemplateTest 
     @Test
     @DirtiesContext
     @Override
+    @Ignore
     public void test_find() throws PersisterException, FinderException, SynchronizerException, InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
 
     }

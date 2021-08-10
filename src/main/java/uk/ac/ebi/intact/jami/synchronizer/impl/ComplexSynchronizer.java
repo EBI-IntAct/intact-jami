@@ -4,7 +4,6 @@ import psidev.psi.mi.jami.listener.comparator.ComplexComparatorListener;
 import psidev.psi.mi.jami.listener.comparator.event.ComplexComparisonEvent;
 import psidev.psi.mi.jami.model.*;
 import psidev.psi.mi.jami.utils.AnnotationUtils;
-import psidev.psi.mi.jami.utils.CommonUtils;
 import psidev.psi.mi.jami.utils.CvTermUtils;
 import psidev.psi.mi.jami.utils.XrefUtils;
 import psidev.psi.mi.jami.utils.clone.InteractorCloner;
@@ -266,10 +265,13 @@ public class ComplexSynchronizer extends InteractorSynchronizerTemplate<Complex,
             query.setParameter("proteinIds", proteinIdList);
             query.setParameter("proteinSize", proteinIdList.size());
             List<Object> complexAcList = query.getResultList();
-
-            Query complexQuery = getEntityManager().createQuery("select distinct i from  IntactComplex i where i.ac in (:complexAcs)");
-            complexQuery.setParameter("complexAcs", complexAcList);
-            return complexQuery.getResultList();
+            if (complexAcList != null && !complexAcList.isEmpty()) {
+                Query complexQuery = getEntityManager().createQuery("select distinct i from  IntactComplex i where i.ac in (:complexAcs)");
+                complexQuery.setParameter("complexAcs", complexAcList);
+                return complexQuery.getResultList();
+            } else {
+                return Collections.EMPTY_LIST;
+            }
         } else {
             return Collections.EMPTY_LIST;
         }
@@ -690,89 +692,14 @@ public class ComplexSynchronizer extends InteractorSynchronizerTemplate<Complex,
         // try to fetch complexes using term proteins
         Collection<IntactComplex> results = findComplexesByProteins(term);
 
-        String termAc = CommonUtils.extractIntactAcFromIdentifier(term.getIdentifiers());
-        if (termAc != null) {
-            results.removeIf(x -> termAc.equals(x.getAc())); // removing mirror complex
+        if (term instanceof IntactComplex) {
+            String termAc = ((IntactComplex) term).getAc();
+            if (termAc != null) {
+                results.removeIf(x -> termAc.equals(x.getAc())); // removing mirror complex
+            }
         }
 
         return postFilterComplexes(term, results);
     }
 
-    protected Collection<IntactComplex> findComplexesByIdentifiers(Complex term, Collection<String> existingOrganisms, Collection<String> existingTypes) {
-        if (term.getIdentifiers().isEmpty()) {
-            return Collections.EMPTY_LIST;
-        }
-        Query query = null;
-        Collection<IntactComplex> totalInteractors = new HashSet<IntactComplex>();
-        // no organism for this interactor.
-        if (existingOrganisms.isEmpty()) {
-            for (Xref ref : term.getIdentifiers()) {
-                query = getEntityManager().createQuery("select i from " + getIntactClass().getSimpleName() + " i " +
-                        "join i.interactorType as t " +
-                        "where i.ac = :id " +
-                        "and i.organism is null " +
-                        "and t.ac in (:typeAc)");
-                query.setParameter("id", ref.getId());
-                query.setParameter("typeAc", existingTypes);
-                totalInteractors.addAll(query.getResultList());
-                {
-                    query = getEntityManager().createQuery("select distinct i from " + getIntactClass().getSimpleName() + " i " +
-                            "join i.dbXrefs as x " +
-                            "join x.database as d " +
-                            "join x.qualifier as q " +
-                            "join i.interactorType as t " +
-                            "where (q.shortName = :identity or q.shortName = :secondaryAc)" +
-                            "and d.shortName = :db " +
-                            "and x.id = :id " +
-                            "and t.ac in (:typeAc) " +
-                            "and i.organism is null");
-                    query.setParameter("identity", Xref.IDENTITY);
-                    query.setParameter("secondaryAc", Xref.SECONDARY);
-                    query.setParameter("db", ref.getDatabase().getShortName());
-                    query.setParameter("id", ref.getId());
-                    query.setParameter("typeAc", existingTypes);
-
-                    totalInteractors.addAll(query.getResultList());
-                }
-            }
-        }
-        // organism for this interactor
-        else {
-            for (Xref ref : term.getIdentifiers()) {
-                query = getEntityManager().createQuery("select i from " + getIntactClass().getSimpleName() + " i " +
-                        "join i.organism as o " +
-                        "join i.interactorType as t " +
-                        "where i.ac = :id " +
-                        "and t.ac in (:typeAc) " +
-                        "and o.ac in (:orgAc)");
-                query.setParameter("id", ref.getId());
-                query.setParameter("typeAc", existingTypes);
-                query.setParameter("orgAc", existingOrganisms);
-                totalInteractors.addAll(query.getResultList());
-                {
-                    query = getEntityManager().createQuery("select distinct i from " + getIntactClass().getSimpleName() + " i " +
-                            "join i.dbXrefs as x " +
-                            "join x.database as d " +
-                            "join x.qualifier as q " +
-                            "join i.organism as o " +
-                            "join i.interactorType as t " +
-                            "where (q.shortName = :identity or q.shortName = :secondaryAc)" +
-                            "and d.shortName = :db " +
-                            "and x.id = :id " +
-                            "and t.ac in (:typeAc) " +
-                            "and o.ac in (:orgAc)");
-                    query.setParameter("identity", Xref.IDENTITY);
-                    query.setParameter("secondaryAc", Xref.SECONDARY);
-                    query.setParameter("db", ref.getDatabase().getShortName());
-                    query.setParameter("id", ref.getId());
-                    query.setParameter("typeAc", existingTypes);
-                    query.setParameter("orgAc", existingOrganisms);
-
-                    totalInteractors.addAll(query.getResultList());
-                }
-            }
-        }
-
-        return totalInteractors;
-    }
 }
