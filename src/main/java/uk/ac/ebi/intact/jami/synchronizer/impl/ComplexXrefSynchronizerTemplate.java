@@ -28,9 +28,13 @@ public class ComplexXrefSynchronizerTemplate extends XrefSynchronizerTemplate<In
 
     private static final Log log = LogFactory.getLog(CvTermSynchronizer.class);
 
-    public ComplexXrefSynchronizerTemplate(SynchronizerContext context){
+    public ComplexXrefSynchronizerTemplate(SynchronizerContext context) {
         super(context, InteractorXref.class);
 
+    }
+
+    public ComplexXrefSynchronizerTemplate(SynchronizerContext context, Class<? extends InteractorXref> xrefClass) {
+        super(context, xrefClass);
     }
 
     @Override
@@ -45,14 +49,14 @@ public class ComplexXrefSynchronizerTemplate extends XrefSynchronizerTemplate<In
 
     public void synchronizeProperties(InteractorXref object) throws FinderException, PersisterException, SynchronizerException {
         super.synchronizeProperties(object);
-        if (object instanceof ComplexGOXref){
+        if (object instanceof ComplexGOXref) {
             // prepare ECO code
-            prepareEvidenceType((ComplexGOXref)object, true);
+            prepareEvidenceType((ComplexGOXref) object, true);
         }
     }
 
     protected void prepareEvidenceType(ComplexGOXref object, boolean enableSynchronization) throws FinderException, PersisterException, SynchronizerException {
-        if (object.getEvidenceType() != null){
+        if (object.getEvidenceType() != null) {
             CvTerm qualifier = object.getEvidenceType();
             object.setEvidenceType(enableSynchronization ?
                     getContext().getDatabaseSynchronizer().synchronize(qualifier, true) :
@@ -68,9 +72,9 @@ public class ComplexXrefSynchronizerTemplate extends XrefSynchronizerTemplate<In
     @Override
     protected void convertPersistableProperties(InteractorXref object) throws SynchronizerException, PersisterException, FinderException {
         super.convertPersistableProperties(object);
-        if (object instanceof ComplexGOXref){
+        if (object instanceof ComplexGOXref) {
             // prepare ECO code
-            prepareEvidenceType((ComplexGOXref)object, false);
+            prepareEvidenceType((ComplexGOXref) object, false);
         }
     }
 }

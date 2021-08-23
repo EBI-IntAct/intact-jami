@@ -17,8 +17,8 @@ import javax.validation.constraints.Size;
  * @since <pre>08/01/14</pre>
  */
 @Entity
-@DiscriminatorValue( "go" )
-public class ComplexGOXref extends InteractorXref{
+@DiscriminatorValue("go")
+public class ComplexGOXref extends InteractorXref {
 
     private CvTerm evidenceType;
     private String pubmed;
@@ -38,20 +38,24 @@ public class ComplexGOXref extends InteractorXref{
         super(IntactUtils.createMIDatabase(Xref.GO, Xref.GO_MI), id, version);
     }
 
+    public ComplexGOXref(CvTerm database, String id, String version, CvTerm qualifier) {
+        super(database, id, version, qualifier);
+    }
+
     public ComplexGOXref(String id) {
         super(IntactUtils.createMIDatabase(Xref.GO, Xref.GO_MI), id);
     }
 
     @Override
     public void setDatabase(CvTerm cvDatabase) {
-        if (cvDatabase != null && !CvTermUtils.isCvTerm(cvDatabase, Xref.GO_MI, Xref.GO)){
-           throw new IllegalArgumentException("A Complex GO cross reference can only have GO as a database.");
+        if (cvDatabase != null && !CvTermUtils.isCvTerm(cvDatabase, Xref.GO_MI, Xref.GO)) {
+            throw new IllegalArgumentException("A Complex GO cross reference can only have GO as a database.");
         }
         super.setDatabase(cvDatabase);
     }
 
     @ManyToOne(targetEntity = IntactCvTerm.class)
-    @JoinColumn( name = "evidencetype_ac" )
+    @JoinColumn(name = "evidencetype_ac")
     @Target(IntactCvTerm.class)
     public CvTerm getEvidenceType() {
         return evidenceType;
@@ -63,7 +67,7 @@ public class ComplexGOXref extends InteractorXref{
 
 
     @Column(name = "pubmed")
-    @Size( max = IntactUtils.MAX_ID_LEN )
+    @Size(max = IntactUtils.MAX_ID_LEN)
     public String getPubmed() {
         return pubmed;
     }

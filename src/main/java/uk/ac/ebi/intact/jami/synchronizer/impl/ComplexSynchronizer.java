@@ -1,10 +1,14 @@
 package uk.ac.ebi.intact.jami.synchronizer.impl;
 
+import psidev.psi.mi.jami.listener.comparator.ComplexComparatorListener;
+import psidev.psi.mi.jami.listener.comparator.event.ComplexComparisonEvent;
 import psidev.psi.mi.jami.model.*;
 import psidev.psi.mi.jami.utils.AnnotationUtils;
+import psidev.psi.mi.jami.utils.CvTermUtils;
 import psidev.psi.mi.jami.utils.XrefUtils;
 import psidev.psi.mi.jami.utils.clone.InteractorCloner;
 import psidev.psi.mi.jami.utils.comparator.CollectionComparator;
+import psidev.psi.mi.jami.utils.comparator.participant.ModelledComparableParticipantComparator;
 import uk.ac.ebi.intact.jami.context.SynchronizerContext;
 import uk.ac.ebi.intact.jami.merger.ComplexMergerEnrichOnly;
 import uk.ac.ebi.intact.jami.model.extension.*;
@@ -23,6 +27,7 @@ import uk.ac.ebi.intact.jami.utils.comparator.IntactModelledParticipantComparato
 import javax.persistence.Query;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Default synchronizer for complexes
@@ -38,11 +43,14 @@ import java.util.*;
 public class ComplexSynchronizer extends InteractorSynchronizerTemplate<Complex, IntactComplex> {
 
     private CollectionComparator<ModelledParticipant> participantsComparator;
+    private CollectionComparator<ModelledComparableParticipant> comparableParticipantsComparator;
     private ComplexExperimentBCSynchronizer experimentBCSynchronizer;
+    private ComplexComparatorListener complexComparatorListener;
 
     public ComplexSynchronizer(SynchronizerContext context) {
         super(context, IntactComplex.class);
         this.participantsComparator = new CollectionComparator<ModelledParticipant>(new IntactModelledParticipantComparator());
+        this.comparableParticipantsComparator = new CollectionComparator<ModelledComparableParticipant>(new ModelledComparableParticipantComparator());
         this.experimentBCSynchronizer = new ComplexExperimentBCSynchronizer(context);
     }
 
@@ -59,7 +67,7 @@ public class ComplexSynchronizer extends InteractorSynchronizerTemplate<Complex,
             if (term.getParticipants().isEmpty()) {
                 filteredResults.add(complex);
             }
-            // same participants but same complex_ac with different version to exclude the new versions as duplicates and allow then to be saved in the database
+            // for only intact complexes, same participants but same complex_ac with different version to exclude the new versions as duplicates and allow then to be saved in the database
             else if (this.participantsComparator.compare(term.getParticipants(), complex.getParticipants()) == 0) {
                 if (term instanceof IntactComplex) {
                     IntactComplex intactComplex = (IntactComplex) term;
@@ -70,6 +78,8 @@ public class ComplexSynchronizer extends InteractorSynchronizerTemplate<Complex,
                             filteredResults.add(complex);
                         }
                     }
+                } else {
+                    filteredResults.add(complex); // for the case of an xml complex
                 }
             }
         }
@@ -116,7 +126,7 @@ public class ComplexSynchronizer extends InteractorSynchronizerTemplate<Complex,
             if (term.getParticipants().isEmpty()) {
                 filteredResults.add(complex);
             }
-            // same participants but same complex_ac with different version to exclude the new versions as duplicates and allow then to be saved in the database
+            // for only intact complexes,same participants but same complex_ac with different version to exclude the new versions as duplicates and allow then to be saved in the database
             else if (this.participantsComparator.compare(term.getParticipants(), complex.getParticipants()) == 0) {
                 if (term instanceof IntactComplex) {
                     IntactComplex intactComplex = (IntactComplex) term;
@@ -127,6 +137,8 @@ public class ComplexSynchronizer extends InteractorSynchronizerTemplate<Complex,
                             filteredResults.add(complex);
                         }
                     }
+                } else {
+                    filteredResults.add(complex); // for the case of an xml complex
                 }
             }
         }
@@ -141,7 +153,7 @@ public class ComplexSynchronizer extends InteractorSynchronizerTemplate<Complex,
             if (term.getParticipants().isEmpty() && complex.getAc() != null) {
                 filteredResults.add(complex.getAc());
             }
-            // same participants but same complex_ac with different version to exclude the new versions as duplicates and allow then to be saved in the database
+            // for only intact complexes, same participants but same complex_ac with different version to exclude the new versions as duplicates and allow then to be saved in the database
             else if (this.participantsComparator.compare(term.getParticipants(), complex.getParticipants()) == 0) {
                 if (term instanceof IntactComplex) {
                     IntactComplex intactComplex = (IntactComplex) term;
@@ -152,7 +164,41 @@ public class ComplexSynchronizer extends InteractorSynchronizerTemplate<Complex,
                             filteredResults.add(complex.getAc());
                         }
                     }
+                } else {
+                    filteredResults.add(complex.getAc()); // for the case of an xml complex
                 }
+            }
+        }
+
+        return filteredResults;
+    }
+
+    protected Collection<String> postFilterComplexes(Complex term, Collection<IntactComplex> results) {
+        Collection<String> filteredResults = new HashSet<String>(results.size());
+        for (IntactComplex complex : results) {
+            // for only intact complexes, same participants but same complex_ac with different version to exclude the new versions as duplicates and allow then to be saved in the database
+            if (this.comparableParticipantsComparator.compare(term.getComparableParticipants(), complex.getComparableParticipants()) == 0) {
+                if (term instanceof IntactComplex) {
+                    IntactComplex intactComplex = (IntactComplex) term;
+                    if (intactComplex.getComplexAcXref() != null && complex.getComplexAcXref() != null) {
+                        if (!intactComplex.getComplexAcXref().getId().equalsIgnoreCase(complex.getComplexAcXref().getId())) {
+                            filteredResults.add(complex.getAc());
+                        } else if (intactComplex.getComplexAcXref().getVersion().equalsIgnoreCase(complex.getComplexAcXref().getVersion())) {
+                            filteredResults.add(complex.getAc());
+                        }
+                    }
+                } else {
+                    filteredResults.add(complex.getAc()); // for the case of an xml complex
+                }
+            } else if (this.complexComparatorListener != null) { // check if different only because of stoichiometry difference if the listener is listening
+                ModelledComparableParticipantComparator modelledComparableParticipantComparator = (ModelledComparableParticipantComparator) this.comparableParticipantsComparator.getObjectComparator();
+                modelledComparableParticipantComparator.setIgnoreStoichiometry(true);
+                if (this.comparableParticipantsComparator.compare(term.getComparableParticipants(), complex.getComparableParticipants()) == 0) {
+                    ComplexComparisonEvent complexComparisonEvent =
+                            new ComplexComparisonEvent(term, complex, ComplexComparisonEvent.EventType.ONLY_STOICHIOMETRY_DIFFERENT);
+                    this.complexComparatorListener.onDifferentValue(complexComparisonEvent);
+                }
+                modelledComparableParticipantComparator.setIgnoreStoichiometry(false);
             }
         }
 
@@ -182,6 +228,53 @@ public class ComplexSynchronizer extends InteractorSynchronizerTemplate<Complex,
             query.setParameter("typeAc", existingTypes);
         }
         return query.getResultList();
+    }
+
+    protected Collection<IntactComplex> findComplexesByProteins(Complex term) {
+        Query query;
+        if (term.getComparableParticipants() != null && !term.getComparableParticipants().isEmpty()) {
+            List<String> proteinIdList =
+                    term.getComparableParticipants().stream()
+                            .map(ModelledComparableParticipant::getProteinId)
+                            .collect(Collectors.toList());
+
+
+            query = getEntityManager().createNativeQuery("select cpx.ac as complex_ac from ia_interactor cpx join " +
+                    "ia_component part on part.interaction_ac=cpx.ac " +
+                    "join ia_interactor itor on (itor.ac=part.interactor_ac and itor.category in ('protein','interactor_pool','complex')) " +
+                    "" +
+                    "left outer join ia_interactor itorProtein on (itorProtein.ac=itor.ac and itor.category in ('protein')) " +
+                    "left outer join ia_interactor_xref itorProteinXref on (itorProteinXref.parent_ac=itorProtein.ac and " +
+                    "                         (itorProteinXref.primaryid in (:proteinIds))) " +
+                    "" +
+                    "left outer join ia_component itorPart on itorPart.interaction_ac=itor.ac " +
+                    "left outer join ia_interactor itorCpx on (itorCpx.ac=itorPart.interactor_ac and itorCpx.category in ('protein')) " +
+                    "left outer join ia_interactor_xref itorCpxXref on (itorCpxXref.parent_ac=itorCpx.ac and " +
+                    "                         (itorCpxXref.primaryid in (:proteinIds))) " +
+                    "" +
+                    "left outer join ia_pool2interactor itorPool on itorPool.interactor_pool_ac=itor.ac " +
+                    "left outer join ia_interactor itorSet on (itorSet.ac=itorPool.interactor_ac and itorSet.category in ('protein')) " +
+                    "left outer join ia_interactor_xref itorSetXref on (itorSetXref.parent_ac=itorSet.ac and " +
+                    "                         (itorSetXref.primaryid in (:proteinIds))) " +
+                    "" +
+                    "where cpx.category='complex' " +
+                    "group by cpx.ac " +
+                    "having (count(distinct concat(itorProtein.ac,concat(itorCpx.ac,itorSet.ac)))=:proteinSize " +
+                    "and count(distinct concat(itorProteinXref.primaryid,concat(itorCpxXref.primaryid,itorSetXref.primaryid)))=:proteinSize)");
+
+            query.setParameter("proteinIds", proteinIdList);
+            query.setParameter("proteinSize", proteinIdList.size());
+            List<Object> complexAcList = query.getResultList();
+            if (complexAcList != null && !complexAcList.isEmpty()) {
+                Query complexQuery = getEntityManager().createQuery("select distinct i from  IntactComplex i where i.ac in (:complexAcs)");
+                complexQuery.setParameter("complexAcs", complexAcList);
+                return complexQuery.getResultList();
+            } else {
+                return Collections.EMPTY_LIST;
+            }
+        } else {
+            return Collections.EMPTY_LIST;
+        }
     }
 
     @Override
@@ -231,11 +324,20 @@ public class ComplexSynchronizer extends InteractorSynchronizerTemplate<Complex,
         if (intactInteractor.areXrefsInitialized()) {
             List<Xref> xrefsToPersist = new ArrayList<Xref>(intactInteractor.getDbXrefs());
             Set<Xref> goReferences = new TreeSet<Xref>(new IntactComplexGoXrefComparator());
+            Xref cvXref = null;
             for (Xref xref : xrefsToPersist) {
-                // do not persist or merge xrefs because of cascades
-                Xref cvXref = enableSynchronization ?
-                        getContext().getComplexXrefSynchronizer().synchronize(xref, false) :
-                        getContext().getComplexXrefSynchronizer().convertToPersistentObject(xref);
+                // check if goxrefs
+                if (CvTermUtils.isCvTerm(xref.getDatabase(), Xref.GO_MI, Xref.GO)) {
+                    // do not persist or merge xrefs because of cascades
+                    cvXref = enableSynchronization ?
+                            getContext().getComplexGOXrefSynchronizer().synchronize(xref, false) :
+                            getContext().getComplexGOXrefSynchronizer().convertToPersistentObject(xref);
+                } else {
+                    // do not persist or merge xrefs because of cascades
+                    cvXref = enableSynchronization ?
+                            getContext().getComplexXrefSynchronizer().synchronize(xref, false) :
+                            getContext().getComplexXrefSynchronizer().convertToPersistentObject(xref);
+                }
                 // we have a different instance because needed to be synchronized
                 if (cvXref != xref) {
                     intactInteractor.getDbXrefs().remove(xref);
@@ -572,4 +674,32 @@ public class ComplexSynchronizer extends InteractorSynchronizerTemplate<Complex,
         super.clearCache();
         this.experimentBCSynchronizer.clearCache();
     }
+
+    public ComplexComparatorListener getComplexComparatorListener() {
+        return complexComparatorListener;
+    }
+
+    public void setComplexComparatorListener(ComplexComparatorListener complexComparatorListener) {
+        this.complexComparatorListener = complexComparatorListener;
+    }
+
+    public Collection<String> findAllMatchingComplexAcs(Complex term) {
+        Query query;
+        if (term == null) {
+            return Collections.EMPTY_LIST;
+        }
+
+        // try to fetch complexes using term proteins
+        Collection<IntactComplex> results = findComplexesByProteins(term);
+
+        if (term instanceof IntactComplex) {
+            String termAc = ((IntactComplex) term).getAc();
+            if (termAc != null) {
+                results.removeIf(x -> termAc.equals(x.getAc())); // removing mirror complex
+            }
+        }
+
+        return postFilterComplexes(term, results);
+    }
+
 }

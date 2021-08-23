@@ -19,7 +19,7 @@ import javax.persistence.EntityManager;
 
 /**
  * Context for synchronizers.
- *
+ * <p>
  * It provides all default synchronizers
  *
  * @author Marine Dumousseau (marine@ebi.ac.uk)
@@ -31,6 +31,7 @@ public interface SynchronizerContext {
 
     /**
      * The entity manager associated with this context. It cannot be null
+     *
      * @return The entity manager
      */
     public EntityManager getEntityManager();
@@ -133,6 +134,8 @@ public interface SynchronizerContext {
     public XrefSynchronizer<InteractorXref> getInteractorXrefSynchronizer();
 
     public XrefSynchronizer<InteractorXref> getComplexXrefSynchronizer();
+
+    public XrefSynchronizer<InteractorXref> getComplexGOXrefSynchronizer();
 
     public XrefSynchronizer<FeatureEvidenceXref> getFeatureEvidenceXrefSynchronizer();
 

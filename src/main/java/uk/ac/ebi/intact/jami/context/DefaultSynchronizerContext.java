@@ -16,7 +16,6 @@ import uk.ac.ebi.intact.jami.model.user.Preference;
 import uk.ac.ebi.intact.jami.model.user.Role;
 import uk.ac.ebi.intact.jami.model.user.User;
 import uk.ac.ebi.intact.jami.synchronizer.*;
-import uk.ac.ebi.intact.jami.synchronizer.IntactExperimentSynchronizer;
 import uk.ac.ebi.intact.jami.synchronizer.impl.*;
 import uk.ac.ebi.intact.jami.synchronizer.listener.DbSynchronizerListener;
 import uk.ac.ebi.intact.jami.utils.IntactUtils;
@@ -149,23 +148,26 @@ public class DefaultSynchronizerContext implements SynchronizerContext {
     // complex xref synchronizer
     private XrefSynchronizer<InteractorXref> complexXrefSynchronizer;
 
-    // db info snchronizer
-    private IntactDbSynchronizer<DbInfo,DbInfo> dbInfoSynchronizer;
-    // application synchronizer
-    private IntactDbSynchronizer<Application,Application> applicationSynchronizer;
-    // application property synchronizer
-    private IntactDbSynchronizer<ApplicationProperty,ApplicationProperty> applicationPropertySynchronizer;
+    // complex go xref synchronizer
+    private XrefSynchronizer<InteractorXref> complexGOXrefSynchronizer;
 
-    public DefaultSynchronizerContext(EntityManager entityManager){
-        if (entityManager == null){
+    // db info snchronizer
+    private IntactDbSynchronizer<DbInfo, DbInfo> dbInfoSynchronizer;
+    // application synchronizer
+    private IntactDbSynchronizer<Application, Application> applicationSynchronizer;
+    // application property synchronizer
+    private IntactDbSynchronizer<ApplicationProperty, ApplicationProperty> applicationPropertySynchronizer;
+
+    public DefaultSynchronizerContext(EntityManager entityManager) {
+        if (entityManager == null) {
             throw new IllegalArgumentException("Entity manager cannot be null in an IntAct database synchronizer context");
         }
         this.entityManager = entityManager;
         this.userContext = ApplicationContextProvider.getBean("jamiUserContext");
     }
 
-    public DefaultSynchronizerContext(EntityManager entityManager, UserContext context){
-        if (entityManager == null){
+    public DefaultSynchronizerContext(EntityManager entityManager, UserContext context) {
+        if (entityManager == null) {
             throw new IllegalArgumentException("Entity manager cannot be null in an IntAct database synchronizer context");
         }
         this.entityManager = entityManager;
@@ -177,7 +179,7 @@ public class DefaultSynchronizerContext implements SynchronizerContext {
     }
 
     public IntactCvSynchronizer getDatabaseSynchronizer() {
-        if (this.databaseSynchronizer == null){
+        if (this.databaseSynchronizer == null) {
             this.databaseSynchronizer = new CvTermSynchronizer(this, IntactUtils.DATABASE_OBJCLASS);
             this.databaseSynchronizer.setListener(this.listener);
         }
@@ -185,7 +187,7 @@ public class DefaultSynchronizerContext implements SynchronizerContext {
     }
 
     public IntactCvSynchronizer getQualifierSynchronizer() {
-        if (this.qualifierSynchronizer == null){
+        if (this.qualifierSynchronizer == null) {
             this.qualifierSynchronizer = new CvTermSynchronizer(this, IntactUtils.QUALIFIER_OBJCLASS);
             this.qualifierSynchronizer.setListener(this.listener);
         }
@@ -193,7 +195,7 @@ public class DefaultSynchronizerContext implements SynchronizerContext {
     }
 
     public IntactCvSynchronizer getTopicSynchronizer() {
-        if (this.topicSynchronizer == null){
+        if (this.topicSynchronizer == null) {
             this.topicSynchronizer = new CvTermSynchronizer(this, IntactUtils.TOPIC_OBJCLASS);
             this.topicSynchronizer.setListener(this.listener);
         }
@@ -201,7 +203,7 @@ public class DefaultSynchronizerContext implements SynchronizerContext {
     }
 
     public IntactCvSynchronizer getAliasTypeSynchronizer() {
-        if (this.aliasTypeSynchronizer == null){
+        if (this.aliasTypeSynchronizer == null) {
             this.aliasTypeSynchronizer = new CvTermSynchronizer(this, IntactUtils.ALIAS_TYPE_OBJCLASS);
             this.aliasTypeSynchronizer.setListener(this.listener);
         }
@@ -209,7 +211,7 @@ public class DefaultSynchronizerContext implements SynchronizerContext {
     }
 
     public IntactCvSynchronizer getUnitSynchronizer() {
-        if (this.unitSynchronizer == null){
+        if (this.unitSynchronizer == null) {
             this.unitSynchronizer = new CvTermSynchronizer(this, IntactUtils.UNIT_OBJCLASS);
             this.unitSynchronizer.setListener(this.listener);
         }
@@ -217,7 +219,7 @@ public class DefaultSynchronizerContext implements SynchronizerContext {
     }
 
     public IntactCvSynchronizer getFeatureTypeSynchronizer() {
-        if (this.featureTypeSynchronizer == null){
+        if (this.featureTypeSynchronizer == null) {
             this.featureTypeSynchronizer = new CvTermSynchronizer(this, IntactUtils.FEATURE_TYPE_OBJCLASS);
             this.featureTypeSynchronizer.setListener(listener);
         }
@@ -225,7 +227,7 @@ public class DefaultSynchronizerContext implements SynchronizerContext {
     }
 
     public IntactCvSynchronizer getExperimentalRoleSynchronizer() {
-        if (this.experimentalRoleSynchronizer == null){
+        if (this.experimentalRoleSynchronizer == null) {
             this.experimentalRoleSynchronizer = new CvTermSynchronizer(this, IntactUtils.EXPERIMENTAL_ROLE_OBJCLASS);
             this.experimentalRoleSynchronizer.setListener(listener);
         }
@@ -233,7 +235,7 @@ public class DefaultSynchronizerContext implements SynchronizerContext {
     }
 
     public IntactCvSynchronizer getBiologicalRoleSynchronizer() {
-        if (this.biologicalRoleSynchronizer == null){
+        if (this.biologicalRoleSynchronizer == null) {
             this.biologicalRoleSynchronizer = new CvTermSynchronizer(this, IntactUtils.BIOLOGICAL_ROLE_OBJCLASS);
             this.biologicalRoleSynchronizer.setListener(listener);
         }
@@ -241,7 +243,7 @@ public class DefaultSynchronizerContext implements SynchronizerContext {
     }
 
     public IntactCvSynchronizer getInteractionDetectionMethodSynchronizer() {
-        if (this.interactionDetectionMethodSynchronizer == null){
+        if (this.interactionDetectionMethodSynchronizer == null) {
             this.interactionDetectionMethodSynchronizer = new CvTermSynchronizer(this, IntactUtils.INTERACTION_DETECTION_METHOD_OBJCLASS);
             this.interactionDetectionMethodSynchronizer.setListener(listener);
         }
@@ -249,7 +251,7 @@ public class DefaultSynchronizerContext implements SynchronizerContext {
     }
 
     public IntactCvSynchronizer getInteractionTypeSynchronizer() {
-        if (this.interactionTypeSynchronizer == null){
+        if (this.interactionTypeSynchronizer == null) {
             this.interactionTypeSynchronizer = new CvTermSynchronizer(this, IntactUtils.INTERACTION_TYPE_OBJCLASS);
             this.interactionTypeSynchronizer.setListener(listener);
         }
@@ -257,7 +259,7 @@ public class DefaultSynchronizerContext implements SynchronizerContext {
     }
 
     public IntactCvSynchronizer getParticipantDetectionMethodSynchronizer() {
-        if (this.participantDetectionMethodSynchronizer == null){
+        if (this.participantDetectionMethodSynchronizer == null) {
             this.participantDetectionMethodSynchronizer = new CvTermSynchronizer(this, IntactUtils.PARTICIPANT_DETECTION_METHOD_OBJCLASS);
             this.participantDetectionMethodSynchronizer.setListener(listener);
         }
@@ -265,7 +267,7 @@ public class DefaultSynchronizerContext implements SynchronizerContext {
     }
 
     public IntactCvSynchronizer getExperimentalPreparationSynchronizer() {
-        if (this.experimentalPreparationSynchronizer == null){
+        if (this.experimentalPreparationSynchronizer == null) {
             this.experimentalPreparationSynchronizer = new CvTermSynchronizer(this, IntactUtils.PARTICIPANT_EXPERIMENTAL_PREPARATION_OBJCLASS);
             this.experimentalPreparationSynchronizer.setListener(listener);
         }
@@ -273,7 +275,7 @@ public class DefaultSynchronizerContext implements SynchronizerContext {
     }
 
     public IntactCvSynchronizer getInteractorTypeSynchronizer() {
-        if (this.interactorTypeSynchronizer == null){
+        if (this.interactorTypeSynchronizer == null) {
             this.interactorTypeSynchronizer = new CvTermSynchronizer(this, IntactUtils.INTERACTOR_TYPE_OBJCLASS);
             this.interactorTypeSynchronizer.setListener(listener);
         }
@@ -281,7 +283,7 @@ public class DefaultSynchronizerContext implements SynchronizerContext {
     }
 
     public IntactCvSynchronizer getRangeStatusSynchronizer() {
-        if (this.rangeStatusSynchronizer == null){
+        if (this.rangeStatusSynchronizer == null) {
             this.rangeStatusSynchronizer = new CvTermSynchronizer(this, IntactUtils.RANGE_STATUS_OBJCLASS);
             this.rangeStatusSynchronizer.setListener(listener);
         }
@@ -289,7 +291,7 @@ public class DefaultSynchronizerContext implements SynchronizerContext {
     }
 
     public IntactCvSynchronizer getConfidenceTypeSynchronizer() {
-        if (this.confidenceTypeSynchronizer == null){
+        if (this.confidenceTypeSynchronizer == null) {
             this.confidenceTypeSynchronizer = new CvTermSynchronizer(this, IntactUtils.CONFIDENCE_TYPE_OBJCLASS);
             this.confidenceTypeSynchronizer.setListener(listener);
         }
@@ -297,7 +299,7 @@ public class DefaultSynchronizerContext implements SynchronizerContext {
     }
 
     public IntactCvSynchronizer getParameterTypeSynchronizer() {
-        if (this.parameterTypeSynchronizer == null){
+        if (this.parameterTypeSynchronizer == null) {
             this.parameterTypeSynchronizer = new CvTermSynchronizer(this, IntactUtils.PARAMETER_TYPE_OBJCLASS);
             this.parameterTypeSynchronizer.setListener(listener);
         }
@@ -305,7 +307,7 @@ public class DefaultSynchronizerContext implements SynchronizerContext {
     }
 
     public IntactCvSynchronizer getCellTypeSynchronizer() {
-        if (this.cellTypeSynchronizer == null){
+        if (this.cellTypeSynchronizer == null) {
             this.cellTypeSynchronizer = new CvTermSynchronizer(this, IntactUtils.CELL_TYPE_OBJCLASS);
             this.cellTypeSynchronizer.setListener(listener);
         }
@@ -313,7 +315,7 @@ public class DefaultSynchronizerContext implements SynchronizerContext {
     }
 
     public IntactCvSynchronizer getTissueSynchronizer() {
-        if (this.tissueSynchronizer == null){
+        if (this.tissueSynchronizer == null) {
             this.tissueSynchronizer = new CvTermSynchronizer(this, IntactUtils.TISSUE_OBJCLASS);
             this.tissueSynchronizer.setListener(listener);
         }
@@ -321,7 +323,7 @@ public class DefaultSynchronizerContext implements SynchronizerContext {
     }
 
     public IntactCvSynchronizer getFeatureDetectionMethodSynchronizer() {
-        if (this.featureDetectionMethodSynchronizer == null){
+        if (this.featureDetectionMethodSynchronizer == null) {
             this.featureDetectionMethodSynchronizer = new CvTermSynchronizer(this, IntactUtils.FEATURE_METHOD_OBJCLASS);
             this.featureDetectionMethodSynchronizer.setListener(listener);
         }
@@ -329,7 +331,7 @@ public class DefaultSynchronizerContext implements SynchronizerContext {
     }
 
     public IntactCvSynchronizer getLifecycleStatusSynchronizer() {
-        if (this.lifecycleStatusSynchronizer == null){
+        if (this.lifecycleStatusSynchronizer == null) {
             this.lifecycleStatusSynchronizer = new CvTermSynchronizer(this, IntactUtils.PUBLICATION_STATUS_OBJCLASS);
             this.lifecycleStatusSynchronizer.setListener(listener);
         }
@@ -337,7 +339,7 @@ public class DefaultSynchronizerContext implements SynchronizerContext {
     }
 
     public IntactCvSynchronizer getLifecycleEventSynchronizer() {
-        if (this.lifecycleEventSynchronizer == null){
+        if (this.lifecycleEventSynchronizer == null) {
             this.lifecycleEventSynchronizer = new CvTermSynchronizer(this, IntactUtils.LIFECYCLE_EVENT_OBJCLASS);
             this.lifecycleEventSynchronizer.setListener(listener);
         }
@@ -399,7 +401,7 @@ public class DefaultSynchronizerContext implements SynchronizerContext {
     }
 
     public IntactSourceSynchronizer getSourceSynchronizer() {
-        if (this.sourceSynchronizer == null){
+        if (this.sourceSynchronizer == null) {
             this.sourceSynchronizer = new SourceSynchronizer(this);
             this.sourceSynchronizer.setListener(listener);
         }
@@ -575,15 +577,15 @@ public class DefaultSynchronizerContext implements SynchronizerContext {
     }
 
     public CooperativeEffectSynchronizer<CooperativeEffect, AbstractIntactCooperativeEffect> getCooperativeEffectSynchronizer() {
-        if (this.cooperativeEffectSynchronizer == null){
-           this.cooperativeEffectSynchronizer = new CompositeCooperativeEffectSynchronizer(this);
+        if (this.cooperativeEffectSynchronizer == null) {
+            this.cooperativeEffectSynchronizer = new CompositeCooperativeEffectSynchronizer(this);
             this.cooperativeEffectSynchronizer.setListener(listener);
         }
         return cooperativeEffectSynchronizer;
     }
 
     public CooperativeEffectSynchronizer<Preassembly, IntactPreassembly> getPreAssemblySynchronizer() {
-        if (this.preAssemblySynchronizer == null){
+        if (this.preAssemblySynchronizer == null) {
             this.preAssemblySynchronizer = new CooperativeEffectSynchronizerTemplate(this, IntactPreassembly.class);
             this.preAssemblySynchronizer.setListener(listener);
         }
@@ -591,7 +593,7 @@ public class DefaultSynchronizerContext implements SynchronizerContext {
     }
 
     public CooperativeEffectSynchronizer<Allostery, AbstractIntactAllostery> getAllosterySynchronizer() {
-        if (this.allosterySynchronizer == null){
+        if (this.allosterySynchronizer == null) {
             this.allosterySynchronizer = new AllosterySynchronizer(this);
             this.allosterySynchronizer.setListener(listener);
         }
@@ -599,15 +601,15 @@ public class DefaultSynchronizerContext implements SynchronizerContext {
     }
 
     public InteractorSynchronizer<Complex, IntactComplex> getComplexSynchronizer() {
-        if (this.complexSynchronizer == null){
-           this.complexSynchronizer = new ComplexSynchronizer(this);
+        if (this.complexSynchronizer == null) {
+            this.complexSynchronizer = new ComplexSynchronizer(this);
             this.complexSynchronizer.setListener(listener);
         }
         return this.complexSynchronizer;
     }
 
     public InteractorSynchronizer<Interactor, IntactInteractor> getInteractorSynchronizer() {
-        if (this.interactorSynchronizer == null){
+        if (this.interactorSynchronizer == null) {
             this.interactorSynchronizer = new CompositeInteractorSynchronizer(this);
             this.interactorSynchronizer.setListener(listener);
         }
@@ -651,7 +653,7 @@ public class DefaultSynchronizerContext implements SynchronizerContext {
     }
 
     public InteractorSynchronizer<InteractorPool, IntactInteractorPool> getInteractorPoolSynchronizer() {
-        if (this.interactorPoolSynchronizer == null){
+        if (this.interactorPoolSynchronizer == null) {
             this.interactorPoolSynchronizer = new InteractorPoolSynchronizer(this);
             this.interactorPoolSynchronizer.setListener(listener);
         }
@@ -696,13 +698,13 @@ public class DefaultSynchronizerContext implements SynchronizerContext {
         return this.confidenceSynchronizer;
     }
 
-    public ParameterSynchronizer<Parameter, InteractionEvidenceParameter> getInteractionParameterSynchronizer(){
+    public ParameterSynchronizer<Parameter, InteractionEvidenceParameter> getInteractionParameterSynchronizer() {
         initialiseParameterTemplateIfNotDone();
         this.parameterSynchronizer.setIntactClass(InteractionEvidenceParameter.class);
         return this.parameterSynchronizer;
     }
 
-    public ParameterSynchronizer<Parameter, ParticipantEvidenceParameter> getParticipantEvidenceParameterSynchronizer(){
+    public ParameterSynchronizer<Parameter, ParticipantEvidenceParameter> getParticipantEvidenceParameterSynchronizer() {
         initialiseParameterTemplateIfNotDone();
         this.parameterSynchronizer.setIntactClass(ParticipantEvidenceParameter.class);
         return this.parameterSynchronizer;
@@ -721,7 +723,7 @@ public class DefaultSynchronizerContext implements SynchronizerContext {
     }
 
     public IntactDbSynchronizer<Organism, IntactOrganism> getOrganismSynchronizer() {
-        if (this.organismSynchronizer == null){
+        if (this.organismSynchronizer == null) {
             this.organismSynchronizer = new OrganismSynchronizer(this);
             this.organismSynchronizer.setListener(listener);
         }
@@ -729,7 +731,7 @@ public class DefaultSynchronizerContext implements SynchronizerContext {
     }
 
     public <I extends AbstractIntactRange> IntactDbSynchronizer<Range, I> getRangeSynchronizer(Class<I> intactClass) {
-        if (this.rangeSynchronizer == null){
+        if (this.rangeSynchronizer == null) {
             this.rangeSynchronizer = new RangeSynchronizerTemplate(this, AbstractIntactRange.class);
             this.rangeSynchronizer.setListener(listener);
         }
@@ -738,7 +740,7 @@ public class DefaultSynchronizerContext implements SynchronizerContext {
     }
 
     public IntactDbSynchronizer<Range, ModelledRange> getModelledRangeSynchronizer() {
-        if (this.modelledRangeSynchronizer == null){
+        if (this.modelledRangeSynchronizer == null) {
             this.modelledRangeSynchronizer = new ModelledRangeSynchronizer(this);
             this.modelledRangeSynchronizer.setListener(listener);
         }
@@ -746,7 +748,7 @@ public class DefaultSynchronizerContext implements SynchronizerContext {
     }
 
     public IntactDbSynchronizer<Range, ExperimentalRange> getExperimentalRangeSynchronizer() {
-        if (this.experimentalRangeSynchronizer == null){
+        if (this.experimentalRangeSynchronizer == null) {
             this.experimentalRangeSynchronizer = new ExperimentalRangeSynchronizer(this);
             this.experimentalRangeSynchronizer.setListener(listener);
         }
@@ -754,7 +756,7 @@ public class DefaultSynchronizerContext implements SynchronizerContext {
     }
 
     public IntactDbSynchronizer<Preference, Preference> getPreferenceSynchronizer() {
-        if (this.preferenceSynchronizer == null){
+        if (this.preferenceSynchronizer == null) {
             this.preferenceSynchronizer = new PreferenceSynchronizer(this);
             this.preferenceSynchronizer.setListener(listener);
         }
@@ -762,7 +764,7 @@ public class DefaultSynchronizerContext implements SynchronizerContext {
     }
 
     public IntactDbSynchronizer<Role, Role> getRoleSynchronizer() {
-        if (this.roleSynchronizer == null){
+        if (this.roleSynchronizer == null) {
             this.roleSynchronizer = new RoleSynchronizer(this);
             this.roleSynchronizer.setListener(listener);
         }
@@ -770,18 +772,17 @@ public class DefaultSynchronizerContext implements SynchronizerContext {
     }
 
     public IntactDbSynchronizer<User, User> getUserSynchronizer() {
-        if (this.userSynchronizer == null){
+        if (this.userSynchronizer == null) {
             this.userSynchronizer = new UserSynchronizer(this);
             this.userSynchronizer.setListener(listener);
-        }
-        else{
+        } else {
             this.userSynchronizer.setIntactMerger(new UserMergerEnrichOnly());
         }
         return userSynchronizer;
     }
 
     public IntactDbSynchronizer<User, User> getUserReadOnlySynchronizer() {
-        if (this.userSynchronizer == null){
+        if (this.userSynchronizer == null) {
             this.userSynchronizer = new UserSynchronizer(this);
             this.userSynchronizer.setListener(listener);
         }
@@ -790,7 +791,7 @@ public class DefaultSynchronizerContext implements SynchronizerContext {
     }
 
     public IntactPublicationSynchronizer getPublicationSynchronizer() {
-        if (this.publicationSynchronizer == null){
+        if (this.publicationSynchronizer == null) {
             this.publicationSynchronizer = new PublicationSynchronizer(this);
             this.publicationSynchronizer.setListener(listener);
         }
@@ -798,7 +799,7 @@ public class DefaultSynchronizerContext implements SynchronizerContext {
     }
 
     public IntactExperimentSynchronizer getExperimentSynchronizer() {
-        if (this.experimentSynchronizer == null){
+        if (this.experimentSynchronizer == null) {
             this.experimentSynchronizer = new uk.ac.ebi.intact.jami.synchronizer.impl.ExperimentSynchronizer(this);
             this.experimentSynchronizer.setListener(listener);
         }
@@ -806,7 +807,7 @@ public class DefaultSynchronizerContext implements SynchronizerContext {
     }
 
     public IntactInteractionSynchronizer getInteractionSynchronizer() {
-        if (this.interactionEvidenceSynchronizer == null){
+        if (this.interactionEvidenceSynchronizer == null) {
             this.interactionEvidenceSynchronizer = new InteractionEvidenceSynchronizer(this);
             this.interactionEvidenceSynchronizer.setListener(listener);
         }
@@ -814,7 +815,7 @@ public class DefaultSynchronizerContext implements SynchronizerContext {
     }
 
     public IntactDbSynchronizer<CooperativityEvidence, IntactCooperativityEvidence> getCooperativityEvidenceSynchronizer() {
-        if (this.cooperativityEvidenceSynchronizer == null){
+        if (this.cooperativityEvidenceSynchronizer == null) {
             this.cooperativityEvidenceSynchronizer = new CooperativityEvidenceSynchronizer(this);
             this.cooperativityEvidenceSynchronizer.setListener(listener);
         }
@@ -833,8 +834,8 @@ public class DefaultSynchronizerContext implements SynchronizerContext {
         return this.lifecycleSynchronizer;
     }
 
-    public IntactDbSynchronizer<Feature, AbstractIntactFeature> getFeatureSynchronizer(){
-        if (this.featureSynchronizer == null){
+    public IntactDbSynchronizer<Feature, AbstractIntactFeature> getFeatureSynchronizer() {
+        if (this.featureSynchronizer == null) {
             this.featureSynchronizer = new CompositeFeatureSynchronizer(this);
             this.featureSynchronizer.setListener(listener);
         }
@@ -842,7 +843,7 @@ public class DefaultSynchronizerContext implements SynchronizerContext {
     }
 
     public IntactDbSynchronizer<FeatureEvidence, IntactFeatureEvidence> getFeatureEvidenceSynchronizer() {
-        if (this.featureEvidenceSynchronizer == null){
+        if (this.featureEvidenceSynchronizer == null) {
             this.featureEvidenceSynchronizer = new FeatureEvidenceSynchronizer(this);
             this.featureEvidenceSynchronizer.setListener(listener);
         }
@@ -850,7 +851,7 @@ public class DefaultSynchronizerContext implements SynchronizerContext {
     }
 
     public IntactDbSynchronizer<ModelledFeature, IntactModelledFeature> getModelledFeatureSynchronizer() {
-        if (this.modelledFeatureSynchronizer == null){
+        if (this.modelledFeatureSynchronizer == null) {
             this.modelledFeatureSynchronizer = new ModelledFeatureSynchronizer(this);
             this.modelledFeatureSynchronizer.setListener(listener);
         }
@@ -858,7 +859,7 @@ public class DefaultSynchronizerContext implements SynchronizerContext {
     }
 
     public IntactDbSynchronizer<VariableParameter, IntactVariableParameter> getVariableParameterSynchronizer() {
-        if (this.variableParameterSynchronizer == null){
+        if (this.variableParameterSynchronizer == null) {
             this.variableParameterSynchronizer = new VariableParameterSynchronizer(this);
             this.variableParameterSynchronizer.setListener(listener);
         }
@@ -866,15 +867,15 @@ public class DefaultSynchronizerContext implements SynchronizerContext {
     }
 
     public IntactDbSynchronizer<VariableParameterValue, IntactVariableParameterValue> getVariableParameterValueSynchronizer() {
-        if (this.variableParameterValueSynchronizer == null){
-           this.variableParameterValueSynchronizer = new VariableParameterValueSynchronizer(this);
+        if (this.variableParameterValueSynchronizer == null) {
+            this.variableParameterValueSynchronizer = new VariableParameterValueSynchronizer(this);
             this.variableParameterValueSynchronizer.setListener(listener);
         }
         return variableParameterValueSynchronizer;
     }
 
     public IntactDbSynchronizer<VariableParameterValueSet, IntactVariableParameterValueSet> getVariableParameterValueSetSynchronizer() {
-        if (this.variableParameterValueSetSynchronizer == null){
+        if (this.variableParameterValueSetSynchronizer == null) {
             this.variableParameterValueSetSynchronizer = new VariableParameterValueSetSynchronizer(this);
             this.variableParameterValueSetSynchronizer.setListener(listener);
         }
@@ -882,7 +883,7 @@ public class DefaultSynchronizerContext implements SynchronizerContext {
     }
 
     public ParticipantSynchronizer<Participant, AbstractIntactParticipant> getParticipantSynchronizer() {
-        if (this.participantSynchronizer == null){
+        if (this.participantSynchronizer == null) {
             this.participantSynchronizer = new CompositeParticipantSynchronizer(this);
             this.participantSynchronizer.setListener(listener);
         }
@@ -890,7 +891,7 @@ public class DefaultSynchronizerContext implements SynchronizerContext {
     }
 
     public ParticipantSynchronizer<ModelledParticipant, IntactModelledParticipant> getModelledParticipantSynchronizer() {
-        if (this.modelledParticipantSynchronizer == null){
+        if (this.modelledParticipantSynchronizer == null) {
             this.modelledParticipantSynchronizer = new ModelledParticipantSynchronizer(this);
             this.modelledParticipantSynchronizer.setListener(listener);
         }
@@ -898,8 +899,8 @@ public class DefaultSynchronizerContext implements SynchronizerContext {
     }
 
 
-    public ParticipantSynchronizer<ParticipantEvidence, IntactParticipantEvidence> getParticipantEvidenceSynchronizer(){
-        if (this.participantEvidenceSynchronizer == null){
+    public ParticipantSynchronizer<ParticipantEvidence, IntactParticipantEvidence> getParticipantEvidenceSynchronizer() {
+        if (this.participantEvidenceSynchronizer == null) {
             this.participantEvidenceSynchronizer = new ParticipantEvidenceSynchronizer(this);
             this.participantEvidenceSynchronizer.setListener(listener);
         }
@@ -908,7 +909,7 @@ public class DefaultSynchronizerContext implements SynchronizerContext {
 
     @Override
     public XrefSynchronizer<InteractorXref> getComplexXrefSynchronizer() {
-        if (this.complexXrefSynchronizer == null){
+        if (this.complexXrefSynchronizer == null) {
             this.complexXrefSynchronizer = new ComplexXrefSynchronizerTemplate(this);
             this.complexXrefSynchronizer.setListener(listener);
         }
@@ -916,8 +917,17 @@ public class DefaultSynchronizerContext implements SynchronizerContext {
     }
 
     @Override
+    public XrefSynchronizer<InteractorXref> getComplexGOXrefSynchronizer() {
+        if (this.complexGOXrefSynchronizer == null) {
+            this.complexGOXrefSynchronizer = new ComplexXrefSynchronizerTemplate(this, ComplexGOXref.class);
+            this.complexGOXrefSynchronizer.setListener(listener);
+        }
+        return complexGOXrefSynchronizer;
+    }
+
+    @Override
     public IntactDbSynchronizer<DbInfo, DbInfo> getDbInfoSynchronizer() {
-        if (this.dbInfoSynchronizer == null){
+        if (this.dbInfoSynchronizer == null) {
             this.dbInfoSynchronizer = new DbInfoSynchronizer(this);
             this.dbInfoSynchronizer.setListener(listener);
         }
@@ -926,7 +936,7 @@ public class DefaultSynchronizerContext implements SynchronizerContext {
 
     @Override
     public IntactDbSynchronizer<Application, Application> getApplicationSynchronizer() {
-        if (this.applicationSynchronizer == null){
+        if (this.applicationSynchronizer == null) {
             this.applicationSynchronizer = new ApplicationSynchronizer(this);
             this.applicationSynchronizer.setListener(listener);
         }
@@ -935,7 +945,7 @@ public class DefaultSynchronizerContext implements SynchronizerContext {
 
     @Override
     public IntactDbSynchronizer<ApplicationProperty, ApplicationProperty> getApplicationPropertySynchronizer() {
-        if (this.applicationPropertySynchronizer == null){
+        if (this.applicationPropertySynchronizer == null) {
             this.applicationPropertySynchronizer = new ApplicationPropertySynchronizer(this);
             this.applicationPropertySynchronizer.setListener(listener);
         }
@@ -981,6 +991,7 @@ public class DefaultSynchronizerContext implements SynchronizerContext {
         initListener(this.annotationSynchronizer);
         initListener(this.xrefSynchronizer);
         initListener(this.complexXrefSynchronizer);
+        initListener(this.complexGOXrefSynchronizer);
         initListener(this.cooperativeEffectSynchronizer);
         initListener(this.preAssemblySynchronizer);
         initListener(this.allosterySynchronizer);
@@ -1046,6 +1057,7 @@ public class DefaultSynchronizerContext implements SynchronizerContext {
         clearCache(this.annotationSynchronizer);
         clearCache(this.xrefSynchronizer);
         clearCache(this.complexXrefSynchronizer);
+        clearCache(this.complexGOXrefSynchronizer);
         clearCache(this.cooperativeEffectSynchronizer);
         clearCache(this.preAssemblySynchronizer);
         clearCache(this.allosterySynchronizer);
@@ -1085,94 +1097,94 @@ public class DefaultSynchronizerContext implements SynchronizerContext {
     }
 
     public IntactCvSynchronizer getGeneralCvSynchronizer() {
-        if (this.generalCvSynchronizer == null){
+        if (this.generalCvSynchronizer == null) {
             this.generalCvSynchronizer = new CvTermSynchronizer(this);
             this.generalCvSynchronizer.setListener(listener);
         }
-        ((CvTermSynchronizer)this.generalCvSynchronizer).setObjClass(null);
+        ((CvTermSynchronizer) this.generalCvSynchronizer).setObjClass(null);
         return this.generalCvSynchronizer;
     }
 
     public IntactCvSynchronizer getCvSynchronizer(String objclass) {
-        if (this.generalCvSynchronizer == null){
+        if (this.generalCvSynchronizer == null) {
             this.generalCvSynchronizer = new CvTermSynchronizer(this);
             this.generalCvSynchronizer.setListener(listener);
         }
-        ((CvTermSynchronizer)this.generalCvSynchronizer).setObjClass(objclass);
+        ((CvTermSynchronizer) this.generalCvSynchronizer).setObjClass(objclass);
         return this.generalCvSynchronizer;
     }
 
     private void initialiseAliasTemplateIfNotDone() {
-        if (this.aliasSynchronizer == null){
+        if (this.aliasSynchronizer == null) {
             this.aliasSynchronizer = new AliasSynchronizerTemplate(this, AbstractIntactAlias.class);
             this.aliasSynchronizer.setListener(listener);
         }
     }
 
     private void initialiseInteractorTemplateIfNotDone() {
-        if (this.interactorBaseSynchronizer == null){
+        if (this.interactorBaseSynchronizer == null) {
             this.interactorBaseSynchronizer = new InteractorSynchronizerTemplate(this, IntactInteractor.class);
             this.interactorBaseSynchronizer.setListener(listener);
         }
     }
 
     private void initialisePolymerTemplateIfNotDone() {
-        if (this.polymerSynchronizer == null){
+        if (this.polymerSynchronizer == null) {
             this.polymerSynchronizer = new PolymerSynchronizerTemplate(this, IntactPolymer.class);
             this.polymerSynchronizer.setListener(listener);
         }
     }
 
     private void initialiseAnnotationTemplateIfNotDone() {
-        if (this.annotationSynchronizer == null){
+        if (this.annotationSynchronizer == null) {
             this.annotationSynchronizer = new AnnotationSynchronizerTemplate(this, AbstractIntactAnnotation.class);
             this.annotationSynchronizer.setListener(listener);
         }
     }
 
     private void initialiseXrefTemplateIfNotDone() {
-        if (this.xrefSynchronizer == null){
+        if (this.xrefSynchronizer == null) {
             this.xrefSynchronizer = new XrefSynchronizerTemplate(this, AbstractIntactXref.class);
             this.xrefSynchronizer.setListener(listener);
         }
     }
 
     private void initialiseConfidenceTemplateIfNotDone() {
-        if (this.confidenceSynchronizer == null){
+        if (this.confidenceSynchronizer == null) {
             this.confidenceSynchronizer = new ConfidenceSynchronizerTemplate(this, AbstractIntactConfidence.class);
             this.confidenceSynchronizer.setListener(listener);
         }
     }
 
     private void initialiseParameterTemplateIfNotDone() {
-        if (this.parameterSynchronizer == null){
+        if (this.parameterSynchronizer == null) {
             this.parameterSynchronizer = new ParameterSynchronizerTemplate(this, AbstractIntactParameter.class);
             this.parameterSynchronizer.setListener(listener);
         }
     }
 
     private void initialiseLifecycleTemplateIfNotDone() {
-        if (this.lifecycleSynchronizer == null){
+        if (this.lifecycleSynchronizer == null) {
             this.lifecycleSynchronizer = new LifeCycleSynchronizerTemplate(this, AbstractLifeCycleEvent.class);
             this.lifecycleSynchronizer.setListener(listener);
         }
     }
 
     private void initializeCausalRelationshipSynchronizerIfNotDone() {
-        if (this.causalRelationshipSynchronizer == null){
+        if (this.causalRelationshipSynchronizer == null) {
             this.causalRelationshipSynchronizer = new CausalRelationchipSynchronizerTemplate(this, AbstractIntactCausalRelationship.class);
             this.causalRelationshipSynchronizer.setListener(listener);
         }
     }
 
-    private void clearCache(IntactDbSynchronizer delegate){
-        if (delegate != null){
+    private void clearCache(IntactDbSynchronizer delegate) {
+        if (delegate != null) {
             delegate.clearCache();
         }
     }
 
-    private void initListener(IntactDbSynchronizer delegate){
-        if (delegate != null){
+    private void initListener(IntactDbSynchronizer delegate) {
+        if (delegate != null) {
             delegate.setListener(listener);
         }
     }

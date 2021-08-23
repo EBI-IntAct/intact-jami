@@ -13,6 +13,7 @@ import uk.ac.ebi.intact.jami.utils.IntactUtils;
 
 import java.lang.reflect.InvocationTargetException;
 import java.math.BigDecimal;
+import java.util.Collection;
 
 /**
  * Utility class for testing
@@ -27,7 +28,7 @@ public class IntactTestUtils {
     public static <T extends AbstractIntactAlias> T createIntactAlias(Class<T> aliasClass, String typeName, String typeMI, String name) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
 
         T alias = aliasClass.getConstructor(String.class).newInstance(name);
-        if (typeName != null){
+        if (typeName != null) {
             alias.setType(IntactUtils.createMIAliasType(typeName, typeMI));
         }
         return alias;
@@ -58,7 +59,7 @@ public class IntactTestUtils {
     }
 
     public static Alias createAliasSynonym() {
-        return AliasUtils.createAlias(Alias.SYNONYM, Alias.SYNONYM_MI,"test synonym");
+        return AliasUtils.createAlias(Alias.SYNONYM, Alias.SYNONYM_MI, "test synonym");
     }
 
     public static Alias createAliasSynonym(String name) {
@@ -129,8 +130,8 @@ public class IntactTestUtils {
                                                                     String dbId, String qualifierName, String qualifierId)
             throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
 
-        T xref = xrefClass.getConstructor(CvTerm.class, String.class).newInstance(IntactUtils.createMIDatabase(dbName, dbMI),dbId);
-        if (qualifierName != null){
+        T xref = xrefClass.getConstructor(CvTerm.class, String.class).newInstance(IntactUtils.createMIDatabase(dbName, dbMI), dbId);
+        if (qualifierName != null) {
             xref.setQualifier(IntactUtils.createMIQualifier(qualifierName, qualifierId));
         }
         return xref;
@@ -142,6 +143,10 @@ public class IntactTestUtils {
 
     public static <T extends AbstractIntactXref> T createPubmedXrefNoQualifier(Class<T> xrefClass, String id) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
         return createIntactXref(xrefClass, Xref.PUBMED, Xref.PUBMED_MI, id, null, null);
+    }
+
+    public static <T extends AbstractIntactXref> T createUniprotXref(Class<T> xrefClass, String id) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
+        return createIntactXref(xrefClass, Xref.UNIPROTKB, Xref.UNIPROTKB_MI, id, Xref.IDENTITY, Xref.IDENTITY_MI);
     }
 
     public static <T extends AbstractIntactXref> T createXrefSeeAlso(Class<T> xrefClass) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
@@ -173,8 +178,8 @@ public class IntactTestUtils {
             throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
 
         T param = parameterClass.getConstructor(CvTerm.class, ParameterValue.class).newInstance(
-                IntactUtils.createMIParameterType(typeName, typeMI),new ParameterValue(new BigDecimal(factor)));
-        if (unitName != null){
+                IntactUtils.createMIParameterType(typeName, typeMI), new ParameterValue(new BigDecimal(factor)));
+        if (unitName != null) {
             param.setUnit(IntactUtils.createMIUnit(unitName, unitMI));
         }
         return param;
@@ -215,25 +220,25 @@ public class IntactTestUtils {
     }
 
     public static Preference createPreference() {
-        return new Preference("key","value");
+        return new Preference("key", "value");
     }
 
     public static Role createCuratorRole() {
         return new Role("CURATOR");
     }
 
-    public static User createCuratorUser(){
+    public static User createCuratorUser() {
         User user = new User("default", "firstName", "lastName", "name@ebi.ac.uk");
         user.getPreferences().add(new Preference("key", "value"));
         user.getRoles().add(new Role("CURATOR"));
         return user;
     }
 
-    public static IntactCvTerm createCvTermWithXrefs(){
-        return IntactUtils.createMIAliasType(Alias.GENE_NAME+ " ", Alias.GENE_NAME_MI);
+    public static IntactCvTerm createCvTermWithXrefs() {
+        return IntactUtils.createMIAliasType(Alias.GENE_NAME + " ", Alias.GENE_NAME_MI);
     }
 
-    public static IntactCvTerm createCvTermWithParent(){
+    public static IntactCvTerm createCvTermWithParent() {
         IntactCvTerm annotationTopic = IntactUtils.createMITopic("teST", null);
         IntactCvTerm annotationTopicParent = IntactUtils.createMITopic(Annotation.CAUTION, Annotation.CAUTION_MI);
         annotationTopic.addParent(annotationTopicParent);
@@ -248,7 +253,7 @@ public class IntactTestUtils {
         return cvDatabase;
     }
 
-    public static IntactCvTerm createCvWithDefinition(){
+    public static IntactCvTerm createCvWithDefinition() {
         IntactCvTerm cvConfidenceType = IntactUtils.createMIConfidenceType("test3", null);
         cvConfidenceType.setFullName("Test Confidence");
         cvConfidenceType.setDefinition("Test Definition");
@@ -259,7 +264,7 @@ public class IntactTestUtils {
     public static <T extends AbstractIntactRange> T createIntactRange(Class<T> rangeClass, int start, int end, ResultingSequence seq) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
 
         T range = rangeClass.getConstructor(Position.class, Position.class).newInstance(new IntactPosition(start), new IntactPosition(end));
-        if (seq != null){
+        if (seq != null) {
             range.setResultingSequence(seq);
         }
         return range;
@@ -270,15 +275,15 @@ public class IntactTestUtils {
     }
 
     public static ExperimentalRange createExperimentalRangeWithResultingSequence() throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
-        return createIntactRange(ExperimentalRange.class, 1,2, new ExperimentalResultingSequence("AAGA", "ACGA"));
+        return createIntactRange(ExperimentalRange.class, 1, 2, new ExperimentalResultingSequence("AAGA", "ACGA"));
     }
 
     public static ModelledRange createModelledRangeWithResultingSequence() throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
-        return createIntactRange(ModelledRange.class, 1,2, new ModelledResultingSequence("AAGA", "ACGA"));
+        return createIntactRange(ModelledRange.class, 1, 2, new ModelledResultingSequence("AAGA", "ACGA"));
     }
 
     public static Range createCertainRangeNoResultingSequence() {
-        return RangeUtils.createCertainRange(1,2);
+        return RangeUtils.createCertainRange(1, 2);
     }
 
     public static Range createCertainRangeWithResultingSequence() {
@@ -290,7 +295,7 @@ public class IntactTestUtils {
     public static <T extends AbstractIntactFeature> T createIntactFeature(Class<T> featureClass, String type, String typeMI) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
         T feature = featureClass.getConstructor(String.class, String.class).newInstance("test feature", "full test feature");
         T feature2 = featureClass.getConstructor(String.class, String.class).newInstance("test feature 2", "full test feature 2");
-        if (type != null){
+        if (type != null) {
             feature.setType(IntactUtils.createMIFeatureType(type, typeMI));
             feature2.setType(IntactUtils.createMIFeatureType(type, typeMI));
         }
@@ -302,7 +307,7 @@ public class IntactTestUtils {
     public static IntactModelledFeature createFullModelledFeatureWithRanges(String type, String typeMI) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
         IntactModelledFeature feature = new IntactModelledFeature("test feature", "full test feature");
         IntactModelledFeature feature2 = new IntactModelledFeature("test feature 2", "full test feature 2");
-        if (type != null){
+        if (type != null) {
             feature.setType(IntactUtils.createMIFeatureType(type, typeMI));
             feature2.setType(IntactUtils.createMIFeatureType(type, typeMI));
         }
@@ -318,7 +323,7 @@ public class IntactTestUtils {
     public static IntactFeatureEvidence createFullFeatureEvidenceWithRanges(String type, String typeMI) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
         IntactFeatureEvidence feature = new IntactFeatureEvidence("test feature", "full test feature");
         IntactFeatureEvidence feature2 = new IntactFeatureEvidence("test feature 2", "full test feature 2");
-        if (type != null){
+        if (type != null) {
             feature.setType(IntactUtils.createMIFeatureType(type, typeMI));
             feature2.setType(IntactUtils.createMIFeatureType(type, typeMI));
         }
@@ -336,36 +341,36 @@ public class IntactTestUtils {
     public static Feature createBasicFeature(String type, String typeMI) {
         Feature feature = new DefaultFeature("test feature", "full test feature");
         Feature feature2 = new DefaultFeature("test feature 2", "full test feature 2");
-        if (type != null){
+        if (type != null) {
             feature.setType(CvTermUtils.createMICvTerm(type, typeMI));
             feature2.setType(CvTermUtils.createMICvTerm(type, typeMI));
         }
         feature.getLinkedFeatures().add(feature2);
-        feature.setRole(CvTermUtils.createMICvTerm("interaction effect",null));
+        feature.setRole(CvTermUtils.createMICvTerm("interaction effect", null));
         return feature;
     }
 
     public static ModelledFeature createBasicModelledFeature(String type, String typeMI) {
         ModelledFeature feature = new DefaultModelledFeature("test feature", "full test feature");
         ModelledFeature feature2 = new DefaultModelledFeature("test feature 2", "full test feature 2");
-        if (type != null){
+        if (type != null) {
             feature.setType(CvTermUtils.createMICvTerm(type, typeMI));
             feature2.setType(CvTermUtils.createMICvTerm(type, typeMI));
         }
         feature.getLinkedFeatures().add(feature2);
-        feature.setRole(CvTermUtils.createMICvTerm("interaction effect",null));
+        feature.setRole(CvTermUtils.createMICvTerm("interaction effect", null));
         return feature;
     }
 
     public static FeatureEvidence createBasicFeatureEvidence(String type, String typeMI) {
         FeatureEvidence feature = new DefaultFeatureEvidence("test feature", "full test feature");
         FeatureEvidence feature2 = new DefaultFeatureEvidence("test feature 2", "full test feature 2");
-        if (type != null){
+        if (type != null) {
             feature.setType(CvTermUtils.createMICvTerm(type, typeMI));
             feature2.setType(CvTermUtils.createMICvTerm(type, typeMI));
         }
         feature.getLinkedFeatures().add(feature2);
-        feature.setRole(CvTermUtils.createMICvTerm("interaction effect",null));
+        feature.setRole(CvTermUtils.createMICvTerm("interaction effect", null));
         feature.getDetectionMethods().add(IntactUtils.createMIFeatureDetectionMethod("feature detection", null));
         feature.getDetectionMethods().add(IntactUtils.createMIFeatureDetectionMethod("feature detection 2", null));
         return feature;
@@ -374,7 +379,7 @@ public class IntactTestUtils {
     public static ModelledFeature createFullModelledFeature(String type, String typeMI) {
         ModelledFeature feature = new DefaultModelledFeature("test feature", "full test feature");
         ModelledFeature feature2 = new DefaultModelledFeature("test feature 2", "full test feature 2");
-        if (type != null){
+        if (type != null) {
             feature.setType(CvTermUtils.createMICvTerm(type, typeMI));
             feature2.setType(CvTermUtils.createMICvTerm(type, typeMI));
         }
@@ -383,14 +388,14 @@ public class IntactTestUtils {
         feature.getAliases().add(createAliasSynonym());
         feature.getXrefs().add(createPubmedXrefNoQualifier());
         feature.getAnnotations().add(createAnnotationComment());
-        feature.setRole(CvTermUtils.createMICvTerm("interaction effect",null));
+        feature.setRole(CvTermUtils.createMICvTerm("interaction effect", null));
         return feature;
     }
 
     public static FeatureEvidence createFullFeatureEvidence(String type, String typeMI) {
         FeatureEvidence feature = new DefaultFeatureEvidence("test feature", "full test feature");
         FeatureEvidence feature2 = new DefaultFeatureEvidence("test feature 2", "full test feature 2");
-        if (type != null){
+        if (type != null) {
             feature.setType(CvTermUtils.createMICvTerm(type, typeMI));
             feature2.setType(CvTermUtils.createMICvTerm(type, typeMI));
         }
@@ -399,7 +404,7 @@ public class IntactTestUtils {
         feature.getAliases().add(createAliasSynonym());
         feature.getXrefs().add(createPubmedXrefNoQualifier());
         feature.getAnnotations().add(createAnnotationComment());
-        feature.setRole(CvTermUtils.createMICvTerm("interaction effect",null));
+        feature.setRole(CvTermUtils.createMICvTerm("interaction effect", null));
         feature.getDetectionMethods().add(IntactUtils.createMIFeatureDetectionMethod("feature detection", null));
         feature.getDetectionMethods().add(IntactUtils.createMIFeatureDetectionMethod("feature detection 2", null));
         return feature;
@@ -448,7 +453,7 @@ public class IntactTestUtils {
     }
 
     public static IntactSource createIntactSource() throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
-        IntactSource source = new IntactSource("IntAct","MI:0469");
+        IntactSource source = new IntactSource("IntAct", "MI:0469");
         source.setFullName("Molecular Interaction Database");
         source.getSynonyms().add(createAliasSynonym(SourceAlias.class));
         source.getXrefs().add(createXrefSeeAlso(SourceXref.class));
@@ -459,7 +464,7 @@ public class IntactTestUtils {
     }
 
     public static Source createSource() {
-        Source source = new DefaultSource("IntAct","MI:0469");
+        Source source = new DefaultSource("IntAct", "MI:0469");
         source.setFullName("Molecular Interaction Database");
         source.getSynonyms().add(createAliasSynonym());
         source.getXrefs().add(createXrefSeeAlso());
@@ -518,15 +523,22 @@ public class IntactTestUtils {
     public static IntactPolymer createIntactPolymer() throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
         IntactPolymer interactor = createIntactInteractor(IntactPolymer.class);
         interactor.setSequence("AAAMGGCA");
-        interactor.getChecksums().add(new DefaultChecksum(IntactUtils.createMITopic("crc64",null), "xxxx3"));
+        interactor.getChecksums().add(new DefaultChecksum(IntactUtils.createMITopic("crc64", null), "xxxx3"));
 
         return interactor;
+    }
+
+    public static IntactProtein createIntactProtein() throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
+        IntactProtein protein = createIntactInteractor(IntactProtein.class);
+        protein.setSequence("AAAMGGCA");
+        protein.getChecksums().add(new DefaultChecksum(IntactUtils.createMITopic("crc64", null), "xxxx3"));
+        return protein;
     }
 
     public static Polymer createDefaultPolymer() throws NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException {
         Polymer interactor = createInteractor(DefaultPolymer.class);
         interactor.setSequence("AAAMGGCA");
-        interactor.getChecksums().add(new DefaultChecksum(IntactUtils.createMITopic("crc64",null), "xxxx3"));
+        interactor.getChecksums().add(new DefaultChecksum(IntactUtils.createMITopic("crc64", null), "xxxx3"));
 
         return interactor;
     }
@@ -538,6 +550,12 @@ public class IntactTestUtils {
         interactor.assignComplexAc(complexAc, version);
 
         return interactor;
+    }
+
+    public static IntactComplex createIntactComplexWithParticipants(String complexAc, String version, Collection<IntactModelledParticipant> intactModelledParticipant) throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
+        IntactComplex intactComplex = createIntactComplex(complexAc, version);
+        intactComplex.getParticipants().addAll(intactModelledParticipant);
+        return intactComplex;
     }
 
     private static CvTerm createEvidenceType() {
@@ -556,6 +574,11 @@ public class IntactTestUtils {
         interactor.add(interactor1);
         interactor.add(interactor2);
 
+        return interactor;
+    }
+
+    public static IntactInteractorPool createEmptyIntactInteractorPool() throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
+        IntactInteractorPool interactor = createIntactInteractor(IntactInteractorPool.class);
         return interactor;
     }
 
