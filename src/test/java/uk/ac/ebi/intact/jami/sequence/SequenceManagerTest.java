@@ -54,7 +54,7 @@ public class SequenceManagerTest{
     public void getNextValueForSequence() throws Exception {
 
 //        beginTransaction();
-        seqManager.createSequenceIfNotExists("test2_seq", 5);
+        seqManager.createSequenceIfNotExists("test2_seq", 4);
 //        commitTransaction();
 
         Assert.assertEquals(5L, seqManager.getNextValueForSequence("test2_seq").longValue());
