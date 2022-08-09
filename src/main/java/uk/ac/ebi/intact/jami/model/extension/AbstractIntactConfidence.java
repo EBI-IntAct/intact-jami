@@ -63,6 +63,7 @@ public abstract class AbstractIntactConfidence extends AbstractIntactPrimaryObje
 
     @Size(max = IntactUtils.MAX_DESCRIPTION_LEN)
     @NotNull
+    @Column(name="`value`")
     public String getValue() {
         return this.value;
     }
