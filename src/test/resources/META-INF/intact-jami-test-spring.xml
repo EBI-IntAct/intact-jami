@@ -71,7 +71,7 @@
         <property name="driverClassName" value="org.h2.Driver"/>
         <property name="url" value="jdbc:h2:mem:intactcore;DB_CLOSE_DELAY=-1;LOCK_MODE=0"/>
         <!--    DEBUG    -->
-        <!--        <property name="url" value="jdbc:h2:/Users/eragueneau/IdeaProjects/IntAct-BackEnd/intact-jami/target/intactcore;AUTO_SERVER=TRUE"/>-->
+        <!--<property name="url" value="jdbc:h2:/Users/eragueneau/IdeaProjects/IntAct-BackEnd/intact-jami/target/intactcore;AUTO_SERVER=TRUE"/>-->
         <property name="username" value="sa"/>
         <property name="password" value=""/>
     </bean>
