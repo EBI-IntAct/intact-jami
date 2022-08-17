@@ -27,7 +27,7 @@ import java.util.Collection;
 
 /**
  * Intact basic implementation of interactors
- *
+ * <p>
  * NOTE: getIdentifiers and getXrefs are not persistent methods annotated with hibernate annotations. All the xrefs present in identifiers
  * and xrefs are persisted in the same table for backward compatibility with intact-core. So the persistent xrefs are available with the getDbXrefs method.
  * For HQL queries, the method getDbXrefs should be used because is annotated with hibernate annotations.
@@ -39,18 +39,19 @@ import java.util.Collection;
  * be used to add/remove annotations as it may mess up with the object state.
  * NOTE: getChecksum is not persistent as checksums are not persisted in the database (exception for polymers and bioactive entities)
  * NOTE: for backward compatibility with intact-core, getObjClass is a property that cannot be inserted nor updated. When intact-core is removed, this property can be removed as well
+ *
  * @author Marine Dumousseau (marine@ebi.ac.uk)
  * @version $Id$
  * @since <pre>16/01/14</pre>
  */
 @javax.persistence.Entity
-@Inheritance( strategy = InheritanceType.SINGLE_TABLE )
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @Table(name = "ia_interactor")
 @DiscriminatorColumn(name = "category", discriminatorType = DiscriminatorType.STRING)
-@DiscriminatorValue( "interactor" )
+@DiscriminatorValue("interactor")
 @Cacheable
 @Where(clause = "category <> 'interaction_evidence'")
-public class IntactInteractor extends AbstractIntactPrimaryObject implements Interactor{
+public class IntactInteractor extends AbstractIntactPrimaryObject implements Interactor {
 
     private String shortName;
     private String fullName;
@@ -71,91 +72,91 @@ public class IntactInteractor extends AbstractIntactPrimaryObject implements Int
 
     private transient Xref acRef;
 
-    protected IntactInteractor(){
+    protected IntactInteractor() {
         super();
     }
 
-    public IntactInteractor(String name, CvTerm type){
-        if (name == null || (name != null && name.length() == 0)){
+    public IntactInteractor(String name, CvTerm type) {
+        if (name == null || (name != null && name.length() == 0)) {
             throw new IllegalArgumentException("The short name cannot be null or empty.");
         }
         this.shortName = name;
         this.interactorType = type;
     }
 
-    public IntactInteractor(String name, String fullName, CvTerm type){
+    public IntactInteractor(String name, String fullName, CvTerm type) {
         this(name, type);
         this.fullName = fullName;
     }
 
-    public IntactInteractor(String name, CvTerm type, Organism organism){
+    public IntactInteractor(String name, CvTerm type, Organism organism) {
         this(name, type);
         this.organism = organism;
     }
 
-    public IntactInteractor(String name, String fullName, CvTerm type, Organism organism){
+    public IntactInteractor(String name, String fullName, CvTerm type, Organism organism) {
         this(name, fullName, type);
         this.organism = organism;
     }
 
-    public IntactInteractor(String name, CvTerm type, Xref uniqueId){
+    public IntactInteractor(String name, CvTerm type, Xref uniqueId) {
         this(name, type);
         getIdentifiers().add(uniqueId);
     }
 
-    public IntactInteractor(String name, String fullName, CvTerm type, Xref uniqueId){
+    public IntactInteractor(String name, String fullName, CvTerm type, Xref uniqueId) {
         this(name, fullName, type);
         getIdentifiers().add(uniqueId);
     }
 
-    public IntactInteractor(String name, CvTerm type, Organism organism, Xref uniqueId){
+    public IntactInteractor(String name, CvTerm type, Organism organism, Xref uniqueId) {
         this(name, type, organism);
         getIdentifiers().add(uniqueId);
     }
 
-    public IntactInteractor(String name, String fullName, CvTerm type, Organism organism, Xref uniqueId){
+    public IntactInteractor(String name, String fullName, CvTerm type, Organism organism, Xref uniqueId) {
         this(name, fullName, type, organism);
         getIdentifiers().add(uniqueId);
     }
 
-    public IntactInteractor(String name){
-        if (name == null || (name != null && name.length() == 0)){
+    public IntactInteractor(String name) {
+        if (name == null || (name != null && name.length() == 0)) {
             throw new IllegalArgumentException("The short name cannot be null or empty.");
         }
         this.shortName = name;
     }
 
-    public IntactInteractor(String name, String fullName){
+    public IntactInteractor(String name, String fullName) {
         this(name);
         this.fullName = fullName;
     }
 
-    public IntactInteractor(String name, Organism organism){
+    public IntactInteractor(String name, Organism organism) {
         this(name);
         this.organism = organism;
     }
 
-    public IntactInteractor(String name, String fullName, Organism organism){
+    public IntactInteractor(String name, String fullName, Organism organism) {
         this(name, fullName);
         this.organism = organism;
     }
 
-    public IntactInteractor(String name, Xref uniqueId){
+    public IntactInteractor(String name, Xref uniqueId) {
         this(name);
         getIdentifiers().add(uniqueId);
     }
 
-    public IntactInteractor(String name, String fullName, Xref uniqueId){
+    public IntactInteractor(String name, String fullName, Xref uniqueId) {
         this(name, fullName);
         getIdentifiers().add(uniqueId);
     }
 
-    public IntactInteractor(String name, Organism organism, Xref uniqueId){
+    public IntactInteractor(String name, Organism organism, Xref uniqueId) {
         this(name, organism);
         getIdentifiers().add(uniqueId);
     }
 
-    public IntactInteractor(String name, String fullName, Organism organism, Xref uniqueId){
+    public IntactInteractor(String name, String fullName, Organism organism, Xref uniqueId) {
         this(name, fullName, organism);
         getIdentifiers().add(uniqueId);
     }
@@ -164,7 +165,7 @@ public class IntactInteractor extends AbstractIntactPrimaryObject implements Int
     public void setAc(String ac) {
         super.setAc(ac);
         // only if identifiers are initialised
-        if (this.acRef != null && !this.acRef.getId().equals(ac)){
+        if (this.acRef != null && !this.acRef.getId().equals(ac)) {
             // we don't want to create a persistent xref
             Xref newRef = new DefaultXref(this.acRef.getDatabase(), ac, this.acRef.getQualifier());
             this.identifiers.removeOnly(acRef);
@@ -174,21 +175,21 @@ public class IntactInteractor extends AbstractIntactPrimaryObject implements Int
     }
 
     @Column(name = "shortlabel", nullable = false, unique = true)
-    @Size( min = 1, max = IntactUtils.MAX_SHORT_LABEL_LEN )
+    @Size(min = 1, max = IntactUtils.MAX_SHORT_LABEL_LEN)
     @NotNull
     public String getShortName() {
         return this.shortName;
     }
 
     public void setShortName(String name) {
-        if (name == null || (name != null && name.length() == 0)){
+        if (name == null || (name != null && name.length() == 0)) {
             throw new IllegalArgumentException("The short name cannot be null or empty.");
         }
         this.shortName = name.trim().toLowerCase();
     }
 
-    @Column( length = IntactUtils.MAX_FULL_NAME_LEN )
-    @Size( max = IntactUtils.MAX_FULL_NAME_LEN )
+    @Column(length = IntactUtils.MAX_FULL_NAME_LEN)
+    @Size(max = IntactUtils.MAX_FULL_NAME_LEN)
     public String getFullName() {
         return this.fullName;
     }
@@ -199,7 +200,7 @@ public class IntactInteractor extends AbstractIntactPrimaryObject implements Int
 
     @Transient
     public Collection<Xref> getIdentifiers() {
-        if (identifiers == null){
+        if (identifiers == null) {
             initialiseXrefs();
         }
         return this.identifiers;
@@ -207,32 +208,31 @@ public class IntactInteractor extends AbstractIntactPrimaryObject implements Int
 
     @Transient
     public Collection<Xref> getXrefs() {
-        if (xrefs == null){
+        if (xrefs == null) {
             initialiseXrefs();
         }
         return this.xrefs;
     }
 
     /**
-     *
      * @return the first identifier in the list of identifiers or null if the list is empty
      */
     @Transient
     public Xref getPreferredIdentifier() {
         return !getIdentifiers().isEmpty() ? getIdentifiers().iterator().next() : null;
     }
+
     /**
-     *
      * @return the preferredName
      */
     @Transient
-    public String getPreferredName(){
+    public String getPreferredName() {
         return this.getShortName();
     }
 
     @Transient
     public Collection<Checksum> getChecksums() {
-        if (checksums == null){
+        if (checksums == null) {
             initialiseChecksums();
         }
         return this.checksums;
@@ -240,7 +240,7 @@ public class IntactInteractor extends AbstractIntactPrimaryObject implements Int
 
     @Transient
     public Collection<Annotation> getAnnotations() {
-        if (annotations == null){
+        if (annotations == null) {
             initialiseAnnotations();
         }
         return this.annotations;
@@ -248,14 +248,14 @@ public class IntactInteractor extends AbstractIntactPrimaryObject implements Int
 
     @Transient
     public Collection<Alias> getAliases() {
-        if (aliases == null){
+        if (aliases == null) {
             initialiseAliases();
         }
         return this.aliases;
     }
 
     @ManyToOne(targetEntity = IntactOrganism.class)
-    @JoinColumn( name = "biosource_ac", referencedColumnName = "ac")
+    @JoinColumn(name = "biosource_ac", referencedColumnName = "ac")
     @Target(IntactOrganism.class)
     public Organism getOrganism() {
         return this.organism;
@@ -266,10 +266,10 @@ public class IntactInteractor extends AbstractIntactPrimaryObject implements Int
     }
 
     @ManyToOne(targetEntity = IntactCvTerm.class)
-    @JoinColumn( name = "interactortype_ac" )
+    @JoinColumn(name = "interactortype_ac")
     @Target(IntactCvTerm.class)
     public CvTerm getInteractorType() {
-        if (this.interactorType == null){
+        if (this.interactorType == null) {
             initialiseDefaultInteractorType();
         }
         return this.interactorType;
@@ -279,57 +279,75 @@ public class IntactInteractor extends AbstractIntactPrimaryObject implements Int
         this.interactorType = interactorType;
     }
 
-    @OneToMany( mappedBy = "interactor", targetEntity = IntactParticipantEvidence.class)
+    @OneToMany(mappedBy = "interactor", targetEntity = IntactParticipantEvidence.class)
     @Target(IntactParticipantEvidence.class)
     /**
      * All the participant evidences where the interactor property points to this interactor
      */
     public Collection<ParticipantEvidence> getRelatedParticipantEvidences() {
-        if (this.relatedParticipantEvidences == null){
+        if (this.relatedParticipantEvidences == null) {
             this.relatedParticipantEvidences = new ArrayList<ParticipantEvidence>();
         }
         return relatedParticipantEvidences;
     }
 
-    @OneToMany( mappedBy = "interactor", targetEntity = IntactModelledParticipant.class)
+    protected void setRelatedParticipantEvidences(Collection<ParticipantEvidence> activeInstances) {
+        this.relatedParticipantEvidences = activeInstances;
+    }
+
+    @OneToMany(mappedBy = "interactor", targetEntity = IntactModelledParticipant.class)
     @Target(IntactModelledParticipant.class)
     /**
      * All the modelled participants where the interactor property points to this interactor
      */
     public Collection<ModelledParticipant> getRelatedModelledParticipants() {
-        if (this.relatedModelledParticipants == null){
+        if (this.relatedModelledParticipants == null) {
             this.relatedModelledParticipants = new ArrayList<ModelledParticipant>();
         }
         return relatedModelledParticipants;
     }
 
-    @Override
-    public String toString() {
-        return shortName + (organism != null ? ", " + organism.toString() : "") + (interactorType != null ? ", " + interactorType.toString() : "")  ;
+    protected void setRelatedModelledParticipants(Collection<ModelledParticipant> activeInstances) {
+        this.relatedModelledParticipants = activeInstances;
     }
 
-    @OneToMany( cascade = {CascadeType.ALL}, orphanRemoval = true, targetEntity = InteractorXref.class)
-    @JoinColumn(name="parent_ac", referencedColumnName="ac")
-    @Cascade( value = {org.hibernate.annotations.CascadeType.SAVE_UPDATE} )
+    @Override
+    public String toString() {
+        return shortName + (organism != null ? ", " + organism.toString() : "") + (interactorType != null ? ", " + interactorType.toString() : "");
+    }
+
+    @OneToMany(cascade = {CascadeType.ALL}, orphanRemoval = true, targetEntity = InteractorXref.class)
+    @JoinColumn(name = "parent_ac", referencedColumnName = "ac")
+    @Cascade(value = {org.hibernate.annotations.CascadeType.SAVE_UPDATE})
     @Target(InteractorXref.class)
     /**
      * This method give direct access to the persistent collection of xrefs (identifiers and xrefs all together) for this object.
      * WARNING: It should not be used to add/remove objects as it may mess up with the state of the object (only used this way by the synchronizers).
      */
     public Collection<Xref> getDbXrefs() {
-        if (persistentXrefs == null){
+        if (persistentXrefs == null) {
             persistentXrefs = new PersistentXrefList(null);
         }
         return persistentXrefs.getWrappedList();
     }
 
-    @OneToMany( cascade = {CascadeType.ALL}, orphanRemoval = true, targetEntity = InteractorAnnotation.class)
+    protected void setDbXrefs(Collection<Xref> persistentXrefs) {
+        if (persistentXrefs instanceof PersistentXrefList) {
+            this.persistentXrefs = (PersistentXrefList) persistentXrefs;
+        } else {
+            this.persistentXrefs = new PersistentXrefList(persistentXrefs);
+        }
+        this.identifiers = null;
+        this.xrefs = null;
+    }
+
+    @OneToMany(cascade = {CascadeType.ALL}, orphanRemoval = true, targetEntity = InteractorAnnotation.class)
     @JoinTable(
-            name="ia_int2annot",
-            joinColumns = @JoinColumn( name="interactor_ac"),
-            inverseJoinColumns = @JoinColumn( name="annotation_ac")
+            name = "ia_int2annot",
+            joinColumns = @JoinColumn(name = "interactor_ac"),
+            inverseJoinColumns = @JoinColumn(name = "annotation_ac")
     )
-    @Cascade( value = {org.hibernate.annotations.CascadeType.SAVE_UPDATE} )
+    @Cascade(value = {org.hibernate.annotations.CascadeType.SAVE_UPDATE})
     @Target(InteractorAnnotation.class)
     /**
      * WARNING: The join table is for backward compatibility with intact-core.
@@ -337,46 +355,64 @@ public class IntactInteractor extends AbstractIntactPrimaryObject implements Int
      * @JoinColumn(name="parent_ac", referencedColumnName="ac")
      */
     public Collection<Annotation> getDbAnnotations() {
-        if (persistentAnnotations == null){
+        if (persistentAnnotations == null) {
             persistentAnnotations = new PersistentAnnotationList(null);
         }
         return this.persistentAnnotations.getWrappedList();
     }
 
-    @OneToMany( cascade = {CascadeType.ALL}, orphanRemoval = true, targetEntity = InteractorAlias.class)
-    @JoinColumn(name="parent_ac", referencedColumnName="ac")
-    @Cascade( value = {org.hibernate.annotations.CascadeType.SAVE_UPDATE} )
+    protected void setDbAnnotations(Collection<Annotation> annotations) {
+        if (annotations instanceof PersistentAnnotationList) {
+            this.persistentAnnotations = (PersistentAnnotationList) annotations;
+        } else {
+            this.persistentAnnotations = new PersistentAnnotationList(annotations);
+        }
+        this.annotations = null;
+    }
+
+    @OneToMany(cascade = {CascadeType.ALL}, orphanRemoval = true, targetEntity = InteractorAlias.class)
+    @JoinColumn(name = "parent_ac", referencedColumnName = "ac")
+    @Cascade(value = {org.hibernate.annotations.CascadeType.SAVE_UPDATE})
     @Target(InteractorAlias.class)
     /**
      * This method give direct access to the persistent collection of aliases for this object.
      * WARNING: It should not be used to add/remove objects as it may mess up with the state of the object (only used this way by the synchronizers).
      */
     public Collection<Alias> getDbAliases() {
-        if (persistentAliases == null){
+        if (persistentAliases == null) {
             persistentAliases = new PersistentAliasList(null);
         }
         return this.persistentAliases.getWrappedList();
     }
 
+    protected void setDbAliases(Collection<Alias> aliases) {
+        if (aliases instanceof PersistentAliasList) {
+            this.persistentAliases = (PersistentAliasList) aliases;
+        } else {
+            this.persistentAliases = new PersistentAliasList(aliases);
+        }
+        this.aliases = null;
+    }
+
     @Transient
-    public boolean areXrefsInitialized(){
+    public boolean areXrefsInitialized() {
         return Hibernate.isInitialized(getDbXrefs());
     }
 
     @Transient
-    public boolean areAliasesInitialized(){
+    public boolean areAliasesInitialized() {
         return Hibernate.isInitialized(getDbAliases());
     }
 
     @Transient
-    public boolean areAnnotationsInitialized(){
+    public boolean areAnnotationsInitialized() {
         return Hibernate.isInitialized(getDbAnnotations());
     }
 
     /**
      * This method can reset all properties that are cached in this object as if it was just loaded from the database
      */
-    public void resetCachedDbProperties(){
+    public void resetCachedDbProperties() {
         this.identifiers = null;
         this.xrefs = null;
         this.aliases = null;
@@ -385,95 +421,97 @@ public class IntactInteractor extends AbstractIntactPrimaryObject implements Int
 
     @Column(name = "objclass", nullable = false, updatable = false)
     @NotNull
-    protected String getObjClass(){
+    protected String getObjClass() {
         return generateObjClass();
+    }
+
+    protected void setObjClass(String objClass) {
+        // nothing to do
     }
 
     protected String generateObjClass() {
         return "uk.ac.ebi.intact.model.InteractorImpl";
     }
 
-    protected void setObjClass(String objClass){
-        // nothing to do
-    }
-
-    protected void initialiseAnnotations(){
+    protected void initialiseAnnotations() {
         // init db persistent annots
         getDbAnnotations();
 
         this.annotations = this.persistentAnnotations;
 
-        for (Annotation a : this.annotations){
+        for (Annotation a : this.annotations) {
             processAddedAnnotation(a);
         }
     }
 
-    protected void initialiseXrefs(){
+    protected void initialiseXrefs() {
         this.identifiers = new InteractorIdentifierList();
         this.xrefs = new InteractorXrefList();
-        if (this.persistentXrefs != null){
-            for (Xref ref : this.persistentXrefs){
+        if (this.persistentXrefs != null) {
+            for (Xref ref : this.persistentXrefs) {
                 if (XrefUtils.isXrefAnIdentifier(ref) || XrefUtils.doesXrefHaveQualifier(ref, null, "intact-secondary")
-                        || XrefUtils.doesXrefHaveQualifier(ref,  Xref.COMPLEX_PRIMARY_MI, Xref.COMPLEX_PRIMARY)){
+                        || XrefUtils.doesXrefHaveQualifier(ref, Xref.COMPLEX_PRIMARY_MI, Xref.COMPLEX_PRIMARY)) {
                     this.identifiers.addOnly(ref);
                     processAddedIdentifierEvent(ref);
-                }
-                else{
+                } else {
                     this.xrefs.addOnly(ref);
                     processAddedXrefEvent(ref);
                 }
             }
-        }
-        else{
+        } else {
             this.persistentXrefs = new PersistentXrefList(null);
         }
 
         // initialise ac
-        if (getAc() != null){
+        if (getAc() != null) {
             IntactContext intactContext = ApplicationContextProvider.getBean("intactJamiContext");
-            if (intactContext != null){
-                this.acRef = new DefaultXref(intactContext.getIntactConfiguration().getDefaultInstitution(), getAc(), CvTermUtils.createIdentityQualifier());
-            }
-            else{
+            if (intactContext != null) {
+                CvTerm database = IntactUtils.getCvByMITerm(Xref.INTACT_MI, IntactUtils.DATABASE_OBJCLASS);
+                CvTerm qualifier = IntactUtils.getCvByMITerm(Xref.IDENTITY_MI, IntactUtils.QUALIFIER_OBJCLASS);
+                if (database == null || qualifier == null) {
+                    this.acRef = new DefaultXref(intactContext.getIntactConfiguration().getDefaultInstitution(), getAc(), CvTermUtils.createIdentityQualifier());
+                } else {
+                    this.acRef = new DefaultXref(database,
+                            getAc(), qualifier);
+                }
+            } else {
                 this.acRef = new DefaultXref(new DefaultCvTerm("unknwon"), getAc(), CvTermUtils.createIdentityQualifier());
             }
             this.identifiers.addOnly(this.acRef);
         }
     }
 
-    protected void initialiseAliases(){
+    protected void initialiseAliases() {
         // init persistent aliases
         getDbAliases();
 
         this.aliases = this.persistentAliases;
-        for (Alias a : this.aliases){
+        for (Alias a : this.aliases) {
             processAddedAlias(a);
         }
     }
 
-    protected void initialiseAliasesWith(Collection<Alias> aliases){
-        if (aliases == null){
+    protected void initialiseAliasesWith(Collection<Alias> aliases) {
+        if (aliases == null) {
             this.aliases = getDbAliases();
-        }
-        else{
+        } else {
             this.aliases = aliases;
         }
     }
 
-    protected void initialiseAnnotationsWith(Collection<Annotation> annotations){
-        if (annotations == null){
+    protected void initialiseAnnotationsWith(Collection<Annotation> annotations) {
+        if (annotations == null) {
             this.annotations = getDbAnnotations();
-        }
-        else{
+        } else {
             this.annotations = annotations;
         }
     }
 
-    protected void initialiseChecksums(){
+    protected void initialiseChecksums() {
         this.checksums = new ArrayList<Checksum>();
     }
 
-    protected void initialiseChecksumsWith(Collection<Checksum> checksum){
+    protected void initialiseChecksumsWith(Collection<Checksum> checksum) {
         this.checksums = checksum;
     }
 
@@ -489,46 +527,8 @@ public class IntactInteractor extends AbstractIntactPrimaryObject implements Int
         // nothing
     }
 
-    protected void setDbXrefs(Collection<Xref> persistentXrefs) {
-        if (persistentXrefs instanceof PersistentXrefList){
-            this.persistentXrefs = (PersistentXrefList)persistentXrefs;
-        }
-        else{
-            this.persistentXrefs = new PersistentXrefList(persistentXrefs);
-        }
-        this.identifiers = null;
-        this.xrefs = null;
-    }
-
-    protected void setDbAliases(Collection<Alias> aliases) {
-        if (aliases instanceof PersistentAliasList){
-            this.persistentAliases = (PersistentAliasList)aliases;
-        }
-        else{
-            this.persistentAliases = new PersistentAliasList(aliases);
-        }
-        this.aliases = null;
-    }
-
-    protected void setDbAnnotations(Collection<Annotation> annotations) {
-        if (annotations instanceof PersistentAnnotationList){
-            this.persistentAnnotations = (PersistentAnnotationList)annotations;
-        }
-        else{
-            this.persistentAnnotations = new PersistentAnnotationList(annotations);
-        }
-        this.annotations = null;
-    }
-
     protected void initialiseDefaultInteractorType() {
         this.interactorType = IntactUtils.createIntactMITerm(Interactor.UNKNOWN_INTERACTOR, Interactor.UNKNOWN_INTERACTOR_MI, IntactUtils.INTERACTOR_TYPE_OBJCLASS);
-    }
-
-    protected void setRelatedParticipantEvidences(Collection<ParticipantEvidence> activeInstances) {
-        this.relatedParticipantEvidences = activeInstances;
-    }
-    protected void setRelatedModelledParticipants(Collection<ModelledParticipant> activeInstances) {
-        this.relatedModelledParticipants = activeInstances;
     }
 
     protected boolean needToProcessAnnotationToAdd() {
@@ -577,6 +577,7 @@ public class IntactInteractor extends AbstractIntactPrimaryObject implements Int
 
     /**
      * Overrides serialization for xrefs and annotations (inner classes not serializable)
+     *
      * @param oos
      * @throws java.io.IOException
      */
@@ -594,6 +595,7 @@ public class IntactInteractor extends AbstractIntactPrimaryObject implements Int
 
     /**
      * Overrides serialization for xrefs and annotations (inner classes not serializable)
+     *
      * @param ois
      * @throws ClassNotFoundException
      * @throws IOException
@@ -603,21 +605,21 @@ public class IntactInteractor extends AbstractIntactPrimaryObject implements Int
         // default deserialization
         ois.defaultReadObject();
         // read default xrefs
-        setDbXrefs((Collection<Xref>)ois.readObject());
+        setDbXrefs((Collection<Xref>) ois.readObject());
         // read default annotations
-        setDbAnnotations((Collection<Annotation>)ois.readObject());
+        setDbAnnotations((Collection<Annotation>) ois.readObject());
         // read default aliases
         setDbAliases((Collection<Alias>) ois.readObject());
     }
 
     protected class InteractorIdentifierList extends AbstractListHavingProperties<Xref> {
-        public InteractorIdentifierList(){
+        public InteractorIdentifierList() {
             super();
         }
 
         @Override
         protected void processAddedObjectEvent(Xref added) {
-            if (!added.equals(acRef)){
+            if (!added.equals(acRef)) {
                 processAddedIdentifierEvent(added);
                 persistentXrefs.add(added);
             }
@@ -625,11 +627,10 @@ public class IntactInteractor extends AbstractIntactPrimaryObject implements Int
 
         @Override
         protected void processRemovedObjectEvent(Xref removed) {
-            if (!removed.equals(acRef)){
+            if (!removed.equals(acRef)) {
                 processRemovedIdentifierEvent(removed);
                 persistentXrefs.remove(removed);
-            }
-            else{
+            } else {
                 super.addOnly(acRef);
                 throw new UnsupportedOperationException("Cannot remove the database accession of a Interactor object from its list of identifiers.");
             }
@@ -639,14 +640,14 @@ public class IntactInteractor extends AbstractIntactPrimaryObject implements Int
         protected void clearProperties() {
             clearPropertiesLinkedToIdentifiers();
             persistentXrefs.retainAll(getXrefs());
-            if (acRef != null){
+            if (acRef != null) {
                 super.addOnly(acRef);
             }
         }
     }
 
     protected class InteractorXrefList extends AbstractListHavingProperties<Xref> {
-        public InteractorXrefList(){
+        public InteractorXrefList() {
             super();
         }
 
@@ -671,7 +672,7 @@ public class IntactInteractor extends AbstractIntactPrimaryObject implements Int
 
     protected class PersistentAnnotationList extends AbstractCollectionWrapper<Annotation> {
 
-        public PersistentAnnotationList(Collection<Annotation> persistentBag){
+        public PersistentAnnotationList(Collection<Annotation> persistentBag) {
             super(persistentBag);
         }
 
@@ -688,8 +689,8 @@ public class IntactInteractor extends AbstractIntactPrimaryObject implements Int
 
         @Override
         protected void processElementToRemove(Object o) {
-            if (o instanceof Annotation){
-                processRemovedAnnotation((Annotation)o);
+            if (o instanceof Annotation) {
+                processRemovedAnnotation((Annotation) o);
             }
         }
 
@@ -700,10 +701,9 @@ public class IntactInteractor extends AbstractIntactPrimaryObject implements Int
     }
 
 
-
     protected class PersistentAliasList extends AbstractCollectionWrapper<Alias> {
 
-        public PersistentAliasList(Collection<Alias> persistentBag){
+        public PersistentAliasList(Collection<Alias> persistentBag) {
             super(persistentBag);
         }
 
@@ -720,8 +720,8 @@ public class IntactInteractor extends AbstractIntactPrimaryObject implements Int
 
         @Override
         protected void processElementToRemove(Object o) {
-            if (o instanceof Alias){
-                processRemovedAlias((Alias)o);
+            if (o instanceof Alias) {
+                processRemovedAlias((Alias) o);
             }
         }
 
@@ -733,7 +733,7 @@ public class IntactInteractor extends AbstractIntactPrimaryObject implements Int
 
     protected class PersistentXrefList extends AbstractCollectionWrapper<Xref> {
 
-        public PersistentXrefList(Collection<Xref> persistentBag){
+        public PersistentXrefList(Collection<Xref> persistentBag) {
             super(persistentBag);
         }
 

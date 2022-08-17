@@ -396,7 +396,7 @@ public class ComplexSynchronizer extends InteractorSynchronizerTemplate<Complex,
     protected void prepareAnnotations(IntactComplex intactInteractor, boolean enableSynchronization) throws FinderException, PersisterException, SynchronizerException {
         if (intactInteractor.areAnnotationsInitialized()) {
             if (AnnotationUtils.collectFirstAnnotationWithTopic(intactInteractor.getAnnotations(), null, "curated-complex") == null) {
-                intactInteractor.getAnnotations().add(new InteractorAnnotation(IntactUtils.createMITopic("curated-complex", null)));
+                intactInteractor.getAnnotations().add(new InteractorAnnotation(IntactUtils.getCvTopicByShortName("curated-complex", null)));
             }
         }
         super.prepareAnnotations(intactInteractor, enableSynchronization);

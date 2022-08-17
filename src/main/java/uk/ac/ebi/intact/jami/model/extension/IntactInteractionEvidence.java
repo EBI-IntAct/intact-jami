@@ -19,8 +19,8 @@ import uk.ac.ebi.intact.jami.model.AbstractIntactPrimaryObject;
 import uk.ac.ebi.intact.jami.model.listener.InteractionParameterListener;
 import uk.ac.ebi.intact.jami.utils.IntactUtils;
 
-import javax.persistence.*;
 import javax.persistence.CascadeType;
+import javax.persistence.*;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
@@ -32,7 +32,7 @@ import java.util.*;
 
 /**
  * Intact implementation of interaction evidence
- *
+ * <p>
  * NOTE: for backward compatibility with intact-core, interaction evidences are stored in same table as interactors.
  * When intact-core is removed, it may be good to move all interaction evidences to a separate table, remove the property 'category'
  * and remove the where clause attached to this entity
@@ -64,7 +64,7 @@ import java.util.*;
 @Table(name = "ia_interactor")
 @EntityListeners(value = {InteractionParameterListener.class})
 @Where(clause = "category = 'interaction_evidence'")
-public class IntactInteractionEvidence extends AbstractIntactPrimaryObject implements InteractionEvidence{
+public class IntactInteractionEvidence extends AbstractIntactPrimaryObject implements InteractionEvidence {
     private transient Xref imexId;
     private String availability;
     private Collection<Parameter> parameters;
@@ -93,14 +93,14 @@ public class IntactInteractionEvidence extends AbstractIntactPrimaryObject imple
 
     private transient Xref acRef;
 
-    public IntactInteractionEvidence(){
+    public IntactInteractionEvidence() {
     }
 
-    public IntactInteractionEvidence(String shortName){
+    public IntactInteractionEvidence(String shortName) {
         this.shortName = shortName;
     }
 
-    public IntactInteractionEvidence(String shortName, CvTerm type){
+    public IntactInteractionEvidence(String shortName, CvTerm type) {
         this(shortName);
         this.interactionType = type;
     }
@@ -109,7 +109,7 @@ public class IntactInteractionEvidence extends AbstractIntactPrimaryObject imple
     public void setAc(String ac) {
         super.setAc(ac);
         // only if identifiers are initialised
-        if (this.acRef != null && !this.acRef.getId().equals(ac)){
+        if (this.acRef != null && !this.acRef.getId().equals(ac)) {
             // we don't want to create a persistent xref
             Xref newRef = new DefaultXref(this.acRef.getDatabase(), ac, this.acRef.getQualifier());
             this.identifiers.removeOnly(acRef);
@@ -119,7 +119,7 @@ public class IntactInteractionEvidence extends AbstractIntactPrimaryObject imple
     }
 
     @Column(name = "shortlabel", nullable = false, unique = true)
-    @Size( min = 1, max = IntactUtils.MAX_SHORT_LABEL_LEN )
+    @Size(min = 1, max = IntactUtils.MAX_SHORT_LABEL_LEN)
     @NotNull
     public String getShortName() {
         return this.shortName;
@@ -138,10 +138,11 @@ public class IntactInteractionEvidence extends AbstractIntactPrimaryObject imple
 
     public void setRigid(String rigid) {
         Collection<Checksum> checksums = getChecksums();
-        if (rigid != null){
-            CvTerm rigidMethod = IntactUtils.createMITopic(Checksum.RIGID, null);
+        if (rigid != null) {
+            CvTerm rigidMethod = IntactUtils.getCvTopicByShortName(Checksum.RIGID, null);
+
             // first remove old rigid
-            if (this.rigid != null){
+            if (this.rigid != null) {
                 checksums.remove(this.rigid);
             }
             this.rigid = new DefaultChecksum(rigidMethod, rigid);
@@ -156,7 +157,7 @@ public class IntactInteractionEvidence extends AbstractIntactPrimaryObject imple
 
     @Transient
     public Collection<Xref> getIdentifiers() {
-        if (identifiers == null){
+        if (identifiers == null) {
             initialiseXrefs();
         }
         return this.identifiers;
@@ -164,7 +165,7 @@ public class IntactInteractionEvidence extends AbstractIntactPrimaryObject imple
 
     @Transient
     public Collection<Xref> getXrefs() {
-        if (xrefs == null){
+        if (xrefs == null) {
             initialiseXrefs();
         }
         return this.xrefs;
@@ -172,7 +173,7 @@ public class IntactInteractionEvidence extends AbstractIntactPrimaryObject imple
 
     @Transient
     public Collection<Checksum> getChecksums() {
-        if (checksums == null){
+        if (checksums == null) {
             initialiseChecksums();
         }
         return this.checksums;
@@ -183,7 +184,7 @@ public class IntactInteractionEvidence extends AbstractIntactPrimaryObject imple
      * WARNING: The property is transient for backward compatibility with intact-core. When it is removed, getDbAnnotations and getAnnotations should be the same
      */
     public Collection<Annotation> getAnnotations() {
-        if (annotations == null){
+        if (annotations == null) {
             initialiseAnnotations();
         }
         return this.annotations;
@@ -208,7 +209,7 @@ public class IntactInteractionEvidence extends AbstractIntactPrimaryObject imple
     }
 
     @ManyToOne(targetEntity = IntactCvTerm.class)
-    @JoinColumn( name = "interactiontype_ac", referencedColumnName = "ac")
+    @JoinColumn(name = "interactiontype_ac", referencedColumnName = "ac")
     @Target(IntactCvTerm.class)
     public CvTerm getInteractionType() {
         return this.interactionType;
@@ -218,22 +219,26 @@ public class IntactInteractionEvidence extends AbstractIntactPrimaryObject imple
         this.interactionType = term;
     }
 
-    @OneToMany( mappedBy = "dbParentInteraction", orphanRemoval = true,
+    @OneToMany(mappedBy = "dbParentInteraction", orphanRemoval = true,
             cascade = {CascadeType.ALL}, targetEntity = IntactParticipantEvidence.class)
-    @Cascade( value = {org.hibernate.annotations.CascadeType.SAVE_UPDATE} )
+    @Cascade(value = {org.hibernate.annotations.CascadeType.SAVE_UPDATE})
     @Target(IntactParticipantEvidence.class)
     public Collection<ParticipantEvidence> getParticipants() {
-        if (participants == null){
+        if (participants == null) {
             initialiseParticipants();
         }
         return participants;
     }
 
+    private void setParticipants(Collection<ParticipantEvidence> participants) {
+        this.participants = participants;
+    }
+
     public boolean addParticipant(ParticipantEvidence part) {
-        if (part == null){
+        if (part == null) {
             return false;
         }
-        if (getParticipants().add(part)){
+        if (getParticipants().add(part)) {
             part.setInteraction(this);
             return true;
         }
@@ -241,10 +246,10 @@ public class IntactInteractionEvidence extends AbstractIntactPrimaryObject imple
     }
 
     public boolean removeParticipant(ParticipantEvidence part) {
-        if (part == null){
+        if (part == null) {
             return false;
         }
-        if (getParticipants().remove(part)){
+        if (getParticipants().remove(part)) {
             part.setInteraction(null);
             return true;
         }
@@ -252,13 +257,13 @@ public class IntactInteractionEvidence extends AbstractIntactPrimaryObject imple
     }
 
     public boolean addAllParticipants(Collection<? extends ParticipantEvidence> participants) {
-        if (participants == null){
+        if (participants == null) {
             return false;
         }
 
         boolean added = false;
-        for (ParticipantEvidence p : participants){
-            if (addParticipant(p)){
+        for (ParticipantEvidence p : participants) {
+            if (addParticipant(p)) {
                 added = true;
             }
         }
@@ -266,13 +271,13 @@ public class IntactInteractionEvidence extends AbstractIntactPrimaryObject imple
     }
 
     public boolean removeAllParticipants(Collection<? extends ParticipantEvidence> participants) {
-        if (participants == null){
+        if (participants == null) {
             return false;
         }
 
         boolean removed = false;
-        for (ParticipantEvidence p : participants){
-            if (removeParticipant(p)){
+        for (ParticipantEvidence p : participants) {
+            if (removeParticipant(p)) {
                 removed = true;
             }
         }
@@ -281,7 +286,7 @@ public class IntactInteractionEvidence extends AbstractIntactPrimaryObject imple
 
     @Override
     public String toString() {
-        return (shortName != null ? shortName+", " : "") + (interactionType != null ? interactionType.toString() : "");
+        return (shortName != null ? shortName + ", " : "") + (interactionType != null ? interactionType.toString() : "");
     }
 
     @Transient
@@ -293,33 +298,31 @@ public class IntactInteractionEvidence extends AbstractIntactPrimaryObject imple
 
     public void assignImexId(String identifier) {
         // add new imex if not null
-        if (identifier != null){
+        if (identifier != null) {
             Collection<Xref> interactionXrefs = getXrefs();
             CvTerm imexDatabase = IntactUtils.createMIDatabase(Xref.IMEX, Xref.IMEX_MI);
             CvTerm imexPrimaryQualifier = IntactUtils.createMIQualifier(Xref.IMEX_PRIMARY, Xref.IMEX_PRIMARY_MI);
             // first remove old doi if not null
-            if (this.imexId != null && !identifier.equals(this.imexId)){
-                if (this.imexId instanceof AbstractIntactXref){
+            if (this.imexId != null && !identifier.equals(this.imexId)) {
+                if (this.imexId instanceof AbstractIntactXref) {
                     ((AbstractIntactXref) this.imexId).setId(identifier);
-                }
-                else{
+                } else {
                     interactionXrefs.remove(this.imexId);
                     this.imexId = new InteractionXref(imexDatabase, identifier, imexPrimaryQualifier);
                     interactionXrefs.add(this.imexId);
                 }
-            }
-            else if (this.imexId == null){
+            } else if (this.imexId == null) {
                 this.imexId = new InteractionXref(imexDatabase, identifier, imexPrimaryQualifier);
                 interactionXrefs.add(this.imexId);
             }
-        }
-        else {
+        } else {
             throw new IllegalArgumentException("The imex id has to be non null.");
         }
     }
 
     /**
      * NOTE: it is transient for backward compatibility with intact-core. In the future, it should be
+     *
      * @ManyToOne(targetEntity = IntactExperiment.class)
      * @JoinColumn( name = "experiment_ac", referencedColumnName = "ac")
      * @Target(IntactExperiment.class)
@@ -327,54 +330,62 @@ public class IntactInteractionEvidence extends AbstractIntactPrimaryObject imple
     @Transient
     public Experiment getExperiment() {
         // the experimental role list is never empty
-        if (getDbExperiments().isEmpty()){
+        if (getDbExperiments().isEmpty()) {
             return null;
         }
         return this.experiments.iterator().next();
     }
 
     public void setExperiment(Experiment experiment) {
-        if (!getDbExperiments().isEmpty()){
+        if (!getDbExperiments().isEmpty()) {
             getDbExperiments().remove(0);
         }
 
-        if (experiment != null){
+        if (experiment != null) {
             this.experiments.add(0, experiment);
         }
     }
 
     public void setExperimentAndAddInteractionEvidence(Experiment experiment) {
-        if (getExperiment() != null){
+        if (getExperiment() != null) {
             getExperiment().removeInteractionEvidence(this);
         }
 
-        if (experiment != null){
+        if (experiment != null) {
             experiment.addInteractionEvidence(this);
         }
     }
 
-    @OneToMany(targetEntity=IntactVariableParameterValueSet.class, cascade = {CascadeType.ALL}, orphanRemoval = true)
-    @JoinColumn(name="parent_ac", referencedColumnName="ac")
-    @Cascade( value = {org.hibernate.annotations.CascadeType.SAVE_UPDATE} )
+    @OneToMany(targetEntity = IntactVariableParameterValueSet.class, cascade = {CascadeType.ALL}, orphanRemoval = true)
+    @JoinColumn(name = "parent_ac", referencedColumnName = "ac")
+    @Cascade(value = {org.hibernate.annotations.CascadeType.SAVE_UPDATE})
     @Target(IntactVariableParameterValueSet.class)
     public Collection<VariableParameterValueSet> getVariableParameterValues() {
 
-        if (variableParameterValueSets == null){
+        if (variableParameterValueSets == null) {
             initialiseVariableParameterValueSets();
         }
         return this.variableParameterValueSets;
     }
 
-    @OneToMany( orphanRemoval = true,
+    private void setVariableParameterValues(Collection<VariableParameterValueSet> variableParameterValueSets) {
+        this.variableParameterValueSets = variableParameterValueSets;
+    }
+
+    @OneToMany(orphanRemoval = true,
             cascade = {CascadeType.ALL}, targetEntity = InteractionEvidenceConfidence.class)
-    @JoinColumn(name="interaction_ac", referencedColumnName="ac")
-    @Cascade( value = {org.hibernate.annotations.CascadeType.SAVE_UPDATE} )
+    @JoinColumn(name = "interaction_ac", referencedColumnName = "ac")
+    @Cascade(value = {org.hibernate.annotations.CascadeType.SAVE_UPDATE})
     @Target(InteractionEvidenceConfidence.class)
     public Collection<Confidence> getConfidences() {
-        if (confidences == null){
+        if (confidences == null) {
             initialiseExperimentalConfidences();
         }
         return this.confidences;
+    }
+
+    private void setConfidences(Collection<Confidence> confidences) {
+        this.confidences = confidences;
     }
 
     @Transient
@@ -388,7 +399,7 @@ public class IntactInteractionEvidence extends AbstractIntactPrimaryObject imple
 
     @Transient
     public boolean isNegative() {
-        if (this.annotations == null){
+        if (this.annotations == null) {
             initialiseAnnotations();
         }
         return this.isNegative != null ? true : false;
@@ -396,26 +407,30 @@ public class IntactInteractionEvidence extends AbstractIntactPrimaryObject imple
 
     public void setNegative(boolean negative) {
         getAnnotations();
-        if (!negative){
+        if (!negative) {
             AnnotationUtils.removeAllAnnotationsWithTopic(getDbAnnotations(), null, "negative");
             this.isNegative = null;
-        }
-        else if (this.isNegative == null){
-            this.isNegative = new InteractionAnnotation(IntactUtils.createMITopic("negative", null));
+        } else if (this.isNegative == null) {
+            CvTerm negativeTopic = IntactUtils.getCvTopicByShortName("negative", null);
+            this.isNegative = new InteractionAnnotation(negativeTopic);
             getDbAnnotations().add(this.isNegative);
         }
     }
 
-    @OneToMany( orphanRemoval = true,
+    @OneToMany(orphanRemoval = true,
             cascade = {CascadeType.ALL}, targetEntity = InteractionEvidenceParameter.class)
-    @JoinColumn(name="interaction_ac", referencedColumnName="ac")
-    @Cascade( value = {org.hibernate.annotations.CascadeType.SAVE_UPDATE} )
+    @JoinColumn(name = "interaction_ac", referencedColumnName = "ac")
+    @Cascade(value = {org.hibernate.annotations.CascadeType.SAVE_UPDATE})
     @Target(InteractionEvidenceParameter.class)
     public Collection<Parameter> getParameters() {
-        if (parameters == null){
+        if (parameters == null) {
             initialiseExperimentalParameters();
         }
         return this.parameters;
+    }
+
+    private void setParameters(Collection<Parameter> parameters) {
+        this.parameters = parameters;
     }
 
     @Transient
@@ -428,53 +443,64 @@ public class IntactInteractionEvidence extends AbstractIntactPrimaryObject imple
     }
 
     @Transient
-    public boolean areVariableParameterValuesInitialized(){
+    public boolean areVariableParameterValuesInitialized() {
         return Hibernate.isInitialized(getVariableParameterValues());
     }
 
     @Transient
-    public boolean areConfidencesInitialized(){
+    public boolean areConfidencesInitialized() {
         return Hibernate.isInitialized(getConfidences());
     }
 
     @Transient
-    public boolean areParametersInitialized(){
+    public boolean areParametersInitialized() {
         return Hibernate.isInitialized(getParameters());
     }
 
     @Transient
-    public boolean areXrefsInitialized(){
+    public boolean areXrefsInitialized() {
         return Hibernate.isInitialized(getDbXrefs());
     }
 
     @Transient
-    public boolean areAnnotationsInitialized(){
+    public boolean areAnnotationsInitialized() {
         return Hibernate.isInitialized(getDbAnnotations());
     }
 
     @Transient
-    public boolean areParticipantsInitialized(){
+    public boolean areParticipantsInitialized() {
         return Hibernate.isInitialized(getParticipants());
     }
 
-    @OneToMany( cascade = {CascadeType.ALL}, orphanRemoval = true, targetEntity = InteractionXref.class)
-    @JoinColumn(name="parent_ac", referencedColumnName="ac")
-    @Cascade( value = {org.hibernate.annotations.CascadeType.SAVE_UPDATE} )
+    @OneToMany(cascade = {CascadeType.ALL}, orphanRemoval = true, targetEntity = InteractionXref.class)
+    @JoinColumn(name = "parent_ac", referencedColumnName = "ac")
+    @Cascade(value = {org.hibernate.annotations.CascadeType.SAVE_UPDATE})
     @Target(InteractionXref.class)
     public Collection<Xref> getDbXrefs() {
-        if (persistentXrefs == null){
+        if (persistentXrefs == null) {
             persistentXrefs = new PersistentXrefList(null);
         }
         return persistentXrefs.getWrappedList();
     }
 
-    @OneToMany( cascade = {CascadeType.ALL}, orphanRemoval = true, targetEntity = InteractionAnnotation.class)
+    private void setDbXrefs(Collection<Xref> persistentXrefs) {
+        if (persistentXrefs instanceof PersistentXrefList) {
+            this.persistentXrefs = (PersistentXrefList) persistentXrefs;
+        } else {
+            this.persistentXrefs = new PersistentXrefList(persistentXrefs);
+        }
+        this.identifiers = null;
+        this.xrefs = null;
+        this.imexId = null;
+    }
+
+    @OneToMany(cascade = {CascadeType.ALL}, orphanRemoval = true, targetEntity = InteractionAnnotation.class)
     @JoinTable(
-            name="ia_int2annot",
-            joinColumns = @JoinColumn( name="interactor_ac"),
-            inverseJoinColumns = @JoinColumn( name="annotation_ac")
+            name = "ia_int2annot",
+            joinColumns = @JoinColumn(name = "interactor_ac"),
+            inverseJoinColumns = @JoinColumn(name = "annotation_ac")
     )
-    @Cascade( value = {org.hibernate.annotations.CascadeType.SAVE_UPDATE} )
+    @Cascade(value = {org.hibernate.annotations.CascadeType.SAVE_UPDATE})
     @Target(InteractionAnnotation.class)
     /**
      * WARNING: The join table is for backward compatibility with intact-core.
@@ -482,16 +508,26 @@ public class IntactInteractionEvidence extends AbstractIntactPrimaryObject imple
      * @JoinColumn(name="parent_ac", referencedColumnName="ac")
      */
     public Collection<Annotation> getDbAnnotations() {
-        if (persistentAnnotations == null){
+        if (persistentAnnotations == null) {
             this.persistentAnnotations = new PersistentAnnotationList(null);
         }
         return this.persistentAnnotations.getWrappedList();
     }
 
+    private void setDbAnnotations(Collection<Annotation> annotations) {
+        if (annotations instanceof PersistentAnnotationList) {
+            this.persistentAnnotations = (PersistentAnnotationList) annotations;
+        } else {
+            this.persistentAnnotations = new PersistentAnnotationList(annotations);
+        }
+        this.annotations = null;
+        this.isNegative = null;
+    }
+
     /**
      * This method can reset all properties that are cached in this object as if it was just loaded from the database
      */
-    public void resetCachedDbProperties(){
+    public void resetCachedDbProperties() {
         this.identifiers = null;
         this.xrefs = null;
         this.annotations = null;
@@ -504,17 +540,25 @@ public class IntactInteractionEvidence extends AbstractIntactPrimaryObject imple
         return "interaction_evidence";
     }
 
+    private void setCategory(String value) {
+        // nothing to do
+    }
+
     @Column(name = "objclass", nullable = false, updatable = false)
     @NotNull
     protected String getObjClass() {
         return "uk.ac.ebi.intact.model.InteractionImpl";
     }
 
+    private void setObjClass(String value) {
+        // nothing to do
+    }
+
     @ManyToMany(targetEntity = IntactExperiment.class)
     @JoinTable(
             name = "ia_int2exp",
-            joinColumns = {@JoinColumn( name = "interaction_ac" )},
-            inverseJoinColumns = {@JoinColumn( name = "experiment_ac" )}
+            joinColumns = {@JoinColumn(name = "interaction_ac")},
+            inverseJoinColumns = {@JoinColumn(name = "experiment_ac")}
     )
     @Target(IntactExperiment.class)
     @Deprecated
@@ -523,21 +567,25 @@ public class IntactInteractionEvidence extends AbstractIntactPrimaryObject imple
      * @deprecated see getExperiment instead. Only kept for backward compatibility with intact core
      */
     protected List<Experiment> getDbExperiments() {
-        if (experiments == null){
+        if (experiments == null) {
             experiments = new ArrayList<Experiment>();
         }
         return experiments;
     }
 
+    private void setDbExperiments(List<Experiment> experiments) {
+        this.experiments = experiments;
+    }
+
     private void processAddedChecksumEvent(Checksum added) {
-        if (rigid == null && ChecksumUtils.doesChecksumHaveMethod(added, Checksum.RIGID_MI, Checksum.RIGID)){
+        if (rigid == null && ChecksumUtils.doesChecksumHaveMethod(added, Checksum.RIGID_MI, Checksum.RIGID)) {
             // the rigid is not set, we can set the rigid
             rigid = added;
         }
     }
 
     private void processRemovedChecksumEvent(Checksum removed) {
-        if (rigid == removed){
+        if (rigid == removed) {
             rigid = ChecksumUtils.collectFirstChecksumWithMethod(getChecksums(), Checksum.RIGID_MI, Checksum.RIGID);
         }
     }
@@ -546,24 +594,24 @@ public class IntactInteractionEvidence extends AbstractIntactPrimaryObject imple
         this.rigid = null;
     }
 
-    private void initialiseExperimentalConfidences(){
+    private void initialiseExperimentalConfidences() {
         this.confidences = new ArrayList<Confidence>();
     }
 
-    private void initialiseVariableParameterValueSets(){
+    private void initialiseVariableParameterValueSets() {
         this.variableParameterValueSets = new ArrayList<VariableParameterValueSet>();
     }
 
-    private void initialiseExperimentalParameters(){
+    private void initialiseExperimentalParameters() {
         this.parameters = new ArrayList<Parameter>();
     }
 
     private void processAddedXrefEvent(Xref added) {
 
         // the added identifier is imex and the current imex is not set
-        if (imexId == null && XrefUtils.isXrefFromDatabase(added, Xref.IMEX_MI, Xref.IMEX)){
+        if (imexId == null && XrefUtils.isXrefFromDatabase(added, Xref.IMEX_MI, Xref.IMEX)) {
             // the added xref is imex-primary
-            if (XrefUtils.doesXrefHaveQualifier(added, Xref.IMEX_PRIMARY_MI, Xref.IMEX_PRIMARY)){
+            if (XrefUtils.doesXrefHaveQualifier(added, Xref.IMEX_PRIMARY_MI, Xref.IMEX_PRIMARY)) {
                 imexId = added;
             }
         }
@@ -571,9 +619,9 @@ public class IntactInteractionEvidence extends AbstractIntactPrimaryObject imple
 
     private void processRemovedXrefEvent(Xref removed) {
         // the removed identifier is pubmed
-        if (imexId != null && imexId.equals(removed)){
+        if (imexId != null && imexId.equals(removed)) {
             Collection<Xref> existingImex = XrefUtils.collectAllXrefsHavingDatabaseAndQualifier(getXrefs(), Xref.IMEX_MI, Xref.IMEX, Xref.IMEX_PRIMARY_MI, Xref.IMEX_PRIMARY);
-            if (!existingImex.isEmpty()){
+            if (!existingImex.isEmpty()) {
                 imexId = existingImex.iterator().next();
             }
         }
@@ -583,116 +631,68 @@ public class IntactInteractionEvidence extends AbstractIntactPrimaryObject imple
         imexId = null;
     }
 
-    private void initialiseAnnotations(){
+    private void initialiseAnnotations() {
         this.annotations = new InteractionAnnotationList();
         this.isNegative = null;
-        if (this.persistentAnnotations != null){
-            for (Annotation annot : this.persistentAnnotations){
-                if (AnnotationUtils.doesAnnotationHaveTopic(annot, null, "negative")){
+        if (this.persistentAnnotations != null) {
+            for (Annotation annot : this.persistentAnnotations) {
+                if (AnnotationUtils.doesAnnotationHaveTopic(annot, null, "negative")) {
                     isNegative = annot;
-                }
-                else{
+                } else {
                     this.annotations.addOnly(annot);
                 }
             }
-        }
-        else{
+        } else {
             this.persistentAnnotations = new PersistentAnnotationList(null);
         }
     }
 
-    private void initialiseParticipants(){
+    private void initialiseParticipants() {
         this.participants = new ArrayList<ParticipantEvidence>();
     }
 
-    private void initialiseChecksums(){
+    private void initialiseChecksums() {
         this.checksums = new InteractionChecksumList();
     }
 
-    private void initialiseXrefs(){
+    private void initialiseXrefs() {
         this.identifiers = new InteractionIdentifierList();
         this.xrefs = new InteractionXrefList();
-        if (this.persistentXrefs != null){
-            for (Xref ref : this.persistentXrefs){
-                if (XrefUtils.isXrefAnIdentifier(ref) || XrefUtils.doesXrefHaveQualifier(ref, null, "intact-secondary")){
+        if (this.persistentXrefs != null) {
+            for (Xref ref : this.persistentXrefs) {
+                if (XrefUtils.isXrefAnIdentifier(ref) || XrefUtils.doesXrefHaveQualifier(ref, null, "intact-secondary")) {
                     this.identifiers.addOnly(ref);
-                }
-                else{
+                } else {
                     this.xrefs.addOnly(ref);
                     processAddedXrefEvent(ref);
                 }
             }
-        }
-        else{
+        } else {
             this.persistentXrefs = new PersistentXrefList(null);
         }
 
         // initialise ac
-        if (getAc() != null){
+        if (getAc() != null) {
             IntactContext intactContext = ApplicationContextProvider.getBean("intactJamiContext");
-            if (intactContext != null){
-                this.acRef = new DefaultXref(intactContext.getIntactConfiguration().getDefaultInstitution(), getAc(), CvTermUtils.createIdentityQualifier());
-            }
-            else{
+            if (intactContext != null) {
+                CvTerm database = IntactUtils.getCvByMITerm(Xref.INTACT_MI, IntactUtils.DATABASE_OBJCLASS);
+                CvTerm qualifier = IntactUtils.getCvByMITerm(Xref.IDENTITY_MI, IntactUtils.QUALIFIER_OBJCLASS);
+                if (database == null || qualifier == null) {
+                    this.acRef = new DefaultXref(intactContext.getIntactConfiguration().getDefaultInstitution(), getAc(), CvTermUtils.createIdentityQualifier());
+                } else {
+                    this.acRef = new DefaultXref(database,
+                            getAc(), qualifier);
+                }
+            } else {
                 this.acRef = new DefaultXref(new DefaultCvTerm("unknwon"), getAc(), CvTermUtils.createIdentityQualifier());
             }
             this.identifiers.addOnly(this.acRef);
         }
     }
 
-    private void setObjClass(String value){
-        // nothing to do
-    }
-
-    private void setCategory(String value){
-        // nothing to do
-    }
-
-    private void setDbXrefs(Collection<Xref> persistentXrefs) {
-        if (persistentXrefs instanceof PersistentXrefList){
-            this.persistentXrefs = (PersistentXrefList)persistentXrefs;
-        }
-        else{
-            this.persistentXrefs = new PersistentXrefList(persistentXrefs);
-        }
-        this.identifiers = null;
-        this.xrefs = null;
-        this.imexId = null;
-    }
-
-    private void setDbAnnotations(Collection<Annotation> annotations) {
-        if (annotations instanceof PersistentAnnotationList){
-            this.persistentAnnotations = (PersistentAnnotationList)annotations;
-        }
-        else{
-            this.persistentAnnotations = new PersistentAnnotationList(annotations);
-        }
-        this.annotations = null;
-        this.isNegative = null;
-    }
-
-    private void setDbExperiments(List<Experiment> experiments) {
-        this.experiments = experiments;
-    }
-
-    private void setVariableParameterValues(Collection<VariableParameterValueSet> variableParameterValueSets) {
-        this.variableParameterValueSets = variableParameterValueSets;
-    }
-
-    private void setConfidences(Collection<Confidence> confidences) {
-        this.confidences = confidences;
-    }
-
-    private void setParameters(Collection<Parameter> parameters) {
-        this.parameters = parameters;
-    }
-
-    private void setParticipants(Collection<ParticipantEvidence> participants) {
-        this.participants = participants;
-    }
-
     /**
      * Overrides serialization for xrefs and annotations (inner classes not serializable)
+     *
      * @param oos
      * @throws java.io.IOException
      */
@@ -710,6 +710,7 @@ public class IntactInteractionEvidence extends AbstractIntactPrimaryObject imple
 
     /**
      * Overrides serialization for xrefs and annotations (inner classes not serializable)
+     *
      * @param ois
      * @throws ClassNotFoundException
      * @throws IOException
@@ -719,34 +720,33 @@ public class IntactInteractionEvidence extends AbstractIntactPrimaryObject imple
         // default deserialization
         ois.defaultReadObject();
         // read default xrefs
-        setDbXrefs((Collection<Xref>)ois.readObject());
+        setDbXrefs((Collection<Xref>) ois.readObject());
         // read default annotations
-        setDbAnnotations((Collection<Annotation>)ois.readObject());
+        setDbAnnotations((Collection<Annotation>) ois.readObject());
         // read default the checksums
-        getChecksums().addAll((Collection<Checksum>)ois.readObject());
+        getChecksums().addAll((Collection<Checksum>) ois.readObject());
     }
 
     /**
      * Experimental interaction identifier list
      */
     private class InteractionIdentifierList extends AbstractListHavingProperties<Xref> {
-        public InteractionIdentifierList(){
+        public InteractionIdentifierList() {
             super();
         }
 
         @Override
         protected void processAddedObjectEvent(Xref added) {
-            if (!added.equals(acRef)){
+            if (!added.equals(acRef)) {
                 persistentXrefs.add(added);
             }
         }
 
         @Override
         protected void processRemovedObjectEvent(Xref removed) {
-            if (!removed.equals(acRef)){
+            if (!removed.equals(acRef)) {
                 persistentXrefs.remove(removed);
-            }
-            else{
+            } else {
                 super.addOnly(acRef);
                 throw new UnsupportedOperationException("Cannot remove the database accession of an Interaction object from its list of identifiers.");
             }
@@ -755,7 +755,7 @@ public class IntactInteractionEvidence extends AbstractIntactPrimaryObject imple
         @Override
         protected void clearProperties() {
             persistentXrefs.retainAll(getXrefs());
-            if (acRef != null){
+            if (acRef != null) {
                 super.addOnly(acRef);
             }
 
@@ -766,7 +766,7 @@ public class IntactInteractionEvidence extends AbstractIntactPrimaryObject imple
      * Experimental interaction Xref list
      */
     private class InteractionXrefList extends AbstractListHavingProperties<Xref> {
-        public InteractionXrefList(){
+        public InteractionXrefList() {
             super();
         }
 
@@ -792,7 +792,7 @@ public class IntactInteractionEvidence extends AbstractIntactPrimaryObject imple
 
     private class PersistentXrefList extends AbstractCollectionWrapper<Xref> {
 
-        public PersistentXrefList(Collection<Xref> persistentBag){
+        public PersistentXrefList(Collection<Xref> persistentBag) {
             super(persistentBag);
         }
 
@@ -818,7 +818,7 @@ public class IntactInteractionEvidence extends AbstractIntactPrimaryObject imple
     }
 
     private class InteractionAnnotationList extends AbstractListHavingProperties<Annotation> {
-        public InteractionAnnotationList(){
+        public InteractionAnnotationList() {
             super();
         }
 
@@ -834,10 +834,9 @@ public class IntactInteractionEvidence extends AbstractIntactPrimaryObject imple
 
         @Override
         protected void clearProperties() {
-            if (isNegative == null){
+            if (isNegative == null) {
                 persistentAnnotations.clear();
-            }
-            else{
+            } else {
                 persistentAnnotations.retainAll(Collections.singleton(isNegative));
             }
         }
@@ -845,7 +844,7 @@ public class IntactInteractionEvidence extends AbstractIntactPrimaryObject imple
 
     private class PersistentAnnotationList extends AbstractCollectionWrapper<Annotation> {
 
-        public PersistentAnnotationList(Collection<Annotation> persistentBag){
+        public PersistentAnnotationList(Collection<Annotation> persistentBag) {
             super(persistentBag);
         }
 
@@ -871,7 +870,7 @@ public class IntactInteractionEvidence extends AbstractIntactPrimaryObject imple
     }
 
     private class InteractionChecksumList extends AbstractListHavingProperties<Checksum> {
-        public InteractionChecksumList(){
+        public InteractionChecksumList() {
             super();
         }
 

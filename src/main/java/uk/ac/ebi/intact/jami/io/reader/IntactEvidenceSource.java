@@ -35,6 +35,17 @@ public class IntactEvidenceSource extends IntactEvidenceStream implements Intera
         return getIntactService().fetchIntactObjects(0, (int)getIntactService().countAll());
     }
 
+    public Collection<InteractionEvidence> getInteractions(int minIndex,int maxIndex) throws MIIOException {
+        if (!isInitialised()){
+            initialiseContext(null);
+        }
+
+        if (getQuery() != null){
+            return getIntactService().fetchIntactObjects(getQuery(), getQueryParameters(), 0, (int) getIntactService().countAll());
+        }
+        return getIntactService().fetchIntactObjects(minIndex, maxIndex,true);
+    }
+
     public long getNumberOfInteractions() {
         if (!isInitialised()){
             initialiseContext(null);

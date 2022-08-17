@@ -19,8 +19,6 @@ import org.apache.commons.lang.StringUtils;
 import org.hibernate.HibernateException;
 import org.hibernate.dialect.Dialect;
 import org.hibernate.engine.spi.Mapping;
-import org.hibernate.mapping.AbstractAuxiliaryDatabaseObject;
-
 import java.lang.reflect.Method;
 import java.util.HashSet;
 
@@ -29,13 +27,13 @@ import java.util.HashSet;
  *
  * @author Marine Dumousseau (marine@ebi.ac.uk)
  */
-public class SequenceAuxiliaryDatabaseObject extends AbstractAuxiliaryDatabaseObject {
+public class SequenceAuxiliaryDatabaseObject  {
 
     private String sequenceName;
     private int initialValue;
 
     public SequenceAuxiliaryDatabaseObject(String sequenceName, int initialValue) {
-        super(new HashSet<String>());
+        //super(new HashSet<String>());
 
         this.initialValue = initialValue;
         this.sequenceName = sequenceName;
@@ -69,8 +67,6 @@ public class SequenceAuxiliaryDatabaseObject extends AbstractAuxiliaryDatabaseOb
         return StringUtils.join(dropSqls, "; ");
     }
 
-    @Override
-    public boolean appliesToDialect(Dialect dialect) {
-        return dialect.supportsSequences();
-    }
+
+
 }

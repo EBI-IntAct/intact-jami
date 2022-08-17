@@ -2,7 +2,7 @@ package uk.ac.ebi.intact.jami.interceptor;
 
 import org.hibernate.EmptyInterceptor;
 import org.hibernate.Transaction;
-import org.hibernate.engine.transaction.spi.LocalStatus;
+import org.hibernate.resource.transaction.spi.TransactionStatus;
 import uk.ac.ebi.intact.jami.ApplicationContextProvider;
 
 import java.util.Iterator;
@@ -41,10 +41,10 @@ public class IntactSynchronizerInterceptor extends EmptyInterceptor{
     public void afterTransactionCompletion(Transaction tx) {
         IntactTransactionSynchronization afterCommitExecutor = ApplicationContextProvider.getBean("afterCommitExecutor");
         if (afterCommitExecutor != null){
-            if (tx.getLocalStatus() == LocalStatus.COMMITTED){
+            if (tx.getStatus() == TransactionStatus.COMMITTED){
                 afterCommitExecutor.afterCompletion(STATUS_COMMITTED);
             }
-            else if (tx.getLocalStatus() == LocalStatus.ROLLED_BACK){
+            else if (tx.getStatus() == TransactionStatus.ROLLED_BACK){
                 afterCommitExecutor.afterCompletion(STATUS_ROLLED_BACK);
             }
             else{

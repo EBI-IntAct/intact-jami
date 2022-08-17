@@ -16,7 +16,7 @@ import java.util.Iterator;
 
 /**
  * Intact implementation of bioactive entity
- *
+ * <p>
  * Smile, standard inchi and standard inchi key are stored as annotations for backward compatibility with IntAct core
  * but when intact-core is removed, it may be good to add these checksum as columns in the interactor table
  *
@@ -25,16 +25,16 @@ import java.util.Iterator;
  * @since <pre>16/01/14</pre>
  */
 @Entity
-@DiscriminatorValue( "bioactive_entity" )
+@DiscriminatorValue("bioactive_entity")
 @Where(clause = "category = 'bioactive_entity'")
-public class IntactBioactiveEntity extends IntactMolecule implements BioactiveEntity{
+public class IntactBioactiveEntity extends IntactMolecule implements BioactiveEntity {
 
     private transient Xref chebi;
     private transient Checksum smile;
     private transient Checksum standardInchi;
     private transient Checksum standardInchiKey;
 
-    protected IntactBioactiveEntity(){
+    protected IntactBioactiveEntity() {
         super();
     }
 
@@ -73,21 +73,21 @@ public class IntactBioactiveEntity extends IntactMolecule implements BioactiveEn
 
     public IntactBioactiveEntity(String name, String fullName, CvTerm type, String uniqueChebi) {
         super(name, fullName, type);
-        if (uniqueChebi != null){
+        if (uniqueChebi != null) {
             setChebi(uniqueChebi);
         }
     }
 
     public IntactBioactiveEntity(String name, CvTerm type, Organism organism, String uniqueChebi) {
         super(name, type, organism);
-        if (uniqueChebi != null){
+        if (uniqueChebi != null) {
             setChebi(uniqueChebi);
         }
     }
 
     public IntactBioactiveEntity(String name, String fullName, CvTerm type, Organism organism, String uniqueChebi) {
         super(name, fullName, type, organism);
-        if (uniqueChebi != null){
+        if (uniqueChebi != null) {
             setChebi(uniqueChebi);
         }
     }
@@ -127,21 +127,21 @@ public class IntactBioactiveEntity extends IntactMolecule implements BioactiveEn
 
     public IntactBioactiveEntity(String name, String fullName, String uniqueChebi) {
         super(name, fullName);
-        if (uniqueChebi != null){
+        if (uniqueChebi != null) {
             setChebi(uniqueChebi);
         }
     }
 
     public IntactBioactiveEntity(String name, Organism organism, String uniqueChebi) {
         super(name, organism);
-        if (uniqueChebi != null){
+        if (uniqueChebi != null) {
             setChebi(uniqueChebi);
         }
     }
 
     public IntactBioactiveEntity(String name, String fullName, Organism organism, String uniqueChebi) {
         super(name, fullName, organism);
-        if (uniqueChebi != null){
+        if (uniqueChebi != null) {
             setChebi(uniqueChebi);
         }
     }
@@ -168,21 +168,19 @@ public class IntactBioactiveEntity extends IntactMolecule implements BioactiveEn
         Collection<Xref> bioactiveEntityIdentifiers = getIdentifiers();
 
         // add new chebi if not null
-        if (id != null){
+        if (id != null) {
             CvTerm chebiDatabase = IntactUtils.createMIDatabase(Xref.CHEBI, Xref.CHEBI_MI);
             CvTerm identityQualifier = IntactUtils.createMIQualifier(Xref.IDENTITY, Xref.IDENTITY_MI);
             // first remove old chebi if not null
-            if (this.chebi != null && !id.equals(this.chebi)){
-                if (this.chebi instanceof AbstractIntactXref){
+            if (this.chebi != null && !id.equals(this.chebi)) {
+                if (this.chebi instanceof AbstractIntactXref) {
                     ((AbstractIntactXref) this.chebi).setId(id);
-                }
-                else{
+                } else {
                     bioactiveEntityIdentifiers.remove(this.chebi);
                     this.chebi = new InteractorXref(chebiDatabase, id, identityQualifier);
                     bioactiveEntityIdentifiers.add(this.chebi);
                 }
-            }
-            else if (this.chebi == null){
+            } else if (this.chebi == null) {
                 this.chebi = new InteractorXref(chebiDatabase, id, identityQualifier);
                 bioactiveEntityIdentifiers.add(this.chebi);
             }
@@ -203,11 +201,11 @@ public class IntactBioactiveEntity extends IntactMolecule implements BioactiveEn
 
     public void setSmile(String smile) {
         Collection<Checksum> bioactiveEntityChecksums = getChecksums();
+        if (smile != null) {
+            CvTerm smileMethod = IntactUtils.getCvTopicByMITerm(Checksum.SMILE, Checksum.SMILE_MI);
 
-        if (smile != null){
-            CvTerm smileMethod = IntactUtils.createMITopic(Checksum.SMILE, Checksum.SMILE_MI);
             // first remove old smile
-            if (this.smile != null){
+            if (this.smile != null) {
                 bioactiveEntityChecksums.remove(this.smile);
             }
             Annotation annotSmile = new InteractorAnnotation(smileMethod, smile);
@@ -233,10 +231,11 @@ public class IntactBioactiveEntity extends IntactMolecule implements BioactiveEn
     public void setStandardInchiKey(String key) {
         Collection<Checksum> bioactiveEntityChecksums = getChecksums();
 
-        if (key != null){
-            CvTerm inchiKeyMethod = IntactUtils.createMITopic(Checksum.STANDARD_INCHI_KEY, Checksum.STANDARD_INCHI_KEY_MI);
+        if (key != null) {
+            CvTerm inchiKeyMethod = IntactUtils.getCvTopicByMITerm(Checksum.STANDARD_INCHI_KEY, Checksum.STANDARD_INCHI_KEY_MI);
+
             // first remove old standard inchi key
-            if (this.standardInchiKey != null){
+            if (this.standardInchiKey != null) {
                 bioactiveEntityChecksums.remove(this.standardInchiKey);
             }
             Annotation annotInchi = new InteractorAnnotation(inchiKeyMethod, key);
@@ -262,10 +261,11 @@ public class IntactBioactiveEntity extends IntactMolecule implements BioactiveEn
     public void setStandardInchi(String inchi) {
         Collection<Checksum> bioactiveEntityChecksums = getChecksums();
 
-        if (inchi != null){
-            CvTerm inchiMethod = IntactUtils.createMITopic(Checksum.INCHI, Checksum.INCHI_MI);;
+        if (inchi != null) {
+            CvTerm inchiMethod = IntactUtils.getCvTopicByMITerm(Checksum.INCHI, Checksum.INCHI_MI);
+
             // first remove standard inchi
-            if (this.standardInchi != null){
+            if (this.standardInchi != null) {
                 bioactiveEntityChecksums.remove(this.standardInchi);
             }
             Annotation annotInchi = new InteractorAnnotation(inchiMethod, inchi);
@@ -283,17 +283,15 @@ public class IntactBioactiveEntity extends IntactMolecule implements BioactiveEn
 
     private void processAddedChecksumEvent(Checksum added) {
         // the added checksum is standard inchi key and it is not the current standard inchi key
-        if (standardInchiKey == null && ChecksumUtils.doesChecksumHaveMethod(added, Checksum.STANDARD_INCHI_KEY_MI, Checksum.STANDARD_INCHI_KEY)){
+        if (standardInchiKey == null && ChecksumUtils.doesChecksumHaveMethod(added, Checksum.STANDARD_INCHI_KEY_MI, Checksum.STANDARD_INCHI_KEY)) {
             // the standard inchi key is not set, we can set the standard inchi key
             standardInchiKey = added;
             getDbAnnotations().add(new InteractorAnnotation(standardInchiKey.getMethod(), standardInchiKey.getValue()));
-        }
-        else if (smile == null && ChecksumUtils.doesChecksumHaveMethod(added, Checksum.SMILE_MI, Checksum.SMILE)){
+        } else if (smile == null && ChecksumUtils.doesChecksumHaveMethod(added, Checksum.SMILE_MI, Checksum.SMILE)) {
             // the smile is not set, we can set the smile
             smile = added;
             getDbAnnotations().add(new InteractorAnnotation(smile.getMethod(), smile.getValue()));
-        }
-        else if (standardInchi == null && ChecksumUtils.doesChecksumHaveMethod(added, Checksum.INCHI_MI, Checksum.INCHI)){
+        } else if (standardInchi == null && ChecksumUtils.doesChecksumHaveMethod(added, Checksum.INCHI_MI, Checksum.INCHI)) {
             // the standard inchi is not set, we can set the standard inchi
             standardInchi = added;
             getDbAnnotations().add(new InteractorAnnotation(standardInchi.getMethod(), standardInchi.getValue()));
@@ -302,24 +300,22 @@ public class IntactBioactiveEntity extends IntactMolecule implements BioactiveEn
 
     private void processRemovedChecksumEvent(Checksum removed) {
         // the removed identifier is standard inchi key
-        if (standardInchiKey != null && standardInchiKey.equals(removed)){
+        if (standardInchiKey != null && standardInchiKey.equals(removed)) {
             getDbAnnotations().remove(new InteractorAnnotation(standardInchiKey.getMethod(), standardInchiKey.getValue()));
             standardInchiKey = ChecksumUtils.collectFirstChecksumWithMethod(getChecksums(), Checksum.STANDARD_INCHI_KEY_MI, Checksum.STANDARD_INCHI_KEY);
-            if (standardInchiKey != null){
+            if (standardInchiKey != null) {
                 getDbAnnotations().add(new InteractorAnnotation(standardInchiKey.getMethod(), standardInchiKey.getValue()));
             }
-        }
-        else if (smile != null && smile.equals(removed)){
+        } else if (smile != null && smile.equals(removed)) {
             getDbAnnotations().remove(new InteractorAnnotation(smile.getMethod(), smile.getValue()));
             smile = ChecksumUtils.collectFirstChecksumWithMethod(getChecksums(), Checksum.SMILE_MI, Checksum.SMILE);
-            if (smile != null){
+            if (smile != null) {
                 getDbAnnotations().add(new InteractorAnnotation(smile.getMethod(), smile.getValue()));
             }
-        }
-        else if (standardInchi != null && standardInchi.equals(removed)){
+        } else if (standardInchi != null && standardInchi.equals(removed)) {
             getDbAnnotations().remove(new InteractorAnnotation(standardInchi.getMethod(), standardInchi.getValue()));
             standardInchi = ChecksumUtils.collectFirstChecksumWithMethod(getChecksums(), Checksum.INCHI_MI, Checksum.INCHI);
-            if (standardInchi != null){
+            if (standardInchi != null) {
                 getDbAnnotations().add(new InteractorAnnotation(standardInchi.getMethod(), standardInchi.getValue()));
             }
         }
@@ -328,19 +324,18 @@ public class IntactBioactiveEntity extends IntactMolecule implements BioactiveEn
     @Override
     protected void processAddedIdentifierEvent(Xref added) {
         // the added identifier is chebi and it is not the current chebi identifier
-        if (chebi != added && XrefUtils.isXrefFromDatabase(added, Xref.CHEBI_MI, Xref.CHEBI)){
+        if (chebi != added && XrefUtils.isXrefFromDatabase(added, Xref.CHEBI_MI, Xref.CHEBI)) {
             // the current chebi identifier is not identity, we may want to set chebiIdentifier
-            if (!XrefUtils.doesXrefHaveQualifier(chebi, Xref.IDENTITY_MI, Xref.IDENTITY)){
+            if (!XrefUtils.doesXrefHaveQualifier(chebi, Xref.IDENTITY_MI, Xref.IDENTITY)) {
                 // the chebi identifier is not set, we can set the chebi identifier
-                if (chebi == null){
+                if (chebi == null) {
                     chebi = added;
-                }
-                else if (XrefUtils.doesXrefHaveQualifier(added, Xref.IDENTITY_MI, Xref.IDENTITY)){
+                } else if (XrefUtils.doesXrefHaveQualifier(added, Xref.IDENTITY_MI, Xref.IDENTITY)) {
                     chebi = added;
                 }
                 // the added xref is secondary object and the current chebi is not a secondary object, we reset chebi identifier
                 else if (!XrefUtils.doesXrefHaveQualifier(chebi, Xref.SECONDARY_MI, Xref.SECONDARY)
-                        && XrefUtils.doesXrefHaveQualifier(added, Xref.SECONDARY_MI, Xref.SECONDARY)){
+                        && XrefUtils.doesXrefHaveQualifier(added, Xref.SECONDARY_MI, Xref.SECONDARY)) {
                     chebi = added;
                 }
             }
@@ -350,7 +345,7 @@ public class IntactBioactiveEntity extends IntactMolecule implements BioactiveEn
     @Override
     protected void processRemovedIdentifierEvent(Xref removed) {
         // the removed identifier is chebi
-        if (chebi != null && chebi.equals(removed)){
+        if (chebi != null && chebi.equals(removed)) {
             chebi = XrefUtils.collectFirstIdentifierWithDatabase(getIdentifiers(), Xref.CHEBI_MI, Xref.CHEBI);
         }
     }
@@ -369,7 +364,7 @@ public class IntactBioactiveEntity extends IntactMolecule implements BioactiveEn
     @Override
     protected void initialiseAnnotations() {
         super.initialiseAnnotationsWith(new BioactiveEntityAnnotationList());
-        BioactiveEntityChecksumList checksumList = (BioactiveEntityChecksumList)getChecksums();
+        BioactiveEntityChecksumList checksumList = (BioactiveEntityChecksumList) getChecksums();
 
         Checksum inchi = this.standardInchi;
         Checksum smile = this.smile;
@@ -379,27 +374,25 @@ public class IntactBioactiveEntity extends IntactMolecule implements BioactiveEn
         checksumList.remove(smile);
         checksumList.remove(key);
 
-        for (Annotation annotation : getDbAnnotations()){
+        for (Annotation annotation : getDbAnnotations()) {
             // we have a checksum
             if (annotation.getValue() != null
-                    && AnnotationUtils.doesAnnotationHaveTopic(annotation, Checksum.SMILE_MI, Checksum.SMILE)){
+                    && AnnotationUtils.doesAnnotationHaveTopic(annotation, Checksum.SMILE_MI, Checksum.SMILE)) {
                 this.smile = new IntactChecksumWrapper(annotation);
                 checksumList.addOnly(this.smile);
-            }
-            else if (annotation.getValue() != null
-                    && AnnotationUtils.doesAnnotationHaveTopic(annotation, Checksum.INCHI_MI, Checksum.INCHI)){
+            } else if (annotation.getValue() != null
+                    && AnnotationUtils.doesAnnotationHaveTopic(annotation, Checksum.INCHI_MI, Checksum.INCHI)) {
                 this.standardInchi = new IntactChecksumWrapper(annotation);
                 checksumList.addOnly(this.standardInchi);
 
-            }
-            else if (annotation.getValue() != null &&
-                    AnnotationUtils.doesAnnotationHaveTopic(annotation, Checksum.STANDARD_INCHI_KEY_MI, Checksum.STANDARD_INCHI_KEY)){
+            } else if (annotation.getValue() != null &&
+                    AnnotationUtils.doesAnnotationHaveTopic(annotation, Checksum.STANDARD_INCHI_KEY_MI, Checksum.STANDARD_INCHI_KEY)) {
                 this.standardInchiKey = new IntactChecksumWrapper(annotation);
                 checksumList.addOnly(this.standardInchiKey);
             }
             // we have a simple annotation
-            else{
-                ((BioactiveEntityAnnotationList)getAnnotations()).addOnly(annotation);
+            else {
+                ((BioactiveEntityAnnotationList) getAnnotations()).addOnly(annotation);
             }
         }
     }
@@ -440,13 +433,13 @@ public class IntactBioactiveEntity extends IntactMolecule implements BioactiveEn
     }
 
     private void clearPropertiesLinkedToChecksums() {
-        if (standardInchiKey != null){
+        if (standardInchiKey != null) {
             getDbAnnotations().remove(new InteractorAnnotation(standardInchiKey.getMethod(), standardInchiKey.getValue()));
         }
-        if (smile != null){
+        if (smile != null) {
             getDbAnnotations().remove(new InteractorAnnotation(smile.getMethod(), smile.getValue()));
         }
-        if (standardInchi != null){
+        if (standardInchi != null) {
             getDbAnnotations().remove(new InteractorAnnotation(standardInchi.getMethod(), standardInchi.getValue()));
         }
 
@@ -456,7 +449,7 @@ public class IntactBioactiveEntity extends IntactMolecule implements BioactiveEn
     }
 
     private class BioactiveEntityChecksumList extends AbstractListHavingProperties<Checksum> {
-        public BioactiveEntityChecksumList(){
+        public BioactiveEntityChecksumList() {
             super();
         }
 
@@ -478,7 +471,7 @@ public class IntactBioactiveEntity extends IntactMolecule implements BioactiveEn
     }
 
     private class BioactiveEntityAnnotationList extends AbstractListHavingProperties<Annotation> {
-        public BioactiveEntityAnnotationList(){
+        public BioactiveEntityAnnotationList() {
             super();
         }
 
@@ -495,24 +488,21 @@ public class IntactBioactiveEntity extends IntactMolecule implements BioactiveEn
         @Override
         protected void clearProperties() {
             Iterator<Annotation> dbAnnotationsIterator = getDbAnnotations().iterator();
-            while(dbAnnotationsIterator.hasNext()){
+            while (dbAnnotationsIterator.hasNext()) {
                 Annotation dbAnnot = dbAnnotationsIterator.next();
 
                 // we have a checksum
                 if (dbAnnot.getValue() != null
-                        && AnnotationUtils.doesAnnotationHaveTopic(dbAnnot, Checksum.SMILE_MI, Checksum.SMILE)){
+                        && AnnotationUtils.doesAnnotationHaveTopic(dbAnnot, Checksum.SMILE_MI, Checksum.SMILE)) {
                     // nothing to do
-                }
-                else if (dbAnnot.getValue() != null
-                        && AnnotationUtils.doesAnnotationHaveTopic(dbAnnot, Checksum.INCHI_MI, Checksum.INCHI)){
+                } else if (dbAnnot.getValue() != null
+                        && AnnotationUtils.doesAnnotationHaveTopic(dbAnnot, Checksum.INCHI_MI, Checksum.INCHI)) {
                     // nothing to do
 
-                }
-                else if (dbAnnot.getValue() != null &&
-                        AnnotationUtils.doesAnnotationHaveTopic(dbAnnot, Checksum.STANDARD_INCHI_KEY_MI, Checksum.STANDARD_INCHI_KEY)){
+                } else if (dbAnnot.getValue() != null &&
+                        AnnotationUtils.doesAnnotationHaveTopic(dbAnnot, Checksum.STANDARD_INCHI_KEY_MI, Checksum.STANDARD_INCHI_KEY)) {
                     // nothing to do
-                }
-                else{
+                } else {
                     dbAnnotationsIterator.remove();
                 }
             }

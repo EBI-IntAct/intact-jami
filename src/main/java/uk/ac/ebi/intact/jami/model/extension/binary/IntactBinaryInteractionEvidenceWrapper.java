@@ -19,16 +19,16 @@ import java.util.Date;
  * @since <pre>05/06/13</pre>
  */
 
-public class IntactBinaryInteractionEvidenceWrapper implements BinaryInteractionEvidence,IntactPrimaryObject{
+public class IntactBinaryInteractionEvidenceWrapper implements BinaryInteractionEvidence, IntactPrimaryObject {
     private IntactInteractionEvidence wrappedInteraction;
     private BinaryInteractionEvidenceWrapper binaryWrapper;
 
-    public IntactBinaryInteractionEvidenceWrapper(IntactInteractionEvidence interaction){
+    public IntactBinaryInteractionEvidenceWrapper(IntactInteractionEvidence interaction) {
         this.wrappedInteraction = interaction;
         this.binaryWrapper = new BinaryInteractionEvidenceWrapper(interaction);
     }
 
-    public IntactBinaryInteractionEvidenceWrapper(IntactInteractionEvidence interaction, CvTerm complexExpansion){
+    public IntactBinaryInteractionEvidenceWrapper(IntactInteractionEvidence interaction, CvTerm complexExpansion) {
         this(interaction);
         this.binaryWrapper = new BinaryInteractionEvidenceWrapper(interaction, complexExpansion);
     }
@@ -37,12 +37,12 @@ public class IntactBinaryInteractionEvidenceWrapper implements BinaryInteraction
         return this.binaryWrapper.getParticipantA();
     }
 
-    public ParticipantEvidence getParticipantB() {
-        return this.binaryWrapper.getParticipantB();
-    }
-
     public void setParticipantA(ParticipantEvidence participantA) {
         this.binaryWrapper.setParticipantA(participantA);
+    }
+
+    public ParticipantEvidence getParticipantB() {
+        return this.binaryWrapper.getParticipantB();
     }
 
     public void setParticipantB(ParticipantEvidence participantB) {
@@ -60,6 +60,7 @@ public class IntactBinaryInteractionEvidenceWrapper implements BinaryInteraction
     /**
      * The collection of participants for this binary interaction.
      * It cannot be changed.
+     *
      * @return
      */
     public Collection<ParticipantEvidence> getParticipants() {
@@ -69,6 +70,7 @@ public class IntactBinaryInteractionEvidenceWrapper implements BinaryInteraction
     /**
      * Adds a new Participant and set the Interaction of this participant if added.
      * If the participant B and A are null, it will first set the participantA. If the participantA is set, it will set the ParticipantB
+     *
      * @param part
      * @return
      * @throws IllegalArgumentException if this Binary interaction already contains two participants
@@ -79,6 +81,7 @@ public class IntactBinaryInteractionEvidenceWrapper implements BinaryInteraction
 
     /**
      * Removes the Participant from this binary interaction
+     *
      * @param part
      * @return
      */
@@ -89,6 +92,7 @@ public class IntactBinaryInteractionEvidenceWrapper implements BinaryInteraction
     /**
      * Adds the participants and set the Interaction of this participant if added.
      * If the participant B and A are null, it will first set the participantA. If the participantA is set, it will set the ParticipantB
+     *
      * @param participants
      * @return
      * @throws IllegalArgumentException if this Binary interaction already contains two participants or the given participants contains more than two participants

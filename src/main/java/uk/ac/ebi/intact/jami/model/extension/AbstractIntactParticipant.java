@@ -15,7 +15,7 @@ import java.util.Collection;
 
 /**
  * Abstract class for intact participants
- *
+ * <p>
  * NOTE; all entities are in the same table for backward compatibility with intact-core. In the future, this will be updated
  * We distinguish entities from participant with interaction property in participants. That is why this abstract class is only @MappedSupperClass and
  * the inheritance stratedy is delegated to IntActModelledParticipant and IntactParticipantEvidence
@@ -48,33 +48,33 @@ public abstract class AbstractIntactParticipant<I extends Interaction, F extends
 
     private String shortName;
 
-    protected AbstractIntactParticipant(){
+    protected AbstractIntactParticipant() {
         super();
     }
 
-    public AbstractIntactParticipant(Interactor interactor){
+    public AbstractIntactParticipant(Interactor interactor) {
         super();
-        if (interactor == null){
+        if (interactor == null) {
             throw new IllegalArgumentException("The interactor cannot be null.");
         }
         this.interactor = interactor;
     }
 
-    public AbstractIntactParticipant(Interactor interactor, CvTerm bioRole){
+    public AbstractIntactParticipant(Interactor interactor, CvTerm bioRole) {
         super();
-        if (interactor == null){
+        if (interactor == null) {
             throw new IllegalArgumentException("The interactor cannot be null.");
         }
         this.interactor = interactor;
         this.biologicalRole = bioRole;
     }
 
-    public AbstractIntactParticipant(Interactor interactor, Stoichiometry stoichiometry){
+    public AbstractIntactParticipant(Interactor interactor, Stoichiometry stoichiometry) {
         this(interactor);
         this.stoichiometry = stoichiometry;
     }
 
-    public AbstractIntactParticipant(Interactor interactor, CvTerm bioRole, Stoichiometry stoichiometry){
+    public AbstractIntactParticipant(Interactor interactor, CvTerm bioRole, Stoichiometry stoichiometry) {
         this(interactor, bioRole);
         this.stoichiometry = stoichiometry;
     }
@@ -89,17 +89,17 @@ public abstract class AbstractIntactParticipant<I extends Interaction, F extends
     }
 
     public void setInteractionAndAddParticipant(I interaction) {
-        if (this.interaction != null){
+        if (this.interaction != null) {
             this.interaction.removeParticipant(this);
         }
 
-        if (interaction != null){
+        if (interaction != null) {
             interaction.addParticipant(this);
         }
     }
 
-    @ManyToOne( targetEntity = IntactInteractor.class, optional = false)
-    @JoinColumn( name = "interactor_ac", referencedColumnName = "ac")
+    @ManyToOne(targetEntity = IntactInteractor.class, optional = false)
+    @JoinColumn(name = "interactor_ac", referencedColumnName = "ac")
     @Target(IntactInteractor.class)
     @NotNull
     public Interactor getInteractor() {
@@ -107,23 +107,23 @@ public abstract class AbstractIntactParticipant<I extends Interaction, F extends
     }
 
     public void setInteractor(Interactor interactor) {
-        if (interactor == null){
+        if (interactor == null) {
             throw new IllegalArgumentException("The interactor cannot be null.");
         }
         Interactor oldInteractor = this.interactor;
         this.interactor = interactor;
-        if (oldInteractor != this.interactor){
-            if (this.changeListener != null){
+        if (oldInteractor != this.interactor) {
+            if (this.changeListener != null) {
                 this.changeListener.onInteractorUpdate(this, oldInteractor);
             }
         }
     }
 
     @ManyToOne(targetEntity = IntactCvTerm.class)
-    @JoinColumn( name = "biologicalrole_ac", referencedColumnName = "ac")
+    @JoinColumn(name = "biologicalrole_ac", referencedColumnName = "ac")
     @Target(IntactCvTerm.class)
     public CvTerm getBiologicalRole() {
-        if (this.biologicalRole == null){
+        if (this.biologicalRole == null) {
             this.biologicalRole = IntactUtils.createMIBiologicalRole(Participant.UNSPECIFIED_ROLE, Participant.UNSPECIFIED_ROLE_MI);
         }
         return this.biologicalRole;
@@ -135,18 +135,26 @@ public abstract class AbstractIntactParticipant<I extends Interaction, F extends
 
     @Transient
     public Collection<CausalRelationship> getCausalRelationships() {
-        if (this.causalRelationships == null){
+        if (this.causalRelationships == null) {
             initialiseCausalRelationships();
         }
         return this.causalRelationships;
     }
 
+    protected void setCausalRelationships(Collection<CausalRelationship> causalRelationships) {
+        this.causalRelationships = causalRelationships;
+    }
+
     @Transient
     public Collection<Xref> getXrefs() {
-        if (xrefs == null){
+        if (xrefs == null) {
             initialiseXrefs();
         }
         return this.xrefs;
+    }
+
+    protected void setXrefs(Collection<Xref> xrefs) {
+        this.xrefs = xrefs;
     }
 
     @Transient
@@ -156,18 +164,26 @@ public abstract class AbstractIntactParticipant<I extends Interaction, F extends
      * @JoinColumn(name="parent_ac", referencedColumnName="ac")
      */
     public Collection<Annotation> getAnnotations() {
-        if (annotations == null){
+        if (annotations == null) {
             initialiseAnnotations();
         }
         return this.annotations;
     }
 
+    protected void setAnnotations(Collection<Annotation> annotations) {
+        this.annotations = annotations;
+    }
+
     @Transient
     public Collection<Alias> getAliases() {
-        if (aliases == null){
+        if (aliases == null) {
             initialiseAliases();
         }
         return this.aliases;
+    }
+
+    protected void setAliases(Collection<Alias> aliases) {
+        this.aliases = aliases;
     }
 
     @Embedded
@@ -176,20 +192,19 @@ public abstract class AbstractIntactParticipant<I extends Interaction, F extends
         return this.stoichiometry;
     }
 
+    public void setStoichiometry(Stoichiometry stoichiometry) {
+        this.stoichiometry = stoichiometry;
+    }
+
     public void setStoichiometry(Integer stoichiometry) {
-        if (stoichiometry == null){
+        if (stoichiometry == null) {
             //TODO Due to backward compatibility with IntAct core that forces to have not
             //TODO null stoichiometry we assume that the default value is zero for unknown
             //this.stoichiometry = null;
             this.stoichiometry = new IntactStoichiometry(0);
-        }
-        else {
+        } else {
             this.stoichiometry = new IntactStoichiometry(stoichiometry, stoichiometry);
         }
-    }
-
-    public void setStoichiometry(Stoichiometry stoichiometry) {
-        this.stoichiometry = stoichiometry;
     }
 
     @Transient
@@ -199,10 +214,14 @@ public abstract class AbstractIntactParticipant<I extends Interaction, F extends
      * from the participant
      */
     public Collection<F> getFeatures() {
-        if (features == null){
+        if (features == null) {
             initialiseFeatures();
         }
         return this.features;
+    }
+
+    protected void setFeatures(Collection<F> features) {
+        this.features = features;
     }
 
     @Transient
@@ -216,11 +235,11 @@ public abstract class AbstractIntactParticipant<I extends Interaction, F extends
 
     public boolean addFeature(F feature) {
 
-        if (feature == null){
+        if (feature == null) {
             return false;
         }
 
-        if (getFeatures().add(feature)){
+        if (getFeatures().add(feature)) {
             feature.setParticipant(this);
             return true;
         }
@@ -229,11 +248,11 @@ public abstract class AbstractIntactParticipant<I extends Interaction, F extends
 
     public boolean removeFeature(F feature) {
 
-        if (feature == null){
+        if (feature == null) {
             return false;
         }
 
-        if (getFeatures().remove(feature)){
+        if (getFeatures().remove(feature)) {
             feature.setParticipant(null);
             return true;
         }
@@ -241,13 +260,13 @@ public abstract class AbstractIntactParticipant<I extends Interaction, F extends
     }
 
     public boolean addAllFeatures(Collection<? extends F> features) {
-        if (features == null){
+        if (features == null) {
             return false;
         }
 
         boolean added = false;
-        for (F feature : features){
-            if (addFeature(feature)){
+        for (F feature : features) {
+            if (addFeature(feature)) {
                 added = true;
             }
         }
@@ -255,13 +274,13 @@ public abstract class AbstractIntactParticipant<I extends Interaction, F extends
     }
 
     public boolean removeAllFeatures(Collection<? extends F> features) {
-        if (features == null){
+        if (features == null) {
             return false;
         }
 
         boolean added = false;
-        for (F feature : features){
-            if (removeFeature(feature)){
+        for (F feature : features) {
+            if (removeFeature(feature)) {
                 added = true;
             }
         }
@@ -274,27 +293,27 @@ public abstract class AbstractIntactParticipant<I extends Interaction, F extends
     }
 
     @Transient
-    public boolean areXrefsInitialized(){
+    public boolean areXrefsInitialized() {
         return Hibernate.isInitialized(getXrefs());
     }
 
     @Transient
-    public boolean areAliasesInitialized(){
+    public boolean areAliasesInitialized() {
         return Hibernate.isInitialized(getAliases());
     }
 
     @Transient
-    public boolean areAnnotationsInitialized(){
+    public boolean areAnnotationsInitialized() {
         return Hibernate.isInitialized(getAnnotations());
     }
 
     @Transient
-    public boolean areFeaturesInitialized(){
+    public boolean areFeaturesInitialized() {
         return Hibernate.isInitialized(getFeatures());
     }
 
     @Transient
-    public boolean areCausalRelationshipsInitialized(){
+    public boolean areCausalRelationshipsInitialized() {
         return Hibernate.isInitialized(getCausalRelationships());
     }
 
@@ -320,54 +339,33 @@ public abstract class AbstractIntactParticipant<I extends Interaction, F extends
         this.annotations = new ArrayList<Annotation>();
     }
 
-    protected void initialiseAliases(){
+    protected void initialiseAliases() {
         this.aliases = new ArrayList<Alias>();
     }
 
-    protected void initialiseFeatures(){
+    protected void initialiseFeatures() {
         this.features = new ArrayList<F>();
     }
 
-    protected void initialiseCausalRelationships(){
+    protected void initialiseCausalRelationships() {
         this.causalRelationships = new ArrayList<CausalRelationship>();
     }
 
-    protected void setAnnotations(Collection<Annotation> annotations) {
-        this.annotations = annotations;
-    }
-
-    protected void setCausalRelationships(Collection<CausalRelationship> causalRelationships) {
-        this.causalRelationships = causalRelationships;
-    }
-
-    protected void setXrefs(Collection<Xref> xrefs) {
-        this.xrefs = xrefs;
-    }
-
-    protected void setAliases(Collection<Alias> aliases) {
-        this.aliases = aliases;
-    }
-
-    protected void setFeatures(Collection<F> features) {
-        this.features = features;
-    }
-
     @Column(name = "shortlabel", nullable = false)
-    @Size( min = 1, max = IntactUtils.MAX_SHORT_LABEL_LEN )
+    @Size(min = 1, max = IntactUtils.MAX_SHORT_LABEL_LEN)
     @NotNull
     @Deprecated
     /**
      * @deprecated only for backward compatibility with intact core.
      */
     protected String getShortLabel() {
-        if (this.shortName == null){
+        if (this.shortName == null) {
             this.shortName = "N/A";
         }
         return shortName;
     }
 
     /**
-     *
      * @param shortName
      * @deprecated only for backward compatibility with intact core
      */
