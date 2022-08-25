@@ -20,6 +20,7 @@ import uk.ac.ebi.intact.jami.utils.IntactUtils;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.ForeignKey;
 import javax.persistence.OrderBy;
 import javax.persistence.Table;
 import javax.persistence.*;
@@ -188,195 +189,12 @@ public class IntactPublication extends AbstractIntactPrimaryObject implements Pu
         }
     }
 
-    protected void initialiseAnnotations() {
-        this.annotations = new PublicationAnnotationList();
-        this.authors = new ArrayList<String>();
-        this.curationDepth = CurationDepth.undefined;
-        this.journal = null;
-        this.publicationDate = null;
-        this.onHold = null;
-        this.toBeReviewed = null;
-        this.accepted = null;
-        this.correctionComment = null;
-
-        // initialise persistent annot and content
-        if (this.persistentAnnotations != null) {
-            for (Annotation annot : this.persistentAnnotations) {
-                if (!processAddedDbAnnotationEvent(annot)) {
-                    this.annotations.addOnly(annot);
-                }
-            }
-        } else {
-            this.persistentAnnotations = new PersistentAnnotationList(null);
-        }
-    }
-
-    protected void initialiseExperiments() {
-        this.experiments = new ArrayList<Experiment>();
-    }
-
-    private void initialiseStatus() {
-        if (this.cvStatus == null) {
-            this.status = LifeCycleStatus.NEW;
-        } else {
-            this.status = LifeCycleStatus.toLifeCycleStatus(this.cvStatus);
-        }
-    }
-
-    protected void initialiseAuthors() {
-        // initialise annotations first
-        initialiseAnnotations();
-    }
-
     private void initialiseReleasedDate() {
         for (LifeCycleEvent evt : getLifecycleEvents()) {
             if (LifeCycleEventType.RELEASED.equals(evt.getEvent())) {
                 this.releasedDate = evt.getWhen();
             }
         }
-    }
-
-    // Publication status
-
-    // On hold
-
-    @Override
-    @Transient
-    public String getOnHoldComment() {
-        // initialise annotations if necessary
-        getAnnotations();
-        return onHold != null ? onHold.getValue() : null;
-    }
-
-    @Override
-    @Transient
-    public boolean isOnHold() {
-        // initialise annotations if necessary
-        getAnnotations();
-        return onHold != null;
-    }
-
-
-    @Override
-    public void onHold(String message) {
-        Collection<Annotation> publicationAnnotationList = getAnnotations();
-
-        if (onHold != null) {
-            this.onHold.setValue(message);
-        } else {
-            CvTerm onHoldTopic = IntactUtils.createMITopic(Releasable.ON_HOLD, null);
-            this.onHold = new InteractorAnnotation(onHoldTopic, message);
-            publicationAnnotationList.add(this.onHold);
-        }
-    }
-
-    @Override
-    public void removeOnHold() {
-        AnnotationUtils.removeAllAnnotationsWithTopic(getDbAnnotations(), null, Releasable.ON_HOLD);
-    }
-
-    // To be reviewed
-
-    @Override
-    @Transient
-    public String getToBeReviewedComment() {
-        // initialise annotations if necessary
-        getAnnotations();
-        return toBeReviewed != null ? toBeReviewed.getValue() : null;
-    }
-
-    @Override
-    public void onToBeReviewed(String message) {
-        Collection<Annotation> publicationAnnotationList = getAnnotations();
-
-        if (toBeReviewed != null) {
-            this.toBeReviewed.setValue(message);
-        } else {
-            CvTerm toBeReviewedTopic = IntactUtils.createMITopic(Releasable.TO_BE_REVIEWED, null);
-            this.toBeReviewed = new InteractorAnnotation(toBeReviewedTopic, message);
-            publicationAnnotationList.add(this.toBeReviewed);
-        }
-    }
-
-    @Override
-    @Transient
-    public boolean isToBeReviewed() {
-        // initialise annotations if necessary
-        getAnnotations();
-        return toBeReviewed != null;
-    }
-
-    @Override
-    public void removeToBeReviewed() {
-        AnnotationUtils.removeAllAnnotationsWithTopic(getDbAnnotations(), null, Releasable.TO_BE_REVIEWED);
-    }
-
-    // Accepted
-
-    @Override
-    @Transient
-    public String getAcceptedComment() {
-        // initialise annotations if necessary
-        getAnnotations();
-        return accepted != null ? accepted.getValue() : null;
-    }
-
-    @Override
-    public void onAccepted(String message) {
-        Collection<Annotation> publicationAnnotationList = getAnnotations();
-
-        if (accepted != null) {
-            this.accepted.setValue(message);
-        } else {
-            CvTerm acceptedTopic = IntactUtils.createMITopic(Releasable.ACCEPTED, null);
-            this.accepted = new InteractorAnnotation(acceptedTopic, message);
-            publicationAnnotationList.add(this.accepted);
-        }
-    }
-
-    @Override
-    @Transient
-    public boolean isAccepted() {
-        // initialise annotations if necessary
-        getAnnotations();
-        return accepted != null;
-    }
-
-    @Override
-    public void removeAccepted() {
-        AnnotationUtils.removeAllAnnotationsWithTopic(getDbAnnotations(), null, Releasable.ACCEPTED);
-    }
-
-    //Correction comment
-
-    @Override
-    @Transient
-    public String getCorrectionComment() {
-        return this.correctionComment != null ? this.correctionComment.getValue() : null;
-    }
-
-    @Override
-    public void onCorrectionComment(String message) {
-        Collection<Annotation> publicationAnnotationList = getAnnotations();
-
-        if (correctionComment != null) {
-            this.correctionComment.setValue(message);
-        } else {
-            CvTerm onHoldTopic = IntactUtils.createMITopic(Releasable.CORRECTION_COMMENT, null);
-            this.correctionComment = new InteractorAnnotation(onHoldTopic, message);
-            publicationAnnotationList.add(this.correctionComment);
-        }
-    }
-
-    @Override
-    @Transient
-    public boolean hasCorrectionComment() {
-        return this.correctionComment != null;
-    }
-
-    @Override
-    public void removeCorrectionComment() {
-        AnnotationUtils.removeAllAnnotationsWithTopic(getDbAnnotations(), null, Releasable.CORRECTION_COMMENT);
     }
 
     // Getters and setters
@@ -467,35 +285,11 @@ public class IntactPublication extends AbstractIntactPrimaryObject implements Pu
     }
 
     @Transient
-    public Collection<Xref> getXrefs() {
-        if (xrefs == null) {
-            initialiseXrefs();
-        }
-        return this.xrefs;
-    }
-
-    @Transient
     public Collection<Xref> getIdentifiers() {
         if (identifiers == null) {
             initialiseXrefs();
         }
         return this.identifiers;
-    }
-
-    @Transient
-    public Collection<Annotation> getAnnotations() {
-        if (annotations == null) {
-            initialiseAnnotations();
-        }
-        return this.annotations;
-    }
-
-    @Transient
-    public List<String> getAuthors() {
-        if (authors == null) {
-            initialiseAuthors();
-        }
-        return this.authors;
     }
 
     @Transient
@@ -1191,42 +985,6 @@ public class IntactPublication extends AbstractIntactPrimaryObject implements Pu
         }
     }
 
-    protected void initialiseXrefs() {
-        this.identifiers = new PublicationIdentifierList();
-        this.xrefs = new PublicationXrefList();
-        if (this.persistentXrefs != null) {
-            for (Xref ref : this.persistentXrefs) {
-                if (XrefUtils.isXrefAnIdentifier(ref) || XrefUtils.doesXrefHaveQualifier(ref, Xref.PRIMARY_MI, Xref.PRIMARY)
-                        || XrefUtils.doesXrefHaveQualifier(ref, null, "intact-secondary")) {
-                    this.identifiers.addOnly(ref);
-                    processAddedIdentifierEvent(ref);
-                } else {
-                    this.xrefs.addOnly(ref);
-                    processAddedXrefEvent(ref);
-                }
-            }
-        } else {
-            this.persistentXrefs = new PersistentXrefList(null);
-        }
-
-        // initialise ac
-        if (getAc() != null) {
-            IntactContext intactContext = ApplicationContextProvider.getBean("intactJamiContext");
-            if (intactContext != null) {
-                CvTerm database = IntactUtils.getCvByMITerm(Xref.INTACT_MI, IntactUtils.DATABASE_OBJCLASS);
-                CvTerm qualifier = IntactUtils.getCvByMITerm(Xref.IDENTITY_MI, IntactUtils.QUALIFIER_OBJCLASS);
-                if (database == null || qualifier == null) {
-                    this.acRef = new DefaultXref(intactContext.getIntactConfiguration().getDefaultInstitution(), getAc(), CvTermUtils.createIdentityQualifier());
-                } else {
-                    this.acRef = new DefaultXref(database,
-                            getAc(), qualifier);
-                }
-            } else {
-                this.acRef = new DefaultXref(new DefaultCvTerm("unknwon"), getAc(), CvTermUtils.createIdentityQualifier());
-            }
-            this.identifiers.addOnly(this.acRef);
-        }
-    }
 
     protected void initialiseExperiments() {
         this.experiments = new ArrayList<Experiment>();
@@ -1414,278 +1172,226 @@ public class IntactPublication extends AbstractIntactPrimaryObject implements Pu
         }
     }
 
-    private void initialiseReleasedDate() {
-        for (LifeCycleEvent evt : getLifecycleEvents()) {
-            if (LifeCycleEventType.RELEASED.equals(evt.getEvent())) {
-                this.releasedDate = evt.getWhen();
-            }
-        }
-        @Transient
-        public boolean areXrefsInitialized () {
-            return Hibernate.isInitialized(getDbXrefs());
-        }
+    /**
+     * Overrides serialization for xrefs and annotations (inner classes not serializable)
+     *
+     * @param oos
+     * @throws java.io.IOException
+     */
+    private void writeObject(ObjectOutputStream oos) throws IOException {
+        // default serialization
+        oos.defaultWriteObject();
+        // write the xrefs
+        oos.writeObject(getDbXrefs());
+        // write the annotations
+        oos.writeObject(getDbAnnotations());
+        // write the status
+        oos.writeObject(getCvStatus());
+    }
 
-        @Transient
-        public boolean areAnnotationsInitialized () {
-            return Hibernate.isInitialized(getDbAnnotations());
-        }
+    /**
+     * Overrides serialization for xrefs and annotations (inner classes not serializable)
+     *
+     * @param ois
+     * @throws ClassNotFoundException
+     * @throws IOException
+     */
+    private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
+        // default deserialization
+        ois.defaultReadObject();
+        // read default xrefs
+        setDbXrefs((Collection<Xref>) ois.readObject());
+        // read default annotations
+        setDbAnnotations((Collection<Annotation>) ois.readObject());
+        // read default status
+        setCvStatus((CvTerm) ois.readObject());
+    }
 
-        @Transient
-        public boolean areExperimentsInitialized () {
-            return Hibernate.isInitialized(getExperiments());
-        }
 
-        @Transient
-        public boolean areLifeCycleEventsInitialized () {
-            return Hibernate.isInitialized(getLifecycleEvents());
-        }
 
-        /**
-         * This method can reset all properties that are cached in this object as if it was just loaded from the database
-         */
-        public void resetCachedDbProperties () {
-            this.identifiers = null;
-            this.xrefs = null;
-            this.pubmedId = null;
-            this.doi = null;
-            this.imexId = null;
-            this.annotations = null;
-            this.releasedDate = null;
-            this.publicationDate = null;
-            this.curationDepth = null;
-            this.status = null;
-            this.journal = null;
-            this.authors = null;
-            this.onHold = null;
-            this.toBeReviewed = null;
-            this.correctionComment = null;
-            this.accepted = null;
-        }
-
-        /**
-         * Overrides serialization for xrefs and annotations (inner classes not serializable)
-         *
-         * @param oos
-         * @throws java.io.IOException
-         */
-        private void writeObject (ObjectOutputStream oos) throws IOException {
-            // default serialization
-            oos.defaultWriteObject();
-            // write the xrefs
-            oos.writeObject(getDbXrefs());
-            // write the annotations
-            oos.writeObject(getDbAnnotations());
-            // write the status
-            oos.writeObject(getCvStatus());
-        }
-
-        /**
-         * Overrides serialization for xrefs and annotations (inner classes not serializable)
-         *
-         * @param ois
-         * @throws ClassNotFoundException
-         * @throws IOException
-         */
-        private void readObject (ObjectInputStream ois) throws ClassNotFoundException, IOException {
-            // default deserialization
-            ois.defaultReadObject();
-            // read default xrefs
-            setDbXrefs((Collection<Xref>) ois.readObject());
-            // read default annotations
-            setDbAnnotations((Collection<Annotation>) ois.readObject());
-            // read default status
-            setCvStatus((CvTerm) ois.readObject());
+    protected class PublicationIdentifierList extends AbstractListHavingProperties<Xref> {
+        public PublicationIdentifierList() {
+            super();
         }
 
         @Override
-        public String toString () {
-            return (imexId != null ? imexId.getId() : (pubmedId != null ? pubmedId.getId() : (doi != null ? doi.getId() : (title != null ? title : "-"))));
-        }
+        protected void processAddedObjectEvent(Xref added) {
 
-
-        protected class PublicationIdentifierList extends AbstractListHavingProperties<Xref> {
-            public PublicationIdentifierList() {
-                super();
-            }
-
-            @Override
-            protected void processAddedObjectEvent(Xref added) {
-
-                if (!added.equals(acRef)) {
-                    processAddedIdentifierEvent(added);
-                    persistentXrefs.add(added);
-                }
-            }
-
-            @Override
-            protected void processRemovedObjectEvent(Xref removed) {
-                if (!removed.equals(acRef)) {
-                    processRemovedIdentifierEvent(removed);
-                    persistentXrefs.remove(removed);
-                } else {
-                    super.addOnly(acRef);
-                    throw new UnsupportedOperationException("Cannot remove the database accession of a Publication object from its list of identifiers.");
-                }
-            }
-
-            @Override
-            protected void clearProperties() {
-                clearPropertiesLinkedToIdentifiers();
-                persistentXrefs.retainAll(getXrefs());
-                if (acRef != null) {
-                    super.addOnly(acRef);
-                }
-            }
-        }
-
-        protected class PublicationXrefList extends AbstractListHavingProperties<Xref> {
-            public PublicationXrefList() {
-                super();
-            }
-
-            @Override
-            protected void processAddedObjectEvent(Xref added) {
-
-                processAddedXrefEvent(added);
+            if (!added.equals(acRef)) {
+                processAddedIdentifierEvent(added);
                 persistentXrefs.add(added);
             }
+        }
 
-            @Override
-            protected void processRemovedObjectEvent(Xref removed) {
-                processRemovedXrefEvent(removed);
+        @Override
+        protected void processRemovedObjectEvent(Xref removed) {
+            if (!removed.equals(acRef)) {
+                processRemovedIdentifierEvent(removed);
                 persistentXrefs.remove(removed);
-            }
-
-            @Override
-            protected void clearProperties() {
-                clearPropertiesLinkedToXrefs();
-                persistentXrefs.retainAll(getIdentifiers());
+            } else {
+                super.addOnly(acRef);
+                throw new UnsupportedOperationException("Cannot remove the database accession of a Publication object from its list of identifiers.");
             }
         }
 
-        protected class PersistentXrefList extends AbstractCollectionWrapper<Xref> {
-
-            public PersistentXrefList(Collection<Xref> persistentBag) {
-                super(persistentBag);
-            }
-
-            @Override
-            protected boolean needToPreProcessElementToAdd(Xref added) {
-                return false;
-            }
-
-            @Override
-            protected Xref processOrWrapElementToAdd(Xref added) {
-                return added;
-            }
-
-            @Override
-            protected void processElementToRemove(Object o) {
-                // do nothing
-            }
-
-            @Override
-            protected boolean needToPreProcessElementToRemove(Object o) {
-                return false;
-            }
-        }
-
-        protected class PublicationAnnotationList extends AbstractListHavingProperties<Annotation> {
-            public PublicationAnnotationList() {
-                super();
-            }
-
-            @Override
-            protected void processAddedObjectEvent(Annotation added) {
-                if (toBeReviewed == null &&
-                        AnnotationUtils.doesAnnotationHaveTopic(added, null, Releasable.TO_BE_REVIEWED)) {
-                    toBeReviewed = added;
-                } else if (accepted == null &&
-                        AnnotationUtils.doesAnnotationHaveTopic(added, null, Releasable.ACCEPTED)) {
-                    accepted = added;
-                } else if (onHold == null &&
-                        AnnotationUtils.doesAnnotationHaveTopic(added, null, Releasable.ON_HOLD)) {
-                    onHold = added;
-                } else if (correctionComment == null &&
-                        AnnotationUtils.doesAnnotationHaveTopic(added, null, Releasable.CORRECTION_COMMENT)) {
-                    correctionComment = added;
-                }
-                persistentAnnotations.add(added);
-            }
-
-            @Override
-            protected void processRemovedObjectEvent(Annotation removed) {
-                if (toBeReviewed != null && toBeReviewed.equals(removed)) {
-                    toBeReviewed = AnnotationUtils.collectFirstAnnotationWithTopic(getAnnotations(),
-                            null, Releasable.TO_BE_REVIEWED);
-                }
-                if (accepted != null && accepted.equals(removed)) {
-                    accepted = AnnotationUtils.collectFirstAnnotationWithTopic(getAnnotations(),
-                            null, Releasable.ACCEPTED);
-                }
-                if (onHold != null && onHold.equals(removed)) {
-                    onHold = AnnotationUtils.collectFirstAnnotationWithTopic(getAnnotations(),
-                            null, Releasable.ON_HOLD);
-                }
-                if (correctionComment != null && correctionComment.equals(removed)) {
-                    correctionComment = AnnotationUtils.collectFirstAnnotationWithTopic(getAnnotations(),
-                            null, Releasable.CORRECTION_COMMENT);
-                }
-                persistentAnnotations.remove(removed);
-            }
-
-            @Override
-            protected void clearProperties() {
-                Annotation authorList = AnnotationUtils.collectFirstAnnotationWithTopic(getDbAnnotations(), Annotation.AUTHOR_MI, Annotation.AUTHOR);
-                Annotation publicationJournal = AnnotationUtils.collectFirstAnnotationWithTopic(getDbAnnotations(), Annotation.PUBLICATION_JOURNAL_MI, Annotation.PUBLICATION_JOURNAL);
-                Annotation publicationYear = AnnotationUtils.collectFirstAnnotationWithTopic(getDbAnnotations(), Annotation.PUBLICATION_YEAR_MI, Annotation.PUBLICATION_YEAR);
-                Annotation curationDepth = AnnotationUtils.collectFirstAnnotationWithTopic(getDbAnnotations(), Annotation.CURATION_DEPTH_MI, Annotation.CURATION_DEPTH);
-                persistentAnnotations.clear();
-
-                if (authorList != null) {
-                    persistentAnnotations.add(authorList);
-                }
-                if (publicationJournal != null) {
-                    persistentAnnotations.add(publicationJournal);
-                }
-                if (publicationYear != null) {
-                    persistentAnnotations.add(publicationYear);
-                }
-                if (curationDepth != null) {
-                    persistentAnnotations.add(curationDepth);
-                }
-
-                onHold = null;
-                toBeReviewed = null;
-                accepted = null;
-                correctionComment = null;
-
-            }
-        }
-
-        protected class PersistentAnnotationList extends AbstractCollectionWrapper<Annotation> {
-            public PersistentAnnotationList(Collection<Annotation> annots) {
-                super(annots);
-            }
-
-            @Override
-            protected boolean needToPreProcessElementToAdd(Annotation added) {
-                return false;
-            }
-
-            @Override
-            protected Annotation processOrWrapElementToAdd(Annotation added) {
-                return added;
-            }
-
-            @Override
-            protected void processElementToRemove(Object o) {
-                // nothing to do
-            }
-
-            @Override
-            protected boolean needToPreProcessElementToRemove(Object o) {
-                return false;
+        @Override
+        protected void clearProperties() {
+            clearPropertiesLinkedToIdentifiers();
+            persistentXrefs.retainAll(getXrefs());
+            if (acRef != null) {
+                super.addOnly(acRef);
             }
         }
     }
+
+    protected class PublicationXrefList extends AbstractListHavingProperties<Xref> {
+        public PublicationXrefList() {
+            super();
+        }
+
+        @Override
+        protected void processAddedObjectEvent(Xref added) {
+
+            processAddedXrefEvent(added);
+            persistentXrefs.add(added);
+        }
+
+        @Override
+        protected void processRemovedObjectEvent(Xref removed) {
+            processRemovedXrefEvent(removed);
+            persistentXrefs.remove(removed);
+        }
+
+        @Override
+        protected void clearProperties() {
+            clearPropertiesLinkedToXrefs();
+            persistentXrefs.retainAll(getIdentifiers());
+        }
+    }
+
+    protected class PersistentXrefList extends AbstractCollectionWrapper<Xref> {
+
+        public PersistentXrefList(Collection<Xref> persistentBag) {
+            super(persistentBag);
+        }
+
+        @Override
+        protected boolean needToPreProcessElementToAdd(Xref added) {
+            return false;
+        }
+
+        @Override
+        protected Xref processOrWrapElementToAdd(Xref added) {
+            return added;
+        }
+
+        @Override
+        protected void processElementToRemove(Object o) {
+            // do nothing
+        }
+
+        @Override
+        protected boolean needToPreProcessElementToRemove(Object o) {
+            return false;
+        }
+    }
+
+    protected class PublicationAnnotationList extends AbstractListHavingProperties<Annotation> {
+        public PublicationAnnotationList() {
+            super();
+        }
+
+        @Override
+        protected void processAddedObjectEvent(Annotation added) {
+            if (toBeReviewed == null &&
+                    AnnotationUtils.doesAnnotationHaveTopic(added, null, Releasable.TO_BE_REVIEWED)) {
+                toBeReviewed = added;
+            } else if (accepted == null &&
+                    AnnotationUtils.doesAnnotationHaveTopic(added, null, Releasable.ACCEPTED)) {
+                accepted = added;
+            } else if (onHold == null &&
+                    AnnotationUtils.doesAnnotationHaveTopic(added, null, Releasable.ON_HOLD)) {
+                onHold = added;
+            } else if (correctionComment == null &&
+                    AnnotationUtils.doesAnnotationHaveTopic(added, null, Releasable.CORRECTION_COMMENT)) {
+                correctionComment = added;
+            }
+            persistentAnnotations.add(added);
+        }
+
+        @Override
+        protected void processRemovedObjectEvent(Annotation removed) {
+            if (toBeReviewed != null && toBeReviewed.equals(removed)) {
+                toBeReviewed = AnnotationUtils.collectFirstAnnotationWithTopic(getAnnotations(),
+                        null, Releasable.TO_BE_REVIEWED);
+            }
+            if (accepted != null && accepted.equals(removed)) {
+                accepted = AnnotationUtils.collectFirstAnnotationWithTopic(getAnnotations(),
+                        null, Releasable.ACCEPTED);
+            }
+            if (onHold != null && onHold.equals(removed)) {
+                onHold = AnnotationUtils.collectFirstAnnotationWithTopic(getAnnotations(),
+                        null, Releasable.ON_HOLD);
+            }
+            if (correctionComment != null && correctionComment.equals(removed)) {
+                correctionComment = AnnotationUtils.collectFirstAnnotationWithTopic(getAnnotations(),
+                        null, Releasable.CORRECTION_COMMENT);
+            }
+            persistentAnnotations.remove(removed);
+        }
+
+        @Override
+        protected void clearProperties() {
+            Annotation authorList = AnnotationUtils.collectFirstAnnotationWithTopic(getDbAnnotations(), Annotation.AUTHOR_MI, Annotation.AUTHOR);
+            Annotation publicationJournal = AnnotationUtils.collectFirstAnnotationWithTopic(getDbAnnotations(), Annotation.PUBLICATION_JOURNAL_MI, Annotation.PUBLICATION_JOURNAL);
+            Annotation publicationYear = AnnotationUtils.collectFirstAnnotationWithTopic(getDbAnnotations(), Annotation.PUBLICATION_YEAR_MI, Annotation.PUBLICATION_YEAR);
+            Annotation curationDepth = AnnotationUtils.collectFirstAnnotationWithTopic(getDbAnnotations(), Annotation.CURATION_DEPTH_MI, Annotation.CURATION_DEPTH);
+            persistentAnnotations.clear();
+
+            if (authorList != null) {
+                persistentAnnotations.add(authorList);
+            }
+            if (publicationJournal != null) {
+                persistentAnnotations.add(publicationJournal);
+            }
+            if (publicationYear != null) {
+                persistentAnnotations.add(publicationYear);
+            }
+            if (curationDepth != null) {
+                persistentAnnotations.add(curationDepth);
+            }
+
+            onHold = null;
+            toBeReviewed = null;
+            accepted = null;
+            correctionComment = null;
+
+        }
+    }
+
+    protected class PersistentAnnotationList extends AbstractCollectionWrapper<Annotation> {
+        public PersistentAnnotationList(Collection<Annotation> annots) {
+            super(annots);
+        }
+
+        @Override
+        protected boolean needToPreProcessElementToAdd(Annotation added) {
+            return false;
+        }
+
+        @Override
+        protected Annotation processOrWrapElementToAdd(Annotation added) {
+            return added;
+        }
+
+        @Override
+        protected void processElementToRemove(Object o) {
+            // nothing to do
+        }
+
+        @Override
+        protected boolean needToPreProcessElementToRemove(Object o) {
+            return false;
+        }
+    }
+}

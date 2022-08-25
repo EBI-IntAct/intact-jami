@@ -71,7 +71,7 @@ public class Preference extends AbstractIntactPrimaryObject {
     }
 
     @Lob
-    @Type(type = "org.hibernate.type.StringClobType")
+    @Type(type = "org.hibernate.type.StringType")
     @Column(name="`value`")
     public String getValue() {
         return value;

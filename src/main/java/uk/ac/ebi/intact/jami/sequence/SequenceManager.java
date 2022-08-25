@@ -108,7 +108,7 @@ public class SequenceManager {
      * @param entityManager The entity manager to use
      * @return the names of the sequences
      */
-    @Transactional(readOnly = true, value = "jamiTransactionManager")
+    @Transactional(readOnly = true)
     public List<String> getExistingSequenceNames(EntityManager entityManager) {
         Query query ;
         String sql = dialect.getQuerySequencesString();
@@ -126,7 +126,7 @@ public class SequenceManager {
      * @param sequenceName The sequence name to query
      * @return The next value for that sequence; null if the sequence does not exist;
      */
-    @Transactional(readOnly = true, value = "jamiTransactionManager")
+    @Transactional(readOnly = true)
     public Long getNextValueForSequence(String sequenceName ) {
         if ( !sequenceExists(sequenceName ) ) {
             log.error( "Sequence does not exist: " + sequenceName +

@@ -1,14 +1,14 @@
 package uk.ac.ebi.intact.jami.dao.impl;
 
-import org.junit.Assert;
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.context.transaction.TransactionConfiguration;
 import org.springframework.transaction.annotation.Transactional;
 import uk.ac.ebi.intact.jami.IntactTestUtils;
 import uk.ac.ebi.intact.jami.dao.IntactDao;
@@ -22,7 +22,7 @@ import java.util.Collection;
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = {"classpath*:META-INF/intact-jami-test-spring.xml"})
 @Transactional(value = "jamiTransactionManager")
-@TransactionConfiguration
+@Rollback
 @DirtiesContext
 public class ComplexDaoImplTest {
 

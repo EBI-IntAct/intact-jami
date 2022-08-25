@@ -41,18 +41,6 @@ public class IntactAcGenerator extends SequenceStyleGenerator {
     public static final String SEQUENCE = "sequence";
     public static final String INTACT_AC_SEQUENCE_NAME = "intact_ac";
 
-/*    @Override
-    public void configure( Type type, Properties properties, ServiceRegistry serviceRegistry ) throws MappingException {
-        String defaultSeqValue = "hibernate_sequence";
-        String sequenceName = ConfigurationHelper.getString(SEQUENCE, properties, defaultSeqValue);
-
-        // use "intact_ac" only if the default sequence name is provided
-        if ( sequenceName.equals( defaultSeqValue ) ) {
-            sequenceName = INTACT_AC_SEQUENCE_NAME;
-            properties.put( SEQUENCE, sequenceName );
-        }
-        super.configure( type, properties, serviceRegistry );
-    }*/
 
     @Override
     public void configure(Type type, Properties properties, ServiceRegistry serviceRegistry) throws MappingException {
@@ -78,29 +66,6 @@ public class IntactAcGenerator extends SequenceStyleGenerator {
         super.configure(type, properties, serviceRegistry);
     }
 
-    /**
-     * The ID is the concatenation of the prefix and a sequence provided by the database, separated
-     * by a dash.
-     *
-     * @param sessionImplementor a hibernate session implementor
-     * @param object             the object being persisted
-     * @return the new generated ID
-     * @throws org.hibernate.HibernateException if something goes wrong
-     */
-    /* @Override
-   public Serializable generate( SessionImplementor sessionImplementor, Object object ) throws HibernateException {
-
-        String prefix="UNK";
-        IntactContext intactContext = ApplicationContextProvider.getBean("intactJamiContext");
-        if (intactContext != null) {
-            prefix = intactContext.getIntactConfiguration().getAcPrefix();
-        }
-        String id = prefix + "-" + super.generate( sessionImplementor, object );
-
-        log.trace( "Assigning Id: " + id );
-
-        return id;
-    }*/
     @Override
     public Serializable generate(SessionImplementor sessionImplementor, Object object) throws HibernateException {
         //TODO... Change the logic
@@ -113,8 +78,7 @@ public class IntactAcGenerator extends SequenceStyleGenerator {
 
         Connection connection = sessionImplementor.connection();
         try {
-            PreparedStatement ps = connection
-                    .prepareStatement(sequenceCallSyntax);
+            PreparedStatement ps = connection.prepareStatement(sequenceCallSyntax);
 
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
@@ -127,6 +91,5 @@ public class IntactAcGenerator extends SequenceStyleGenerator {
 
         return stringId;
     }
-
 
 }
