@@ -748,7 +748,7 @@ public class IntactInteractionEvidence extends AbstractIntactPrimaryObject imple
             }
             else{
                 super.addOnly(acRef);
-                throw new UnsupportedOperationException("Cannot remove the database accession of an Interaction object from its list of identifiers.");
+                throw new UnsupportedOperationException("Cannot remove the database accession of an Interaction object from its list of identifiers. Trying to delete " + removed);
             }
         }
 

@@ -631,7 +631,7 @@ public class IntactInteractor extends AbstractIntactPrimaryObject implements Int
             }
             else{
                 super.addOnly(acRef);
-                throw new UnsupportedOperationException("Cannot remove the database accession of a Interactor object from its list of identifiers.");
+                throw new UnsupportedOperationException("Cannot remove the database accession of a Interactor object from its list of identifiers. Trying to delete " + removed);
             }
         }
 

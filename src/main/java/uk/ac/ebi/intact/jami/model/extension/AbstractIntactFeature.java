@@ -588,7 +588,7 @@ public abstract class AbstractIntactFeature<P extends Entity, F extends Feature>
             }
             else{
                 super.addOnly(acRef);
-                throw new UnsupportedOperationException("Cannot remove the database accession of a Feature object from its list of identifiers.");
+                throw new UnsupportedOperationException("Cannot remove the database accession of a Feature object from its list of identifiers. Trying to delete " + removed);
             }
         }
 

@@ -1244,7 +1244,7 @@ public class IntactPublication extends AbstractIntactPrimaryObject implements Pu
                 persistentXrefs.remove(removed);
             } else {
                 super.addOnly(acRef);
-                throw new UnsupportedOperationException("Cannot remove the database accession of a Publication object from its list of identifiers.");
+                throw new UnsupportedOperationException("Cannot remove the database accession of a Publication object from its list of identifiers. Trying to delete " + removed);
             }
         }
 
