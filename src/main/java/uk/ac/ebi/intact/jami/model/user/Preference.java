@@ -55,7 +55,7 @@ public class Preference extends AbstractIntactPrimaryObject {
     // Getters and Setters
 
     @Index( name = "idx_preference_key")
-    @Column(nullable = false, length = IntactUtils.MAX_SHORT_LABEL_LEN, name = "`key`")
+    @Column(nullable = false, length = IntactUtils.MAX_SHORT_LABEL_LEN, name = "key")
     @NotNull
     @Size(max = IntactUtils.MAX_SHORT_LABEL_LEN)
     public String getKey() {
@@ -71,8 +71,7 @@ public class Preference extends AbstractIntactPrimaryObject {
     }
 
     @Lob
-    @Type(type = "org.hibernate.type.StringType")
-    @Column(name="`value`")
+    @Type(type = "org.hibernate.type.MaterializedClobType")
     public String getValue() {
         return value;
     }

@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *//*
+ */
 
 package uk.ac.ebi.intact.jami.utils;
 
@@ -22,10 +22,9 @@ import org.junit.runner.RunWith;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-*/
 /**
  * @author Marine Dumousseau (marine@ebi.ac.uk)
- *//*
+ */
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = {"classpath*:/META-INF/intact-jami-test-spring.xml"})
@@ -39,10 +38,11 @@ public class IntactSchemaUtilsTest {
             System.out.println(sql);
         }
 
-        Assert.assertEquals(277, strings.length);
-        Assert.assertEquals(277, IntactSchemaUtils.generateCreateSchemaDDLForPostgreSQL().length);
-        Assert.assertEquals(277, IntactSchemaUtils.generateCreateSchemaDDLForHSQL().length);
-        Assert.assertEquals(277, IntactSchemaUtils.generateCreateSchemaDDLForH2().length);
+        Assert.assertEquals(260, strings.length);
+//        Assert.assertEquals(260, IntactSchemaUtils.generateCreateSchemaDDLForPostgreSQL().length);
+//        Assert.assertEquals(260, IntactSchemaUtils.generateCreateSchemaDDLForHSQL().length);
+//        Assert.assertEquals(260, IntactSchemaUtils.generateCreateSchemaDDLForH2().length);
+
+        Assert.assertEquals(68, IntactSchemaUtils.getTableNames().length);
     }
 }
-*/

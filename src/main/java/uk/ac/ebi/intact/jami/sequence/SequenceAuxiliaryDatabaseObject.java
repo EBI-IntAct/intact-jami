@@ -15,8 +15,8 @@
  */
 package uk.ac.ebi.intact.jami.sequence;
 
-import org.apache.commons.lang.StringUtils;
 import org.hibernate.HibernateException;
+import org.hibernate.boot.model.relational.AbstractAuxiliaryDatabaseObject;
 import org.hibernate.dialect.Dialect;
 import org.hibernate.engine.spi.Mapping;
 import java.lang.reflect.Method;
@@ -27,34 +27,41 @@ import java.util.HashSet;
  *
  * @author Marine Dumousseau (marine@ebi.ac.uk)
  */
-public class SequenceAuxiliaryDatabaseObject  {
+public class SequenceAuxiliaryDatabaseObject extends AbstractAuxiliaryDatabaseObject {
 
-    private String sequenceName;
-    private int initialValue;
+    private final String sequenceName;
+    private final int initialValue;
 
     public SequenceAuxiliaryDatabaseObject(String sequenceName, int initialValue) {
-        //super(new HashSet<String>());
+        super(new HashSet<>());
 
         this.initialValue = initialValue;
         this.sequenceName = sequenceName;
     }
 
     public String sqlCreateString(Dialect dialect, Mapping p, String defaultCatalog, String defaultSchema) throws HibernateException {
-        return sqlCreateString(dialect);
+        return String.join("; ", sqlCreateStrings(dialect));
     }
 
-    public String sqlCreateString(Dialect dialect) {
-        String sql;
+    public String sqlCreateString(Dialect dialect) throws HibernateException {
+        return String.join("; ", sqlCreateStrings(dialect));
+    }
+
+    public String[] sqlCreateStrings(Dialect dialect, Mapping p, String defaultCatalog, String defaultSchema) throws HibernateException {
+        return sqlCreateStrings(dialect);
+    }
+
+    public String[] sqlCreateStrings(Dialect dialect) {
+        String[] sql;
         if (dialect.supportsPooledSequences()) {
-            String[] createSqls = dialect.getCreateSequenceStrings(sequenceName, initialValue, 1);
-            sql = StringUtils.join(createSqls, "; ");
+            sql = dialect.getCreateSequenceStrings(sequenceName, initialValue, 1);
         } else {
             // for databases like postgres, we cannot use the above method and the method we need is protected
             // in the Dialect class (public in the subclass)
             String methodName = "getCreateSequenceString";
             try {
                 final Method method = dialect.getClass().getMethod(methodName, String.class);
-                sql = (String) method.invoke(dialect, sequenceName);
+                sql = new String[]{(String) method.invoke(dialect, sequenceName)};
             } catch (Exception e) {
                 throw new IllegalStateException(e);
             }
@@ -62,11 +69,13 @@ public class SequenceAuxiliaryDatabaseObject  {
         return sql;
     }
 
-    public String sqlDropString(Dialect dialect, String defaultCatalog, String defaultSchema) {
-        String[] dropSqls = dialect.getDropSequenceStrings(sequenceName);
-        return StringUtils.join(dropSqls, "; ");
+    @Override
+    public String[] sqlDropStrings(Dialect dialect) {
+        return dialect.getDropSequenceStrings(sequenceName);
     }
 
-
-
+    @Override
+    public boolean appliesToDialect(Dialect dialect) {
+        return dialect.supportsSequences();
+    }
 }

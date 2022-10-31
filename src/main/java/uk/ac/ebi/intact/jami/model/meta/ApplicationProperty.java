@@ -45,7 +45,7 @@ public class ApplicationProperty extends AbstractIntactPrimaryObject {
     }
 
     @Lob
-    @Type(type = "org.hibernate.type.StringType")
+    @Type(type = "org.hibernate.type.MaterializedClobType")
     public String getValue() {
         return value;
     }

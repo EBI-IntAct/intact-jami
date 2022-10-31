@@ -59,7 +59,7 @@ public class Application extends AbstractIntactPrimaryObject {
     }
 
     @Lob
-    @Type(type = "org.hibernate.type.StringType")
+    @Type(type = "org.hibernate.type.MaterializedClobType")
     public String getDescription() {
         return description;
     }
