@@ -1,11 +1,11 @@
 package uk.ac.ebi.intact.jami.model.user;
 
-import org.hibernate.annotations.Index;
 import uk.ac.ebi.intact.jami.model.AbstractIntactPrimaryObject;
 import uk.ac.ebi.intact.jami.utils.IntactUtils;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.Index;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
@@ -18,7 +18,9 @@ import javax.validation.constraints.Size;
  * @since 2.2.1
  */
 @Entity
-@Table( name="ia_role" )
+@Table(
+        name="ia_role",
+        indexes = { @Index(name = "idx_role_name", columnList = "name") })
 public class Role extends AbstractIntactPrimaryObject {
 
     public static final String ROLE_ADMIN = "ADMIN";
@@ -48,7 +50,6 @@ public class Role extends AbstractIntactPrimaryObject {
     // Getters and Setters
 
     @Column( unique = true, nullable = false, length = IntactUtils.MAX_SHORT_LABEL_LEN)
-    @Index( name = "idx_role_name" )
     @NotNull
     @Size(max = IntactUtils.MAX_SHORT_LABEL_LEN)
     public String getName() {
