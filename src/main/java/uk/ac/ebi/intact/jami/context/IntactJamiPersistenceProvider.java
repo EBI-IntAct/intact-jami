@@ -38,6 +38,7 @@ public class IntactJamiPersistenceProvider extends HibernatePersistenceProvider 
     public HibernateConfig getBasicConfiguration(Properties props) {
         if (props == null) props = new Properties();
         final LocalContainerEntityManagerFactoryBean factoryBean = new LocalContainerEntityManagerFactoryBean();
+        factoryBean.setPersistenceXmlLocation("classpath*:/META-INF/jami-persistence.xml");
 
         final IntactHibernateJpaVendorAdapter jpaVendorAdapter = new IntactHibernateJpaVendorAdapter();
         jpaVendorAdapter.setDatabasePlatform(Dialect.getDialect(props).getClass().getName());

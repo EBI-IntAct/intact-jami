@@ -39,9 +39,9 @@ public class IntactSchemaUtilsTest {
         }
 
         Assert.assertEquals(260, strings.length);
-//        Assert.assertEquals(260, IntactSchemaUtils.generateCreateSchemaDDLForPostgreSQL().length);
-//        Assert.assertEquals(260, IntactSchemaUtils.generateCreateSchemaDDLForHSQL().length);
-//        Assert.assertEquals(260, IntactSchemaUtils.generateCreateSchemaDDLForH2().length);
+        Assert.assertEquals(260, IntactSchemaUtils.generateCreateSchemaDDLForPostgreSQL().length);
+        Assert.assertEquals(260, IntactSchemaUtils.generateCreateSchemaDDLForHSQL().length);
+        Assert.assertEquals(260, IntactSchemaUtils.generateCreateSchemaDDLForH2().length);
 
         Assert.assertEquals(68, IntactSchemaUtils.getTableNames().length);
     }
