@@ -34,10 +34,6 @@ public class ComplexAcGenerator extends SequenceStyleGenerator {
 
     private static final Log log = LogFactory.getLog(ComplexAcGenerator.class);
     private String sequenceCallSyntax;
-    /**
-     * The sequence parameter
-     */
-    public static final String SEQUENCE = "sequence";
     // To avoid the use of the schema in the sequence name a public synonym was added after created the sequence
     // INTACT_AC sequence works in the same way
     // grant select on INTACT.COMPLEX_AC to REPLACE_SCHEMA_USER;
@@ -52,12 +48,12 @@ public class ComplexAcGenerator extends SequenceStyleGenerator {
         final Dialect dialect = jdbcEnvironment.getDialect();
 
         //String defaultSeqValue = "hibernate_sequence";
-        String sequenceName = ConfigurationHelper.getString(SEQUENCE, properties, DEF_SEQUENCE_NAME);
+        String sequenceName = ConfigurationHelper.getString(SEQUENCE_PARAM, properties, DEF_SEQUENCE_NAME);
 
         // use "intact_ac" only if the default sequence name is provided
         if (sequenceName.equals(DEF_SEQUENCE_NAME)) {
             sequenceName = COMPLEX_AC_SEQUENCE_NAME;
-            properties.put(SEQUENCE, sequenceName);
+            properties.put(SEQUENCE_PARAM, sequenceName);
         }
 
         final String sequencePerEntitySuffix = ConfigurationHelper.getString(CONFIG_SEQUENCE_PER_ENTITY_SUFFIX, properties, DEF_SEQUENCE_SUFFIX);

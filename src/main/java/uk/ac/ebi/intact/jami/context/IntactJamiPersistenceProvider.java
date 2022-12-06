@@ -9,10 +9,9 @@ import org.hibernate.dialect.Dialect;
 import org.hibernate.jpa.HibernatePersistenceProvider;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.stereotype.Component;
-import uk.ac.ebi.intact.jami.model.ComplexAcGenerator;
-import uk.ac.ebi.intact.jami.model.IntactAcGenerator;
 import uk.ac.ebi.intact.jami.model.IntactPrimaryObject;
 import uk.ac.ebi.intact.jami.sequence.SequenceAuxiliaryDatabaseObject;
+import uk.ac.ebi.intact.jami.utils.IntactUtils;
 
 import java.util.List;
 import java.util.Properties;
@@ -52,8 +51,8 @@ public class IntactJamiPersistenceProvider extends HibernatePersistenceProvider 
     }
 
     private final static List<AuxiliaryDatabaseObject> auxiliaryDatabaseObjects = List.of(
-            new SequenceAuxiliaryDatabaseObject(IntactAcGenerator.INTACT_AC_SEQUENCE_NAME, 1),
-            new SequenceAuxiliaryDatabaseObject(ComplexAcGenerator.COMPLEX_AC_SEQUENCE_NAME, 1)
+            new SequenceAuxiliaryDatabaseObject(IntactUtils.CV_LOCAL_SEQ, 1),
+            new SequenceAuxiliaryDatabaseObject(IntactUtils.UNASSIGNED_SEQ, 1)
     );
 
     public MetadataBuilder configure(MetadataBuilder configuration) {
