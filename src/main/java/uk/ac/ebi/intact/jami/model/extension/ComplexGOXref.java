@@ -1,24 +1,13 @@
 package uk.ac.ebi.intact.jami.model.extension;
 
-import org.hibernate.Hibernate;
 import org.hibernate.annotations.Target;
-import org.hibernate.validator.constraints.NotBlank;
-import org.junit.After;
-import org.junit.AfterClass;
 import psidev.psi.mi.jami.model.CvTerm;
 import psidev.psi.mi.jami.model.Xref;
 import psidev.psi.mi.jami.utils.CvTermUtils;
-import uk.ac.ebi.intact.jami.constraints.CGXValidator;
 import uk.ac.ebi.intact.jami.utils.IntactUtils;
 
-import javax.annotation.PostConstruct;
 import javax.persistence.*;
-import javax.validation.ConstraintViolation;
-import javax.validation.Validation;
-import javax.validation.Validator;
-import javax.validation.ValidatorFactory;
 import javax.validation.constraints.Size;
-import java.util.Set;
 
 /**
  * Implementation of xref for interactors
@@ -29,7 +18,6 @@ import java.util.Set;
  */
 @Entity
 @DiscriminatorValue("go")
-@CGXValidator
 public class ComplexGOXref extends InteractorXref{
 
     private CvTerm evidenceType;
