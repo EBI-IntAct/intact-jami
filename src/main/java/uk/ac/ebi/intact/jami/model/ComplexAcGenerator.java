@@ -78,15 +78,15 @@ public class ComplexAcGenerator extends SequenceStyleGenerator {
 
         Connection connection = sessionImplementor.connection();
         try {
-            PreparedStatement ps = connection
-                    .prepareStatement(sequenceCallSyntax);
-
-            ResultSet rs = ps.executeQuery();
-            if (rs.next()) {
-                long id = rs.getLong(1);
-                stringId = prefix + "-" + id;
+            try (PreparedStatement ps = connection.prepareStatement(sequenceCallSyntax)) {
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (rs.next()) {
+                        long id = rs.getLong(1);
+                        stringId = prefix + "-" + id;
+                    }
+                    log.trace("Assigning Complex Ac: " + stringId);
+                }
             }
-            log.trace("Assigning Complex Ac: " + stringId);
         } catch (Exception e) {
             e.printStackTrace();
         }

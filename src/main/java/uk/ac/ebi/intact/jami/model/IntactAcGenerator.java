@@ -69,12 +69,13 @@ public class IntactAcGenerator extends SequenceStyleGenerator {
 
         Connection connection = sessionImplementor.connection();
         try {
-            PreparedStatement ps = connection.prepareStatement(sequenceCallSyntax);
-
-            ResultSet rs = ps.executeQuery();
-            if (rs.next()) {
-                long id = rs.getLong(1);
-                stringId = prefix + "-" + id;
+            try (PreparedStatement ps = connection.prepareStatement(sequenceCallSyntax)) {
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (rs.next()) {
+                        long id = rs.getLong(1);
+                        stringId = prefix + "-" + id;
+                    }
+                }
             }
         } catch (Exception e) {
             e.printStackTrace();
