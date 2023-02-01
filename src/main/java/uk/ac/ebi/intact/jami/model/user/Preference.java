@@ -1,12 +1,12 @@
 package uk.ac.ebi.intact.jami.model.user;
 
-import org.hibernate.annotations.Index;
 import org.hibernate.annotations.Type;
 import uk.ac.ebi.intact.jami.model.AbstractIntactPrimaryObject;
 import uk.ac.ebi.intact.jami.utils.IntactUtils;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.Index;
 import javax.persistence.Lob;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
@@ -20,7 +20,9 @@ import javax.validation.constraints.Size;
  * @since 2.2.1
  */
 @Entity
-@Table( name="ia_preference" )
+@Table(
+        name="ia_preference",
+        indexes = { @Index(name = "idx_preference_key", columnList = "key") })
 public class Preference extends AbstractIntactPrimaryObject {
 
     public static final String KEY_INSTITUTION_AC = "editor.institution.ac";
@@ -54,8 +56,7 @@ public class Preference extends AbstractIntactPrimaryObject {
     ///////////////////////////
     // Getters and Setters
 
-    @Index( name = "idx_preference_key")
-    @Column(nullable = false, length = IntactUtils.MAX_SHORT_LABEL_LEN, name = "`key`")
+    @Column(nullable = false, length = IntactUtils.MAX_SHORT_LABEL_LEN, name = "key")
     @NotNull
     @Size(max = IntactUtils.MAX_SHORT_LABEL_LEN)
     public String getKey() {
@@ -71,8 +72,7 @@ public class Preference extends AbstractIntactPrimaryObject {
     }
 
     @Lob
-    @Type(type = "org.hibernate.type.StringType")
-    @Column(name="`value`")
+    @Type(type = "org.hibernate.type.MaterializedClobType")
     public String getValue() {
         return value;
     }

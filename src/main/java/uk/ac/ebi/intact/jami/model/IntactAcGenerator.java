@@ -5,8 +5,6 @@
  */
 package uk.ac.ebi.intact.jami.model;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.hibernate.HibernateException;
 import org.hibernate.MappingException;
 import org.hibernate.dialect.Dialect;
@@ -32,13 +30,7 @@ import java.util.Properties;
  */
 public class IntactAcGenerator extends SequenceStyleGenerator {
 
-    private static final Log log = LogFactory.getLog(IntactAcGenerator.class);
-
     private String sequenceCallSyntax;
-    /**
-     * The sequence parameter
-     */
-    public static final String SEQUENCE = "sequence";
     public static final String INTACT_AC_SEQUENCE_NAME = "intact_ac";
 
 
@@ -47,13 +39,12 @@ public class IntactAcGenerator extends SequenceStyleGenerator {
         final JdbcEnvironment jdbcEnvironment = serviceRegistry.getService(JdbcEnvironment.class);
         final Dialect dialect = jdbcEnvironment.getDialect();
 
-        //String defaultSeqValue = "hibernate_sequence";
-        String sequenceName = ConfigurationHelper.getString(SEQUENCE, properties, DEF_SEQUENCE_NAME);
+        String sequenceName = ConfigurationHelper.getString(SEQUENCE_PARAM, properties, DEF_SEQUENCE_NAME);
 
         // use "intact_ac" only if the default sequence name is provided
         if (sequenceName.equals(DEF_SEQUENCE_NAME)) {
             sequenceName = INTACT_AC_SEQUENCE_NAME;
-            properties.put(SEQUENCE, sequenceName);
+            properties.put(SEQUENCE_PARAM, sequenceName);
         }
 
         final String sequencePerEntitySuffix = ConfigurationHelper.getString(CONFIG_SEQUENCE_PER_ENTITY_SUFFIX, properties, DEF_SEQUENCE_SUFFIX);
@@ -78,12 +69,13 @@ public class IntactAcGenerator extends SequenceStyleGenerator {
 
         Connection connection = sessionImplementor.connection();
         try {
-            PreparedStatement ps = connection.prepareStatement(sequenceCallSyntax);
-
-            ResultSet rs = ps.executeQuery();
-            if (rs.next()) {
-                long id = rs.getLong(1);
-                stringId = prefix + "-" + id;
+            try (PreparedStatement ps = connection.prepareStatement(sequenceCallSyntax)) {
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (rs.next()) {
+                        long id = rs.getLong(1);
+                        stringId = prefix + "-" + id;
+                    }
+                }
             }
         } catch (Exception e) {
             e.printStackTrace();

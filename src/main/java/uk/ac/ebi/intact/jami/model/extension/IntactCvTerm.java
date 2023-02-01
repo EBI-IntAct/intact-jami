@@ -6,8 +6,6 @@ import psidev.psi.mi.jami.model.*;
 import psidev.psi.mi.jami.utils.AnnotationUtils;
 import psidev.psi.mi.jami.utils.collection.AbstractCollectionWrapper;
 import psidev.psi.mi.jami.utils.collection.AbstractListHavingProperties;
-import uk.ac.ebi.intact.jami.ApplicationContextProvider;
-import uk.ac.ebi.intact.jami.context.IntactContext;
 import uk.ac.ebi.intact.jami.utils.IntactUtils;
 
 import javax.persistence.*;
@@ -139,9 +137,7 @@ public class IntactCvTerm extends AbstractIntactCvTerm implements OntologyTerm {
 
         // add new definition if not null
         if (def != null) {
-            IntactContext intactContext = ApplicationContextProvider.getBean("intactJamiContext");
             CvTerm defTopic = IntactUtils.getCvTopicByShortName("definition", null);
-
             // first remove old definition if not null
             if (getDefinition() != null) { //Initialize the annotations too
                 this.definition.setValue(def);

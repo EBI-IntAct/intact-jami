@@ -38,14 +38,14 @@ public abstract class AbstractIntactResultingSequence implements ResultingSequen
     }
 
     @Lob
-    @Type(type = "org.hibernate.type.StringType")
+    @Type(type = "org.hibernate.type.MaterializedClobType")
     @Column(name = "resulting_sequence")
     public String getNewSequence() {
         return newSequence;
     }
 
     @Lob
-    @Type(type = "org.hibernate.type.StringType")
+    @Type(type = "org.hibernate.type.MaterializedClobType")
     @Column(name = "full_sequence")
     public String getOriginalSequence() {
         return originalSequence;

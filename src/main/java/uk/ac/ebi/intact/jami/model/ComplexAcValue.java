@@ -26,9 +26,9 @@ public class ComplexAcValue {
     //access methods for attributes
 
     @Id
-    @GeneratedValue( generator = "complex-ac-generator" )
-    @GenericGenerator( name = "complex-ac-generator", strategy = "uk.ac.ebi.intact.jami.model.ComplexAcGenerator")
-    @Column( name = "ac", length = 30)
+    @GeneratedValue(generator = "complex-ac-generator", strategy = GenerationType.SEQUENCE)
+    @GenericGenerator(name = "complex-ac-generator", strategy = "uk.ac.ebi.intact.jami.model.ComplexAcGenerator")
+    @Column(name = "ac", length = 30)
     public String getAc() {
         return ac;
     }

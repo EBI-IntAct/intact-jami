@@ -3,6 +3,7 @@ package uk.ac.ebi.intact.jami.model.lifecycle;
 import uk.ac.ebi.intact.jami.model.user.User;
 
 import javax.persistence.Entity;
+import javax.persistence.Index;
 import javax.persistence.Table;
 import java.util.Date;
 
@@ -13,7 +14,12 @@ import java.util.Date;
  * @version $Id$
  */
 @Entity
-@Table( name = "ia_lifecycle_event" )
+@Table(
+        name = "ia_lifecycle_event",
+        indexes = {
+                @Index(name = "idx_event_who", columnList = "user_ac"),
+                @Index(name = "idx_event_event", columnList = "event_ac")
+        })
 public class PublicationLifeCycleEvent extends AbstractLifeCycleEvent {
 
     protected PublicationLifeCycleEvent() {

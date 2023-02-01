@@ -48,21 +48,6 @@ public class IntactBinaryEvidenceSource extends IntactBinaryEvidenceStream imple
         return this.loadedInteractions;
     }
 
-    public Collection<BinaryInteractionEvidence> getInteractions(Collection<InteractionEvidence> interactions) throws MIIOException {
-
-        Collection<BinaryInteractionEvidence> binaryInteractionEvidences = new ArrayList<BinaryInteractionEvidence>(interactions.size());
-            for (InteractionEvidence inter : interactions){
-                if (getExpansionMethod().isInteractionExpandable(inter)){
-                    try {
-                        binaryInteractionEvidences.addAll(getExpansionMethod().expand(inter));
-                    } catch (ComplexExpansionException e) {
-                        throw new MIIOException("Impossible to expand n-ary interaction", e);
-                    }
-                }
-            }
-         return binaryInteractionEvidences;
-    }
-
     public long getNumberOfInteractions() {
         return getInteractions().size();
     }

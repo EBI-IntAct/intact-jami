@@ -1,10 +1,10 @@
 package uk.ac.ebi.intact.jami.model.meta;
 
-import org.hibernate.annotations.Index;
 import org.hibernate.annotations.Type;
 import uk.ac.ebi.intact.jami.model.AbstractIntactPrimaryObject;
 
 import javax.persistence.Entity;
+import javax.persistence.Index;
 import javax.persistence.Lob;
 import javax.persistence.Table;
 
@@ -13,7 +13,9 @@ import javax.persistence.Table;
  *
  */
 @Entity
-@Table( name = "ia_application_prop" )
+@Table(
+        name = "ia_application_prop",
+        indexes = { @Index( name = "idx_app_prop_key", columnList = "key") })
 public class ApplicationProperty extends AbstractIntactPrimaryObject {
 
     private String key;
@@ -35,7 +37,6 @@ public class ApplicationProperty extends AbstractIntactPrimaryObject {
     ///////////////////////////
     // Getters and Setters
 
-    @Index( name = "idx_app_prop_key" )
     public String getKey() {
         return key;
     }
@@ -45,7 +46,7 @@ public class ApplicationProperty extends AbstractIntactPrimaryObject {
     }
 
     @Lob
-    @Type(type = "org.hibernate.type.StringType")
+    @Type(type = "org.hibernate.type.MaterializedClobType")
     public String getValue() {
         return value;
     }
