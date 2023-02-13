@@ -255,7 +255,7 @@ public class IntactProtein extends IntactPolymer implements Protein {
         Collection<Checksum> proteinChecksums = getChecksums();
 
         if (rogid != null) {
-            CvTerm rogidMethod = IntactUtils.getCvTopicByShortName(Checksum.ROGID, null);
+            CvTerm rogidMethod = IntactUtils.createMITopic(Checksum.ROGID, null);
 
             // first remove old rogid
             if (this.rogid != null) {

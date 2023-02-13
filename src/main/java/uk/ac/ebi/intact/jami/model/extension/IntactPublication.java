@@ -356,7 +356,7 @@ public class IntactPublication extends AbstractIntactPrimaryObject implements Pu
 
         // add new journal if not null
         if (journal != null) {
-            CvTerm journalTopic = IntactUtils.getCvTopicByMITerm(Annotation.PUBLICATION_JOURNAL, Annotation.PUBLICATION_JOURNAL_MI);
+            CvTerm journalTopic = IntactUtils.createMITopic(Annotation.PUBLICATION_JOURNAL, Annotation.PUBLICATION_JOURNAL_MI);
             // first remove old journal if not null
             if (getJournal() != null) {
                 Annotation oldJournal = AnnotationUtils.collectFirstAnnotationWithTopicAndValue(getDbAnnotations(), Annotation.PUBLICATION_JOURNAL_MI, Annotation.PUBLICATION_JOURNAL, this.journal);
@@ -396,7 +396,7 @@ public class IntactPublication extends AbstractIntactPrimaryObject implements Pu
 
         // add new journal if not null
         if (date != null) {
-            CvTerm yearTopic = IntactUtils.getCvTopicByMITerm(Annotation.PUBLICATION_YEAR, Annotation.PUBLICATION_YEAR_MI);
+            CvTerm yearTopic = IntactUtils.createMITopic(Annotation.PUBLICATION_YEAR, Annotation.PUBLICATION_YEAR_MI);
             // first remove old journal if not null
             if (getPublicationDate() != null) {
                 Annotation oldDate = AnnotationUtils.collectFirstAnnotationWithTopicAndValue(getDbAnnotations(), Annotation.PUBLICATION_YEAR_MI, Annotation.PUBLICATION_YEAR, IntactUtils.YEAR_FORMAT.format(this.publicationDate));
@@ -503,7 +503,7 @@ public class IntactPublication extends AbstractIntactPrimaryObject implements Pu
 
         // add new curation depth if not null
         if (curationDepth != null && !curationDepth.equals(CurationDepth.undefined)) {
-            CvTerm depthTopic = IntactUtils.getCvTopicByMITerm(Annotation.CURATION_DEPTH, Annotation.CURATION_DEPTH_MI);
+            CvTerm depthTopic = IntactUtils.createMITopic(Annotation.CURATION_DEPTH, Annotation.CURATION_DEPTH_MI);
             // first remove old curation depth if not null
             if (getCurationDepth() != null && !getCurationDepth().equals(CurationDepth.undefined)) {
                 Annotation oldDepth = AnnotationUtils.collectFirstAnnotationWithTopic(getDbAnnotations(), Annotation.CURATION_DEPTH_MI, Annotation.CURATION_DEPTH);
@@ -767,7 +767,7 @@ public class IntactPublication extends AbstractIntactPrimaryObject implements Pu
         if (toBeReviewed != null) {
             this.toBeReviewed.setValue(message);
         } else {
-            CvTerm toBeReviewedTopic = IntactUtils.getCvTopicByShortName(Releasable.TO_BE_REVIEWED, null);
+            CvTerm toBeReviewedTopic = IntactUtils.createMITopic(Releasable.TO_BE_REVIEWED, null);
             this.toBeReviewed = new InteractorAnnotation(toBeReviewedTopic, message);
             complexAnnotationList.add(this.toBeReviewed);
         }
@@ -780,7 +780,7 @@ public class IntactPublication extends AbstractIntactPrimaryObject implements Pu
         if (accepted != null) {
             this.accepted.setValue(message);
         } else {
-            CvTerm acceptedTopic = IntactUtils.getCvTopicByShortName(Releasable.ACCEPTED, null);
+            CvTerm acceptedTopic = IntactUtils.createMITopic(Releasable.ACCEPTED, null);
             this.accepted = new InteractorAnnotation(acceptedTopic, message);
             complexAnnotationList.add(this.accepted);
         }
@@ -796,7 +796,7 @@ public class IntactPublication extends AbstractIntactPrimaryObject implements Pu
 
     @Override
     public void removeAccepted() {
-        AnnotationUtils.removeAllAnnotationsWithTopic(getAnnotations(), null, Releasable.ACCEPTED);
+        AnnotationUtils.removeAllAnnotationsWithTopic(getDbAnnotations(), null, Releasable.ACCEPTED);
     }
 
     @Override
@@ -809,25 +809,25 @@ public class IntactPublication extends AbstractIntactPrimaryObject implements Pu
 
     @Override
     public void removeToBeReviewed() {
-        AnnotationUtils.removeAllAnnotationsWithTopic(getAnnotations(), null, Releasable.TO_BE_REVIEWED);
+        AnnotationUtils.removeAllAnnotationsWithTopic(getDbAnnotations(), null, Releasable.TO_BE_REVIEWED);
     }
 
     @Override
     public void onHold(String message) {
-        Collection<Annotation> complexAnnotationList = getAnnotations();
+        Collection<Annotation> publicationAnnotationList = getAnnotations();
 
         if (onHold != null) {
             this.onHold.setValue(message);
         } else {
-            CvTerm onHoldTopic = IntactUtils.getCvTopicByShortName(Releasable.ON_HOLD, null);
+            CvTerm onHoldTopic = IntactUtils.createMITopic(Releasable.ON_HOLD, null);
             this.onHold = new InteractorAnnotation(onHoldTopic, message);
-            complexAnnotationList.add(this.onHold);
+            publicationAnnotationList.add(this.onHold);
         }
     }
 
     @Override
     public void removeCorrectionComment() {
-        AnnotationUtils.removeAllAnnotationsWithTopic(getAnnotations(), null, Releasable.CORRECTION_COMMENT);
+        AnnotationUtils.removeAllAnnotationsWithTopic(getDbAnnotations(), null, Releasable.CORRECTION_COMMENT);
     }
 
     @Override
@@ -838,14 +838,14 @@ public class IntactPublication extends AbstractIntactPrimaryObject implements Pu
 
     @Override
     public void onCorrectionComment(String message) {
-        Collection<Annotation> complexAnnotationList = getAnnotations();
+        Collection<Annotation> publicationAnnotationList = getAnnotations();
 
         if (correctionComment != null) {
             this.correctionComment.setValue(message);
         } else {
-            CvTerm onHoldTopic = IntactUtils.getCvTopicByShortName(Releasable.CORRECTION_COMMENT, null);
+            CvTerm onHoldTopic = IntactUtils.createMITopic(Releasable.CORRECTION_COMMENT, null);
             this.correctionComment = new InteractorAnnotation(onHoldTopic, message);
-            complexAnnotationList.add(this.correctionComment);
+            publicationAnnotationList.add(this.correctionComment);
         }
     }
 
@@ -865,7 +865,7 @@ public class IntactPublication extends AbstractIntactPrimaryObject implements Pu
 
     @Override
     public void removeOnHold() {
-        AnnotationUtils.removeAllAnnotationsWithTopic(getAnnotations(), null, Releasable.ON_HOLD);
+        AnnotationUtils.removeAllAnnotationsWithTopic(getDbAnnotations(), null, Releasable.ON_HOLD);
     }
 
     @ManyToOne(targetEntity = User.class)
@@ -1230,7 +1230,7 @@ public class IntactPublication extends AbstractIntactPrimaryObject implements Pu
                 persistentXrefs.remove(removed);
             } else {
                 super.addOnly(acRef);
-                throw new UnsupportedOperationException("Cannot remove the database accession of a Publication object from its list of identifiers.");
+                throw new UnsupportedOperationException("Cannot remove the database accession of a Publication object from its list of identifiers. Trying to delete " + removed);
             }
         }
 

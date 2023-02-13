@@ -6,13 +6,10 @@ import psidev.psi.mi.jami.utils.AliasUtils;
 import psidev.psi.mi.jami.utils.ExperimentUtils;
 import psidev.psi.mi.jami.utils.ParticipantUtils;
 import psidev.psi.mi.jami.utils.comparator.IntegerComparator;
-import uk.ac.ebi.intact.jami.ApplicationContextProvider;
-import uk.ac.ebi.intact.jami.context.IntactContext;
 import uk.ac.ebi.intact.jami.model.extension.*;
 import uk.ac.ebi.intact.jami.model.lifecycle.LifeCycleEvent;
 
 import javax.persistence.EntityManager;
-import javax.persistence.FlushModeType;
 import javax.persistence.Query;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -1153,9 +1150,7 @@ public class IntactUtils {
         initialiseFeature(feature);
         // initialise linked features
         for (ModelledFeature feat : feature.getLinkedFeatures()) {
-            if (!Hibernate.isInitialized(feat)) {
-                initialiseModelledFeature((IntactModelledFeature) feat);
-            }
+            initialiseModelledFeature((IntactModelledFeature) feat);
         }
     }
 
@@ -1163,9 +1158,7 @@ public class IntactUtils {
         initialiseFeature(feature);
         // initialise linked features
         for (FeatureEvidence feat : feature.getLinkedFeatures()) {
-            if (!Hibernate.isInitialized(feat)) {
-                initialiseFeatureEvidence((IntactFeatureEvidence) feat);
-            }
+            initialiseFeatureEvidence((IntactFeatureEvidence) feat);
         }
         // initialise db method
         for (CvTerm cv : feature.getDetectionMethods()) {
@@ -1271,25 +1264,6 @@ public class IntactUtils {
         }
     }
 
-    public static void initialisePublication(IntactPublication publication, boolean loadSiblingInteractionEvidences) {
-        // initialise xrefs
-        for (Object ref : publication.getDbXrefs()) {
-            initialiseXref((AbstractIntactXref) ref);
-        }
-        // initialise annotations
-        for (Object ref : publication.getDbAnnotations()) {
-            initialiseAnnotation((AbstractIntactAnnotation) ref);
-        }
-        // initialise source
-        if (publication.getSource() != null) {
-            initialiseSource((IntactSource) publication.getSource());
-        }
-        // initialise experiment
-        for (Experiment exp : publication.getExperiments()) {
-            initialiseExperiment((IntactExperiment) exp, false, loadSiblingInteractionEvidences);
-        }
-    }
-
     public static void initialiseExperiment(IntactExperiment experiment, boolean initPublication) {
         if (initPublication && experiment.getPublication() != null) {
             // initialise publication
@@ -1320,41 +1294,6 @@ public class IntactUtils {
         // initialise interaction evidences
         for (InteractionEvidence ev : experiment.getInteractionEvidences()) {
             initialiseInteractionEvidence((IntactInteractionEvidence) ev, false);
-        }
-    }
-
-    public static void initialiseExperiment(IntactExperiment experiment, boolean initPublication, boolean loadSiblingInteractionEvidences) {
-        if (initPublication && experiment.getPublication() != null) {
-            // initialise publication
-            initialisePublication((IntactPublication) experiment.getPublication(), loadSiblingInteractionEvidences);
-        }
-        // initialise xrefs
-        for (Object ref : experiment.getXrefs()) {
-            initialiseXref((AbstractIntactXref) ref);
-        }
-        // initialise annotations
-        for (Object ref : experiment.getAnnotations()) {
-            initialiseAnnotation((AbstractIntactAnnotation) ref);
-        }
-        // initialise detection method
-        initialiseCvTerm((IntactCvTerm) experiment.getInteractionDetectionMethod());
-        // initialise host organism
-        if (experiment.getHostOrganism() != null) {
-            initialiseOrganism((IntactOrganism) experiment.getHostOrganism());
-        }
-        // initialise participant method
-        if (experiment.getParticipantIdentificationMethod() != null) {
-            initialiseCvTerm((IntactCvTerm) experiment.getParticipantIdentificationMethod());
-        }
-        // initialise variable parameters
-        for (VariableParameter param : experiment.getVariableParameters()) {
-            initialiseVariableParameter((IntactVariableParameter) param);
-        }
-        // initialise interaction evidences if needed
-        if (loadSiblingInteractionEvidences) {
-            for (InteractionEvidence ev : experiment.getInteractionEvidences()) {
-                initialiseInteractionEvidence((IntactInteractionEvidence) ev, false);
-            }
         }
     }
 
@@ -1468,114 +1407,7 @@ public class IntactUtils {
         }
     }
 
-    public static void initialiseInteractionEvidence(IntactInteractionEvidence interaction, boolean initExperiment, boolean loadSiblingInteractionEvidences) {
-        // initialise xrefs
-        for (Object ref : interaction.getDbXrefs()) {
-            initialiseXref((AbstractIntactXref) ref);
-        }
-        // initialise annotations
-        for (Object ref : interaction.getDbAnnotations()) {
-            initialiseAnnotation((AbstractIntactAnnotation) ref);
-        }
-        // initialise experiment
-        if (initExperiment && interaction.getExperiment() != null) {
-            initialiseExperiment((IntactExperiment) interaction.getExperiment(), true, loadSiblingInteractionEvidences);
-        }
-        // init participants
-        for (ParticipantEvidence participant : interaction.getParticipants()) {
-            initialiseParticipantEvidence((IntactParticipantEvidence) participant);
-        }
-        // init confidences
-        for (Confidence conf : interaction.getConfidences()) {
-            initialiseConfidence((AbstractIntactConfidence) conf);
-        }
-        // init parameters
-        for (Parameter param : interaction.getParameters()) {
-            initialiseParameter((AbstractIntactParameter) param);
-        }
-        // init interaction type
-        if (interaction.getInteractionType() != null) {
-            initialiseCvTerm((IntactCvTerm) interaction.getInteractionType());
-        }
-        // init evidence type
-        for (VariableParameterValueSet set : interaction.getVariableParameterValues()) {
-            initialiseVariableParameterValueSet((IntactVariableParameterValueSet) set);
-        }
-    }
-
     public static void initialiseComplex(IntactComplex complex) {
         initialiseInteractor(complex);
-    }
-
-    public static CvTerm getCvTopicByShortName(String shortName, String miTerm) {
-        IntactContext intactContext = ApplicationContextProvider.getBean("intactJamiContext");
-        CvTerm topic = null;
-        try {
-            FlushModeType mode = initialiseEntityManagerFlushType(intactContext.getIntactDao().getEntityManager());
-            topic = intactContext.getIntactDao().getCvTermDao().getByShortName(shortName, IntactUtils.TOPIC_OBJCLASS);
-            resetEntityManagerFlushType(intactContext.getIntactDao().getEntityManager(), mode);
-        } catch (Exception e) {
-        }
-
-        if (topic == null) {
-            topic = IntactUtils.createMITopic(shortName, miTerm);
-        }
-
-        return topic;
-    }
-
-    public static CvTerm getCvTopicByMITerm(String shortName, String miTerm) {
-        IntactContext intactContext = ApplicationContextProvider.getBean("intactJamiContext");
-        CvTerm topic = null;
-        try {
-            FlushModeType mode = initialiseEntityManagerFlushType(intactContext.getIntactDao().getEntityManager());
-            topic = intactContext.getIntactDao().getCvTermDao().getByMIIdentifier(miTerm, IntactUtils.TOPIC_OBJCLASS);
-            resetEntityManagerFlushType(intactContext.getIntactDao().getEntityManager(), mode);
-        } catch (Exception e) {
-        }
-
-        if (topic == null) {
-            topic = IntactUtils.createMITopic(shortName, miTerm);
-        }
-
-        return topic;
-    }
-
-    public static CvTerm getCvByMITerm(String miTerm, String ObjClass) {
-        IntactContext intactContext = ApplicationContextProvider.getBean("intactJamiContext");
-        CvTerm cvTerm = null;
-        if (intactContext != null) {
-            FlushModeType mode = initialiseEntityManagerFlushType(intactContext.getIntactDao().getEntityManager());
-            cvTerm = intactContext.getIntactDao().getCvTermDao().getByMIIdentifier(miTerm, ObjClass);
-            resetEntityManagerFlushType(intactContext.getIntactDao().getEntityManager(), mode);
-        }
-        return cvTerm;
-    }
-
-    /**
-     * If the flushmode of the entity manager is not null, it will set the mode to COMMIT to avoid flushing the changes when doing queries.
-     * The objects need to be fully synchronized before the entity manager can be flushed
-     *
-     * @return the original flushmode of the entity manager
-     */
-    protected static FlushModeType initialiseEntityManagerFlushType(EntityManager entityManager) {
-        // set flush mode to commit so queries do not trigger flush
-        FlushModeType mode = entityManager.getFlushMode();
-        // set flushmode if not readonly. Do not set flushmode if readonly because of hibernate assertion failure!!!!
-        if (mode != null) {
-            entityManager.setFlushMode(FlushModeType.COMMIT);
-        }
-        return mode;
-    }
-
-    /**
-     * Reset the flushmode type of the entity manager if the provided mode is not null
-     *
-     * @param mode
-     */
-    protected static void resetEntityManagerFlushType(EntityManager entityManager, FlushModeType mode) {
-        if (mode != null) {
-            entityManager.setFlushMode(mode);
-        }
     }
 }

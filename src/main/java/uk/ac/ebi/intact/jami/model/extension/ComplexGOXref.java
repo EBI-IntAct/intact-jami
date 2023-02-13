@@ -48,7 +48,7 @@ public class ComplexGOXref extends InteractorXref{
 
     @Override
     public void setDatabase(CvTerm cvDatabase) {
-        if (cvDatabase != null && !CvTermUtils.isCvTerm(cvDatabase, Xref.GO_MI, Xref.GO)) {
+        if (cvDatabase != null && cvDatabase.getShortName() != null && !CvTermUtils.isCvTerm(cvDatabase, Xref.GO_MI, Xref.GO)) {
             throw new IllegalArgumentException("A Complex GO cross reference can only have GO as a database.");
         }
         super.setDatabase(cvDatabase);

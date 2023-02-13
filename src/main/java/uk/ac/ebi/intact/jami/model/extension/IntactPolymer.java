@@ -185,7 +185,7 @@ public class IntactPolymer extends IntactMolecule implements Polymer {
         Collection<Checksum> polymerChecksums = getChecksums();
 
         if (crc64 != null) {
-            CvTerm crc64Method = IntactUtils.getCvTopicByShortName("crc64", null);
+            CvTerm crc64Method = IntactUtils.createMITopic("crc64", null);
 
             // first remove old crc64
             if (this.crc64 != null) {
@@ -262,7 +262,7 @@ public class IntactPolymer extends IntactMolecule implements Polymer {
     @OneToMany(orphanRemoval = true, cascade = {CascadeType.ALL})
     @Cascade(value = {org.hibernate.annotations.CascadeType.SAVE_UPDATE})
     @JoinColumn(name = "parent_ac", referencedColumnName = "ac")
-    @OrderColumn(name = "sequence_index")
+    @IndexColumn(name = "sequence_index")
     @LazyCollection(LazyCollectionOption.FALSE)
     @Deprecated
     /**

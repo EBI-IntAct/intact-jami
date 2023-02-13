@@ -137,7 +137,7 @@ public class IntactCvTerm extends AbstractIntactCvTerm implements OntologyTerm {
 
         // add new definition if not null
         if (def != null) {
-            CvTerm defTopic = IntactUtils.getCvTopicByShortName("definition", null);
+            CvTerm defTopic = IntactUtils.createMITopic("definition", null);
             // first remove old definition if not null
             if (getDefinition() != null) { //Initialize the annotations too
                 this.definition.setValue(def);

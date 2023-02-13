@@ -466,14 +466,7 @@ public class IntactInteractor extends AbstractIntactPrimaryObject implements Int
         if (getAc() != null) {
             IntactContext intactContext = ApplicationContextProvider.getBean("intactJamiContext");
             if (intactContext != null) {
-                CvTerm database = IntactUtils.getCvByMITerm(Xref.INTACT_MI, IntactUtils.DATABASE_OBJCLASS);
-                CvTerm qualifier = IntactUtils.getCvByMITerm(Xref.IDENTITY_MI, IntactUtils.QUALIFIER_OBJCLASS);
-                if (database == null || qualifier == null) {
-                    this.acRef = new DefaultXref(intactContext.getIntactConfiguration().getDefaultInstitution(), getAc(), CvTermUtils.createIdentityQualifier());
-                } else {
-                    this.acRef = new DefaultXref(database,
-                            getAc(), qualifier);
-                }
+                this.acRef = new DefaultXref(intactContext.getIntactConfiguration().getDefaultInstitution(), getAc(), CvTermUtils.createIdentityQualifier());
             } else {
                 this.acRef = new DefaultXref(new DefaultCvTerm("unknwon"), getAc(), CvTermUtils.createIdentityQualifier());
             }

@@ -606,7 +606,7 @@ public class PublicationSynchronizer extends AbstractIntactDbSynchronizer<Public
                         authorList.setValue(authorAnnot);
                     }
                 } else {
-                    intactPublication.getDbAnnotations().add(new PublicationAnnotation(IntactUtils.getCvTopicByMITerm(Annotation.AUTHOR, Annotation.AUTHOR_MI), authorAnnot));
+                    intactPublication.getDbAnnotations().add(new PublicationAnnotation(IntactUtils.createMITopic(Annotation.AUTHOR, Annotation.AUTHOR_MI), authorAnnot));
                 }
             }
         }

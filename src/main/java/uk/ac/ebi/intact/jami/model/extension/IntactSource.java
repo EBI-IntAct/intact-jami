@@ -135,7 +135,7 @@ public class IntactSource extends AbstractIntactCvTerm implements Source {
 
         // add new url if not null
         if (url != null) {
-            CvTerm urlTopic = IntactUtils.getCvTopicByMITerm(Annotation.URL, Annotation.URL_MI);
+            CvTerm urlTopic = IntactUtils.createMITopic(Annotation.URL, Annotation.URL_MI);
 
             // first remove old url if not null
             if (this.url != null) {
@@ -164,7 +164,7 @@ public class IntactSource extends AbstractIntactCvTerm implements Source {
 
         // add new url if not null
         if (address != null) {
-            CvTerm addressTopic = IntactUtils.getCvTopicByShortName(Annotation.POSTAL_ADDRESS, null);
+            CvTerm addressTopic = IntactUtils.createMITopic(Annotation.POSTAL_ADDRESS, null);
 
             if (this.postalAddress != null) {
                 this.postalAddress.setValue(address);

@@ -107,13 +107,6 @@ public class InteractionEvidenceService implements IntactService<InteractionEvid
     }
 
     @Transactional(propagation = Propagation.REQUIRED, value = "jamiTransactionManager", readOnly = true)
-    public List<InteractionEvidence> fetchIntactObjects(String query, Map<String, Object> parameters, int first, int max, boolean loadLazyCollections,boolean loadSiblingInteractionEvidences) {
-        List<InteractionEvidence> results = new ArrayList<InteractionEvidence>(this.intactDAO.getInteractionDao().getByQuery(query, parameters, first, max));
-        initialiseLazyInteraction(loadLazyCollections, results,loadSiblingInteractionEvidences);
-        return results;
-    }
-
-    @Transactional(propagation = Propagation.REQUIRED, value = "jamiTransactionManager", readOnly = true)
     public List<InteractionEvidence> fetchIntactObjects(String query, Map<String, Object> parameters, boolean loadLazyCollections) {
         List<InteractionEvidence> results = new ArrayList<InteractionEvidence>(this.intactDAO.getInteractionDao().getByQuery(query, parameters, 0, Integer.MAX_VALUE));
         initialiseLazyInteraction(loadLazyCollections, results);
@@ -196,14 +189,6 @@ public class InteractionEvidenceService implements IntactService<InteractionEvid
         if (loadLazyCollections){
             for (InteractionEvidence interaction : results){
                 IntactUtils.initialiseInteractionEvidence((IntactInteractionEvidence) interaction, true);
-            }
-        }
-    }
-
-    private void initialiseLazyInteraction(boolean loadLazyCollections, List<InteractionEvidence> results,boolean loadSiblingInteractionEvidences ) {
-        if (loadLazyCollections){
-            for (InteractionEvidence interaction : results){
-                IntactUtils.initialiseInteractionEvidence((IntactInteractionEvidence) interaction, true,loadSiblingInteractionEvidences);
             }
         }
     }

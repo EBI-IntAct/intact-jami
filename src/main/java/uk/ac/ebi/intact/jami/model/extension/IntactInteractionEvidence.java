@@ -139,7 +139,7 @@ public class IntactInteractionEvidence extends AbstractIntactPrimaryObject imple
     public void setRigid(String rigid) {
         Collection<Checksum> checksums = getChecksums();
         if (rigid != null) {
-            CvTerm rigidMethod = IntactUtils.getCvTopicByShortName(Checksum.RIGID, null);
+            CvTerm rigidMethod = IntactUtils.createMITopic(Checksum.RIGID, null);
 
             // first remove old rigid
             if (this.rigid != null) {
@@ -411,7 +411,7 @@ public class IntactInteractionEvidence extends AbstractIntactPrimaryObject imple
             AnnotationUtils.removeAllAnnotationsWithTopic(getDbAnnotations(), null, "negative");
             this.isNegative = null;
         } else if (this.isNegative == null) {
-            CvTerm negativeTopic = IntactUtils.getCvTopicByShortName("negative", null);
+            CvTerm negativeTopic = IntactUtils.createMITopic("negative", null);
             this.isNegative = new InteractionAnnotation(negativeTopic);
             getDbAnnotations().add(this.isNegative);
         }
@@ -675,14 +675,7 @@ public class IntactInteractionEvidence extends AbstractIntactPrimaryObject imple
         if (getAc() != null) {
             IntactContext intactContext = ApplicationContextProvider.getBean("intactJamiContext");
             if (intactContext != null) {
-                CvTerm database = IntactUtils.getCvByMITerm(Xref.INTACT_MI, IntactUtils.DATABASE_OBJCLASS);
-                CvTerm qualifier = IntactUtils.getCvByMITerm(Xref.IDENTITY_MI, IntactUtils.QUALIFIER_OBJCLASS);
-                if (database == null || qualifier == null) {
-                    this.acRef = new DefaultXref(intactContext.getIntactConfiguration().getDefaultInstitution(), getAc(), CvTermUtils.createIdentityQualifier());
-                } else {
-                    this.acRef = new DefaultXref(database,
-                            getAc(), qualifier);
-                }
+                this.acRef = new DefaultXref(intactContext.getIntactConfiguration().getDefaultInstitution(), getAc(), CvTermUtils.createIdentityQualifier());
             } else {
                 this.acRef = new DefaultXref(new DefaultCvTerm("unknwon"), getAc(), CvTermUtils.createIdentityQualifier());
             }
