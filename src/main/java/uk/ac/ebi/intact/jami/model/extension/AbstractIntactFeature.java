@@ -436,11 +436,13 @@ public abstract class AbstractIntactFeature<P extends Entity, F extends Feature>
         this.xrefs = new FeatureXrefList();
         if (this.persistentXrefs != null) {
             for (Xref ref : this.persistentXrefs) {
-                if (XrefUtils.isXrefAnIdentifier(ref) || XrefUtils.doesXrefHaveQualifier(ref, null, "intact-secondary")) {
-                    this.identifiers.addOnly(ref);
-                    processAddedIdentifierEvent(ref);
-                } else {
-                    this.xrefs.addOnly(ref);
+                if (ref != null) {
+                    if (XrefUtils.isXrefAnIdentifier(ref) || XrefUtils.doesXrefHaveQualifier(ref, null, "intact-secondary")) {
+                        this.identifiers.addOnly(ref);
+                        processAddedIdentifierEvent(ref);
+                    } else {
+                        this.xrefs.addOnly(ref);
+                    }
                 }
             }
         } else {
@@ -505,7 +507,9 @@ public abstract class AbstractIntactFeature<P extends Entity, F extends Feature>
         // initialise persistent feature and content
         if (this.persistentLinkedFeatures != null) {
             for (F linked : this.persistentLinkedFeatures) {
-                this.linkedFeatures.addOnly(linked);
+                if (linked != null) {
+                    this.linkedFeatures.addOnly(linked);
+                }
             }
         } else {
             this.persistentLinkedFeatures = new PersistentLinkedFeatureList(null);

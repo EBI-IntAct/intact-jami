@@ -375,24 +375,26 @@ public class IntactBioactiveEntity extends IntactMolecule implements BioactiveEn
         checksumList.remove(key);
 
         for (Annotation annotation : getDbAnnotations()) {
-            // we have a checksum
-            if (annotation.getValue() != null
-                    && AnnotationUtils.doesAnnotationHaveTopic(annotation, Checksum.SMILE_MI, Checksum.SMILE)) {
-                this.smile = new IntactChecksumWrapper(annotation);
-                checksumList.addOnly(this.smile);
-            } else if (annotation.getValue() != null
-                    && AnnotationUtils.doesAnnotationHaveTopic(annotation, Checksum.INCHI_MI, Checksum.INCHI)) {
-                this.standardInchi = new IntactChecksumWrapper(annotation);
-                checksumList.addOnly(this.standardInchi);
+            if (annotation != null) {
+                // we have a checksum
+                if (annotation.getValue() != null
+                        && AnnotationUtils.doesAnnotationHaveTopic(annotation, Checksum.SMILE_MI, Checksum.SMILE)) {
+                    this.smile = new IntactChecksumWrapper(annotation);
+                    checksumList.addOnly(this.smile);
+                } else if (annotation.getValue() != null
+                        && AnnotationUtils.doesAnnotationHaveTopic(annotation, Checksum.INCHI_MI, Checksum.INCHI)) {
+                    this.standardInchi = new IntactChecksumWrapper(annotation);
+                    checksumList.addOnly(this.standardInchi);
 
-            } else if (annotation.getValue() != null &&
-                    AnnotationUtils.doesAnnotationHaveTopic(annotation, Checksum.STANDARD_INCHI_KEY_MI, Checksum.STANDARD_INCHI_KEY)) {
-                this.standardInchiKey = new IntactChecksumWrapper(annotation);
-                checksumList.addOnly(this.standardInchiKey);
-            }
-            // we have a simple annotation
-            else {
-                ((BioactiveEntityAnnotationList) getAnnotations()).addOnly(annotation);
+                } else if (annotation.getValue() != null &&
+                        AnnotationUtils.doesAnnotationHaveTopic(annotation, Checksum.STANDARD_INCHI_KEY_MI, Checksum.STANDARD_INCHI_KEY)) {
+                    this.standardInchiKey = new IntactChecksumWrapper(annotation);
+                    checksumList.addOnly(this.standardInchiKey);
+                }
+                // we have a simple annotation
+                else {
+                    ((BioactiveEntityAnnotationList) getAnnotations()).addOnly(annotation);
+                }
             }
         }
     }

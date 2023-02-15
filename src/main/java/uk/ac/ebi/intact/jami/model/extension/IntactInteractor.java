@@ -440,7 +440,9 @@ public class IntactInteractor extends AbstractIntactPrimaryObject implements Int
         this.annotations = this.persistentAnnotations;
 
         for (Annotation a : this.annotations) {
-            processAddedAnnotation(a);
+            if (a != null) {
+                processAddedAnnotation(a);
+            }
         }
     }
 
@@ -449,13 +451,15 @@ public class IntactInteractor extends AbstractIntactPrimaryObject implements Int
         this.xrefs = new InteractorXrefList();
         if (this.persistentXrefs != null) {
             for (Xref ref : this.persistentXrefs) {
-                if (XrefUtils.isXrefAnIdentifier(ref) || XrefUtils.doesXrefHaveQualifier(ref, null, "intact-secondary")
-                        || XrefUtils.doesXrefHaveQualifier(ref, Xref.COMPLEX_PRIMARY_MI, Xref.COMPLEX_PRIMARY)) {
-                    this.identifiers.addOnly(ref);
-                    processAddedIdentifierEvent(ref);
-                } else {
-                    this.xrefs.addOnly(ref);
-                    processAddedXrefEvent(ref);
+                if (ref != null) {
+                    if (XrefUtils.isXrefAnIdentifier(ref) || XrefUtils.doesXrefHaveQualifier(ref, null, "intact-secondary")
+                            || XrefUtils.doesXrefHaveQualifier(ref, Xref.COMPLEX_PRIMARY_MI, Xref.COMPLEX_PRIMARY)) {
+                        this.identifiers.addOnly(ref);
+                        processAddedIdentifierEvent(ref);
+                    } else {
+                        this.xrefs.addOnly(ref);
+                        processAddedXrefEvent(ref);
+                    }
                 }
             }
         } else {
@@ -480,7 +484,9 @@ public class IntactInteractor extends AbstractIntactPrimaryObject implements Int
 
         this.aliases = this.persistentAliases;
         for (Alias a : this.aliases) {
-            processAddedAlias(a);
+            if (a != null) {
+                processAddedAlias(a);
+            }
         }
     }
 

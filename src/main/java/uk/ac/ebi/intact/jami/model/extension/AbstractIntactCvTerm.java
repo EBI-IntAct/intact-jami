@@ -284,12 +284,14 @@ public abstract class AbstractIntactCvTerm extends AbstractIntactPrimaryObject i
         // initialise persistent xref and content
         if (this.persistentXrefs != null) {
             for (Xref ref : this.persistentXrefs) {
-                if (XrefUtils.isXrefAnIdentifier(ref) || XrefUtils.doesXrefHaveQualifier(ref, null, "intact-secondary")) {
-                    this.identifiers.addOnly(ref);
-                    processAddedIdentifierEvent(ref);
-                } else {
-                    this.xrefs.addOnly(ref);
-                    processAddedXrefEvent(ref);
+                if (ref != null) {
+                    if (XrefUtils.isXrefAnIdentifier(ref) || XrefUtils.doesXrefHaveQualifier(ref, null, "intact-secondary")) {
+                        this.identifiers.addOnly(ref);
+                        processAddedIdentifierEvent(ref);
+                    } else {
+                        this.xrefs.addOnly(ref);
+                        processAddedXrefEvent(ref);
+                    }
                 }
             }
         } else {

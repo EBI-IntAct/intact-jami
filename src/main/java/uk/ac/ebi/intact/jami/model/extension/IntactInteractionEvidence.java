@@ -636,10 +636,12 @@ public class IntactInteractionEvidence extends AbstractIntactPrimaryObject imple
         this.isNegative = null;
         if (this.persistentAnnotations != null) {
             for (Annotation annot : this.persistentAnnotations) {
-                if (AnnotationUtils.doesAnnotationHaveTopic(annot, null, "negative")) {
-                    isNegative = annot;
-                } else {
-                    this.annotations.addOnly(annot);
+                if (annot != null) {
+                    if (AnnotationUtils.doesAnnotationHaveTopic(annot, null, "negative")) {
+                        isNegative = annot;
+                    } else {
+                        this.annotations.addOnly(annot);
+                    }
                 }
             }
         } else {
@@ -660,11 +662,13 @@ public class IntactInteractionEvidence extends AbstractIntactPrimaryObject imple
         this.xrefs = new InteractionXrefList();
         if (this.persistentXrefs != null) {
             for (Xref ref : this.persistentXrefs) {
-                if (XrefUtils.isXrefAnIdentifier(ref) || XrefUtils.doesXrefHaveQualifier(ref, null, "intact-secondary")) {
-                    this.identifiers.addOnly(ref);
-                } else {
-                    this.xrefs.addOnly(ref);
-                    processAddedXrefEvent(ref);
+                if (ref != null) {
+                    if (XrefUtils.isXrefAnIdentifier(ref) || XrefUtils.doesXrefHaveQualifier(ref, null, "intact-secondary")) {
+                        this.identifiers.addOnly(ref);
+                    } else {
+                        this.xrefs.addOnly(ref);
+                        processAddedXrefEvent(ref);
+                    }
                 }
             }
         } else {

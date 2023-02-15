@@ -298,7 +298,9 @@ public class IntactFeatureEvidence extends AbstractIntactFeature<ExperimentalEnt
         // initialise persistent feature and content
         if (this.persistentDetectionMethods != null){
             for (CvTerm method : this.persistentDetectionMethods){
-                this.detectionMethods.addOnly(method);
+                if (method != null) {
+                    this.detectionMethods.addOnly(method);
+                }
             }
         }
         else{

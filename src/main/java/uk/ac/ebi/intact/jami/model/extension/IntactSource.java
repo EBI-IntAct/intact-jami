@@ -230,8 +230,10 @@ public class IntactSource extends AbstractIntactCvTerm implements Source {
         // initialise persistent annotations and content
         if (this.persistentAnnotations != null) {
             for (Annotation annot : this.persistentAnnotations) {
-                if (!processAddedAnnotations(annot)) {
-                    this.annotations.addOnly(annot);
+                if (annot != null) {
+                    if (!processAddedAnnotations(annot)) {
+                        this.annotations.addOnly(annot);
+                    }
                 }
             }
         } else {
