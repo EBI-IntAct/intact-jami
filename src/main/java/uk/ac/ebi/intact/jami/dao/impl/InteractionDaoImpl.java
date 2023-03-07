@@ -747,7 +747,7 @@ public class InteractionDaoImpl extends AbstractIntactBaseDao<InteractionEvidenc
         Query query = getEntityManager().createQuery("select size(i.participants) from IntactInteractionEvidence i " +
                 "where i.ac = :ac");
         query.setParameter("ac", ac);
-        return (Integer)query.getSingleResult();
+        return getIntQueryResult(query);
     }
 
     @Override
@@ -791,7 +791,7 @@ public class InteractionDaoImpl extends AbstractIntactBaseDao<InteractionEvidenc
         Query query = getEntityManager().createQuery("select size(i.confidences) from IntactInteractionEvidence i " +
                 "where i.ac = :ac");
         query.setParameter("ac", ac);
-        return (Integer)query.getSingleResult();
+        return getIntQueryResult(query);
     }
 
     @Override
@@ -799,7 +799,7 @@ public class InteractionDaoImpl extends AbstractIntactBaseDao<InteractionEvidenc
         Query query = getEntityManager().createQuery("select size(i.parameters) from IntactInteractionEvidence i " +
                 "where i.ac = :ac");
         query.setParameter("ac", ac);
-        return (Integer)query.getSingleResult();
+        return getIntQueryResult(query);
     }
 
     @Override
@@ -807,7 +807,7 @@ public class InteractionDaoImpl extends AbstractIntactBaseDao<InteractionEvidenc
         Query query = getEntityManager().createQuery("select size(i.dbXrefs) from IntactInteractionEvidence i " +
                 "where i.ac = :ac");
         query.setParameter("ac", ac);
-        return (Integer)query.getSingleResult();
+        return getIntQueryResult(query);
     }
 
     @Override
@@ -815,7 +815,7 @@ public class InteractionDaoImpl extends AbstractIntactBaseDao<InteractionEvidenc
         Query query = getEntityManager().createQuery("select size(i.dbAnnotations) from IntactInteractionEvidence i " +
                 "where i.ac = :ac");
         query.setParameter("ac", ac);
-        return (Integer)query.getSingleResult();
+        return getIntQueryResult(query);
     }
 
     @Override
@@ -823,7 +823,7 @@ public class InteractionDaoImpl extends AbstractIntactBaseDao<InteractionEvidenc
         Query query = getEntityManager().createQuery("select size(i.variableParameterValues) from IntactInteractionEvidence i " +
                 "where i.ac = :ac");
         query.setParameter("ac", ac);
-        return (Integer)query.getSingleResult();
+        return getIntQueryResult(query);
     }
 
     @Override
@@ -832,7 +832,6 @@ public class InteractionDaoImpl extends AbstractIntactBaseDao<InteractionEvidenc
                 "join i.participants as p join p.interactor as inter " +
                 "where inter.ac = :ac");
         query.setParameter("ac", ac);
-        Long results = (Long)query.getSingleResult();
-        return results != null ? results.intValue() : 0;
+        return getLongQueryResult(query).intValue();
     }
 }

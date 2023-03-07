@@ -26,24 +26,20 @@ public class ComplexGOXref extends InteractorXref{
     protected ComplexGOXref() {
     }
 
-    public ComplexGOXref(String id, CvTerm qualifier) {
-        super(IntactUtils.createMIDatabase(Xref.GO, Xref.GO_MI), id, qualifier);
+    public ComplexGOXref(CvTerm database, String id) {
+        super(database, id);
     }
 
-    public ComplexGOXref(String id, String version, CvTerm qualifier) {
-        super(IntactUtils.createMIDatabase(Xref.GO, Xref.GO_MI), id, version, qualifier);
+    public ComplexGOXref(CvTerm database, String id, CvTerm qualifier) {
+        super(database, id, qualifier);
     }
 
-    public ComplexGOXref(String id, String version) {
-        super(IntactUtils.createMIDatabase(Xref.GO, Xref.GO_MI), id, version);
+    public ComplexGOXref(CvTerm database, String id, String version) {
+        super(database, id, version);
     }
 
     public ComplexGOXref(CvTerm database, String id, String version, CvTerm qualifier) {
         super(database, id, version, qualifier);
-    }
-
-    public ComplexGOXref(String id) {
-        super(IntactUtils.createMIDatabase(Xref.GO, Xref.GO_MI), id);
     }
 
     @Override

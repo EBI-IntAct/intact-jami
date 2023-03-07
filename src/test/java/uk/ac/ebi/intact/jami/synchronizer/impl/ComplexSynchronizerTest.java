@@ -2,7 +2,6 @@ package uk.ac.ebi.intact.jami.synchronizer.impl;
 
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.transaction.annotation.Transactional;
@@ -10,9 +9,6 @@ import psidev.psi.mi.jami.listener.comparator.event.ComplexComparisonEvent;
 import psidev.psi.mi.jami.listener.comparator.impl.ComplexComparatorListenerImpl;
 import psidev.psi.mi.jami.listener.comparator.observer.ComplexComparatorObserver;
 import psidev.psi.mi.jami.model.Complex;
-import psidev.psi.mi.jami.model.InteractorPool;
-import psidev.psi.mi.jami.model.ModelledParticipant;
-import psidev.psi.mi.jami.model.Stoichiometry;
 import psidev.psi.mi.jami.model.impl.*;
 import psidev.psi.mi.jami.utils.XrefUtils;
 import uk.ac.ebi.intact.jami.IntactTestUtils;
@@ -138,7 +134,6 @@ public class ComplexSynchronizerTest extends InteractorSynchronizerTemplateTest 
     @Test
     @DirtiesContext
     @Override
-    @Ignore
     public void test_persist_all() throws PersisterException, FinderException, SynchronizerException, InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
 
     }
@@ -147,7 +142,6 @@ public class ComplexSynchronizerTest extends InteractorSynchronizerTemplateTest 
     @Test
     @DirtiesContext
     @Override
-    @Ignore
     public void test_deleted() throws PersisterException, FinderException, SynchronizerException, InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
 
     }
@@ -156,7 +150,6 @@ public class ComplexSynchronizerTest extends InteractorSynchronizerTemplateTest 
     @Test
     @DirtiesContext
     @Override
-    @Ignore
     public void test_find() throws PersisterException, FinderException, SynchronizerException, InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
 
     }
@@ -302,7 +295,6 @@ public class ComplexSynchronizerTest extends InteractorSynchronizerTemplateTest 
     @Test
     @DirtiesContext
     @Override
-    @Ignore
     public void test_synchronize_properties() throws PersisterException, FinderException, SynchronizerException, InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
 
     }
@@ -311,7 +303,6 @@ public class ComplexSynchronizerTest extends InteractorSynchronizerTemplateTest 
     @Test
     @DirtiesContext
     @Override
-    @Ignore
     public void test_synchronize_not_persist() throws PersisterException, FinderException, SynchronizerException, InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
 
     }
@@ -320,7 +311,6 @@ public class ComplexSynchronizerTest extends InteractorSynchronizerTemplateTest 
     @Test
     @DirtiesContext
     @Override
-    @Ignore
     public void test_synchronize_persist() throws PersisterException, FinderException, SynchronizerException, InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
 
     }
@@ -329,7 +319,6 @@ public class ComplexSynchronizerTest extends InteractorSynchronizerTemplateTest 
     @Test
     @DirtiesContext
     @Override
-    @Ignore
     public void test_synchronize_merge() throws PersisterException, FinderException, SynchronizerException, InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
 
     }
@@ -338,7 +327,6 @@ public class ComplexSynchronizerTest extends InteractorSynchronizerTemplateTest 
     @Test
     @DirtiesContext
     @Override
-    @Ignore
     public void test_synchronize_merge2() throws PersisterException, FinderException, SynchronizerException, InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
 
     }
@@ -347,7 +335,6 @@ public class ComplexSynchronizerTest extends InteractorSynchronizerTemplateTest 
     @Test
     @DirtiesContext
     @Override
-    @Ignore
     public void test_jami() throws PersisterException, FinderException, SynchronizerException, InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
 
     }
@@ -356,7 +343,6 @@ public class ComplexSynchronizerTest extends InteractorSynchronizerTemplateTest 
     @Test
     @DirtiesContext
     @Override
-    @Ignore
     public void test_commonName_synch() throws PersisterException, FinderException, SynchronizerException, NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException {
 
     }

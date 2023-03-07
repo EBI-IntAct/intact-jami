@@ -500,7 +500,7 @@ public class ExperimentDaoImpl extends AbstractIntactBaseDao<Experiment, IntactE
         Query query = getEntityManager().createQuery("select size(e.interactionEvidences) from IntactExperiment e " +
                 "where e.ac = :ac");
         query.setParameter("ac", ac);
-        return (Integer)query.getSingleResult();
+        return getIntQueryResult(query);
     }
 
     @Override
@@ -508,7 +508,7 @@ public class ExperimentDaoImpl extends AbstractIntactBaseDao<Experiment, IntactE
         Query query = getEntityManager().createQuery("select size(i.xrefs) from IntactExperiment i " +
                 "where i.ac = :ac");
         query.setParameter("ac", ac);
-        return (Integer)query.getSingleResult();
+        return getIntQueryResult(query);
     }
 
     @Override
@@ -516,7 +516,7 @@ public class ExperimentDaoImpl extends AbstractIntactBaseDao<Experiment, IntactE
         Query query = getEntityManager().createQuery("select size(i.annotations) from IntactExperiment i " +
                 "where i.ac = :ac");
         query.setParameter("ac", ac);
-        return (Integer)query.getSingleResult();
+        return getIntQueryResult(query);
     }
 
     @Override
@@ -524,7 +524,7 @@ public class ExperimentDaoImpl extends AbstractIntactBaseDao<Experiment, IntactE
         Query query = getEntityManager().createQuery("select size(i.variableParameters) from IntactExperiment i " +
                 "where i.ac = :ac");
         query.setParameter("ac", ac);
-        return (Integer)query.getSingleResult();
+        return getIntQueryResult(query);
     }
 
     @Override
@@ -533,8 +533,7 @@ public class ExperimentDaoImpl extends AbstractIntactBaseDao<Experiment, IntactE
                 "join i.hostOrganism o " +
                 "where o.ac = :ac");
         query.setParameter("ac", organismAc);
-        Long results = (Long)query.getSingleResult();
-        return results != null ? results.intValue() : 0;
+        return getLongQueryResult(query).intValue();
     }
 
     @Override
