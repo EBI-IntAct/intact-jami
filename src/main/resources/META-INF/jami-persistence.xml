@@ -9,7 +9,6 @@
         <properties>
             <property name="hibernate.max_fetch_depth" value="4"/>
             <property name="hibernate.connection.release_mode" value="after_transaction"/>
-            <property name="javax.persistence.validation.mode" value="CALLBACK"/>
         </properties>
 
     </persistence-unit>

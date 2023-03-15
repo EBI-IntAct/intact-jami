@@ -284,12 +284,14 @@ public abstract class AbstractIntactCvTerm extends AbstractIntactPrimaryObject i
         // initialise persistent xref and content
         if (this.persistentXrefs != null) {
             for (Xref ref : this.persistentXrefs) {
-                if (XrefUtils.isXrefAnIdentifier(ref) || XrefUtils.doesXrefHaveQualifier(ref, null, "intact-secondary")) {
-                    this.identifiers.addOnly(ref);
-                    processAddedIdentifierEvent(ref);
-                } else {
-                    this.xrefs.addOnly(ref);
-                    processAddedXrefEvent(ref);
+                if (ref != null) {
+                    if (XrefUtils.isXrefAnIdentifier(ref) || XrefUtils.doesXrefHaveQualifier(ref, null, "intact-secondary")) {
+                        this.identifiers.addOnly(ref);
+                        processAddedIdentifierEvent(ref);
+                    } else {
+                        this.xrefs.addOnly(ref);
+                        processAddedXrefEvent(ref);
+                    }
                 }
             }
         } else {
@@ -299,14 +301,7 @@ public abstract class AbstractIntactCvTerm extends AbstractIntactPrimaryObject i
         if (getAc() != null) {
             IntactContext intactContext = ApplicationContextProvider.getBean("intactJamiContext");
             if (intactContext != null) {
-                CvTerm database = IntactUtils.getCvByMITerm(Xref.INTACT_MI, IntactUtils.DATABASE_OBJCLASS);
-                CvTerm qualifier = IntactUtils.getCvByMITerm(Xref.IDENTITY_MI, IntactUtils.QUALIFIER_OBJCLASS);
-                if (database == null || qualifier == null) {
-                    this.acRef = new DefaultXref(intactContext.getIntactConfiguration().getDefaultInstitution(), getAc(), CvTermUtils.createIdentityQualifier());
-                } else {
-                    this.acRef = new DefaultXref(database,
-                            getAc(), qualifier);
-                }
+                this.acRef = new DefaultXref(intactContext.getIntactConfiguration().getDefaultInstitution(), getAc(), CvTermUtils.createIdentityQualifier());
             } else {
                 this.acRef = new DefaultXref(new DefaultCvTerm("unknown"), getAc(), CvTermUtils.createIdentityQualifier());
             }

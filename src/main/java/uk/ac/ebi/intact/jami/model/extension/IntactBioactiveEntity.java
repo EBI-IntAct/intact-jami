@@ -202,7 +202,7 @@ public class IntactBioactiveEntity extends IntactMolecule implements BioactiveEn
     public void setSmile(String smile) {
         Collection<Checksum> bioactiveEntityChecksums = getChecksums();
         if (smile != null) {
-            CvTerm smileMethod = IntactUtils.getCvTopicByMITerm(Checksum.SMILE, Checksum.SMILE_MI);
+            CvTerm smileMethod = IntactUtils.createMITopic(Checksum.SMILE, Checksum.SMILE_MI);
 
             // first remove old smile
             if (this.smile != null) {
@@ -232,7 +232,7 @@ public class IntactBioactiveEntity extends IntactMolecule implements BioactiveEn
         Collection<Checksum> bioactiveEntityChecksums = getChecksums();
 
         if (key != null) {
-            CvTerm inchiKeyMethod = IntactUtils.getCvTopicByMITerm(Checksum.STANDARD_INCHI_KEY, Checksum.STANDARD_INCHI_KEY_MI);
+            CvTerm inchiKeyMethod = IntactUtils.createMITopic(Checksum.STANDARD_INCHI_KEY, Checksum.STANDARD_INCHI_KEY_MI);
 
             // first remove old standard inchi key
             if (this.standardInchiKey != null) {
@@ -262,7 +262,7 @@ public class IntactBioactiveEntity extends IntactMolecule implements BioactiveEn
         Collection<Checksum> bioactiveEntityChecksums = getChecksums();
 
         if (inchi != null) {
-            CvTerm inchiMethod = IntactUtils.getCvTopicByMITerm(Checksum.INCHI, Checksum.INCHI_MI);
+            CvTerm inchiMethod = IntactUtils.createMITopic(Checksum.INCHI, Checksum.INCHI_MI);
 
             // first remove standard inchi
             if (this.standardInchi != null) {
@@ -375,24 +375,26 @@ public class IntactBioactiveEntity extends IntactMolecule implements BioactiveEn
         checksumList.remove(key);
 
         for (Annotation annotation : getDbAnnotations()) {
-            // we have a checksum
-            if (annotation.getValue() != null
-                    && AnnotationUtils.doesAnnotationHaveTopic(annotation, Checksum.SMILE_MI, Checksum.SMILE)) {
-                this.smile = new IntactChecksumWrapper(annotation);
-                checksumList.addOnly(this.smile);
-            } else if (annotation.getValue() != null
-                    && AnnotationUtils.doesAnnotationHaveTopic(annotation, Checksum.INCHI_MI, Checksum.INCHI)) {
-                this.standardInchi = new IntactChecksumWrapper(annotation);
-                checksumList.addOnly(this.standardInchi);
+            if (annotation != null) {
+                // we have a checksum
+                if (annotation.getValue() != null
+                        && AnnotationUtils.doesAnnotationHaveTopic(annotation, Checksum.SMILE_MI, Checksum.SMILE)) {
+                    this.smile = new IntactChecksumWrapper(annotation);
+                    checksumList.addOnly(this.smile);
+                } else if (annotation.getValue() != null
+                        && AnnotationUtils.doesAnnotationHaveTopic(annotation, Checksum.INCHI_MI, Checksum.INCHI)) {
+                    this.standardInchi = new IntactChecksumWrapper(annotation);
+                    checksumList.addOnly(this.standardInchi);
 
-            } else if (annotation.getValue() != null &&
-                    AnnotationUtils.doesAnnotationHaveTopic(annotation, Checksum.STANDARD_INCHI_KEY_MI, Checksum.STANDARD_INCHI_KEY)) {
-                this.standardInchiKey = new IntactChecksumWrapper(annotation);
-                checksumList.addOnly(this.standardInchiKey);
-            }
-            // we have a simple annotation
-            else {
-                ((BioactiveEntityAnnotationList) getAnnotations()).addOnly(annotation);
+                } else if (annotation.getValue() != null &&
+                        AnnotationUtils.doesAnnotationHaveTopic(annotation, Checksum.STANDARD_INCHI_KEY_MI, Checksum.STANDARD_INCHI_KEY)) {
+                    this.standardInchiKey = new IntactChecksumWrapper(annotation);
+                    checksumList.addOnly(this.standardInchiKey);
+                }
+                // we have a simple annotation
+                else {
+                    ((BioactiveEntityAnnotationList) getAnnotations()).addOnly(annotation);
+                }
             }
         }
     }

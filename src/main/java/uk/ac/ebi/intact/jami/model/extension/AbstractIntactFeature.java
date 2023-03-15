@@ -436,11 +436,13 @@ public abstract class AbstractIntactFeature<P extends Entity, F extends Feature>
         this.xrefs = new FeatureXrefList();
         if (this.persistentXrefs != null) {
             for (Xref ref : this.persistentXrefs) {
-                if (XrefUtils.isXrefAnIdentifier(ref) || XrefUtils.doesXrefHaveQualifier(ref, null, "intact-secondary")) {
-                    this.identifiers.addOnly(ref);
-                    processAddedIdentifierEvent(ref);
-                } else {
-                    this.xrefs.addOnly(ref);
+                if (ref != null) {
+                    if (XrefUtils.isXrefAnIdentifier(ref) || XrefUtils.doesXrefHaveQualifier(ref, null, "intact-secondary")) {
+                        this.identifiers.addOnly(ref);
+                        processAddedIdentifierEvent(ref);
+                    } else {
+                        this.xrefs.addOnly(ref);
+                    }
                 }
             }
         } else {
@@ -450,13 +452,7 @@ public abstract class AbstractIntactFeature<P extends Entity, F extends Feature>
         if (getAc() != null) {
             IntactContext intactContext = ApplicationContextProvider.getBean("intactJamiContext");
             if (intactContext != null) {
-                CvTerm database = IntactUtils.getCvByMITerm(Xref.INTACT_MI, IntactUtils.DATABASE_OBJCLASS);
-                CvTerm qualifier = IntactUtils.getCvByMITerm(Xref.IDENTITY_MI, IntactUtils.QUALIFIER_OBJCLASS);
-                if (database == null || qualifier == null) {
-                    this.acRef = new DefaultXref(intactContext.getIntactConfiguration().getDefaultInstitution(), getAc(), CvTermUtils.createIdentityQualifier());
-                } else {
-                    this.acRef = new DefaultXref(database, getAc(), qualifier);
-                }
+                this.acRef = new DefaultXref(intactContext.getIntactConfiguration().getDefaultInstitution(), getAc(), CvTermUtils.createIdentityQualifier());
             } else {
                 this.acRef = new DefaultXref(new DefaultCvTerm("unknwon"), getAc(), CvTermUtils.createIdentityQualifier());
             }
@@ -511,7 +507,9 @@ public abstract class AbstractIntactFeature<P extends Entity, F extends Feature>
         // initialise persistent feature and content
         if (this.persistentLinkedFeatures != null) {
             for (F linked : this.persistentLinkedFeatures) {
-                this.linkedFeatures.addOnly(linked);
+                if (linked != null) {
+                    this.linkedFeatures.addOnly(linked);
+                }
             }
         } else {
             this.persistentLinkedFeatures = new PersistentLinkedFeatureList(null);

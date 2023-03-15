@@ -315,7 +315,7 @@ public class IntactComplex extends IntactInteractor implements Complex, Releasab
         if (toBeReviewed != null) {
             this.toBeReviewed.setValue(message);
         } else {
-            CvTerm toBeReviewedTopic = IntactUtils.getCvTopicByShortName(Releasable.TO_BE_REVIEWED, null);
+            CvTerm toBeReviewedTopic = IntactUtils.createMITopic(Releasable.TO_BE_REVIEWED, null);
             this.toBeReviewed = new InteractorAnnotation(toBeReviewedTopic, message);
             complexAnnotationList.add(this.toBeReviewed);
         }
@@ -328,7 +328,7 @@ public class IntactComplex extends IntactInteractor implements Complex, Releasab
         if (accepted != null) {
             this.accepted.setValue(message);
         } else {
-            CvTerm acceptedTopic = IntactUtils.getCvTopicByShortName(Releasable.ACCEPTED, null);
+            CvTerm acceptedTopic = IntactUtils.createMITopic(Releasable.ACCEPTED, null);
             this.accepted = new InteractorAnnotation(acceptedTopic, message);
             complexAnnotationList.add(this.accepted);
         }
@@ -363,7 +363,7 @@ public class IntactComplex extends IntactInteractor implements Complex, Releasab
         if (correctionComment != null) {
             this.correctionComment.setValue(message);
         } else {
-            CvTerm onHoldTopic = IntactUtils.getCvTopicByShortName(Releasable.CORRECTION_COMMENT, null);
+            CvTerm onHoldTopic = IntactUtils.createMITopic(Releasable.CORRECTION_COMMENT, null);
             this.correctionComment = new InteractorAnnotation(onHoldTopic, message);
             complexAnnotationList.add(this.correctionComment);
         }
@@ -408,7 +408,7 @@ public class IntactComplex extends IntactInteractor implements Complex, Releasab
         if (onHold != null) {
             this.onHold.setValue(message);
         } else {
-            CvTerm onHoldTopic = IntactUtils.getCvTopicByShortName(Releasable.ON_HOLD, null);
+            CvTerm onHoldTopic = IntactUtils.createMITopic(Releasable.ON_HOLD, null);
             this.onHold = new InteractorAnnotation(onHoldTopic, message);
             complexAnnotationList.add(this.onHold);
         }
@@ -658,7 +658,7 @@ public class IntactComplex extends IntactInteractor implements Complex, Releasab
 
         // add new physical properties if not null
         if (properties != null) {
-            CvTerm complexPhysicalProperties = IntactUtils.getCvTopicByMITerm(Annotation.COMPLEX_PROPERTIES, Annotation.COMPLEX_PROPERTIES_MI);
+            CvTerm complexPhysicalProperties = IntactUtils.createMITopic(Annotation.COMPLEX_PROPERTIES, Annotation.COMPLEX_PROPERTIES_MI);
 
             // first remove old physical property if not null
             if (this.physicalProperties != null) {
@@ -780,7 +780,7 @@ public class IntactComplex extends IntactInteractor implements Complex, Releasab
     public void setRigid(String rigid) {
         Collection<Checksum> checksums = getChecksums();
         if (rigid != null) {
-            CvTerm rigidMethod = IntactUtils.getCvTopicByShortName(Checksum.RIGID, null);
+            CvTerm rigidMethod = IntactUtils.createMITopic(Checksum.RIGID, null);
 
             // first remove old rigid
             if (this.rigid != null) {

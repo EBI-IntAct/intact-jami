@@ -11,7 +11,7 @@ import org.hibernate.HibernateException;
 import org.hibernate.MappingException;
 import org.hibernate.dialect.Dialect;
 import org.hibernate.engine.jdbc.env.spi.JdbcEnvironment;
-import org.hibernate.engine.spi.SessionImplementor;
+import org.hibernate.engine.spi.SharedSessionContractImplementor;
 import org.hibernate.id.enhanced.SequenceStyleGenerator;
 import org.hibernate.internal.util.config.ConfigurationHelper;
 import org.hibernate.service.ServiceRegistry;
@@ -67,7 +67,7 @@ public class ComplexAcGenerator extends SequenceStyleGenerator {
     }
 
     @Override
-    public Serializable generate(SessionImplementor sessionImplementor, Object object) throws HibernateException {
+    public Serializable generate(SharedSessionContractImplementor sessionImplementor, Object object) throws HibernateException {
          //TODO... Change the logic
         String prefix = "CPX";
         String stringId = null;

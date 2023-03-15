@@ -14,6 +14,7 @@ import uk.ac.ebi.intact.jami.synchronizer.SynchronizerException;
 import uk.ac.ebi.intact.jami.synchronizer.impl.CvTermSynchronizer;
 
 import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
 import javax.persistence.NonUniqueResultException;
 import javax.persistence.Query;
 import java.util.Collection;
@@ -125,7 +126,12 @@ public class CvTermDaoImpl extends AbstractIntactBaseDao<CvTerm, IntactCvTerm> i
         query.setParameter("identity", Xref.IDENTITY);
         query.setParameter("secondaryAc", Xref.SECONDARY);
         query.setParameter("primary", primaryId);
-        return (IntactCvTerm)query.getSingleResult();
+        try {
+            return (IntactCvTerm) query.getSingleResult();
+        } catch (NoResultException e) {
+            // Nothing to do, the query did not find any result
+            return null;
+        }
     }
 
     @Override
@@ -140,7 +146,12 @@ public class CvTermDaoImpl extends AbstractIntactBaseDao<CvTerm, IntactCvTerm> i
         query.setParameter("secondaryAc", Xref.SECONDARY);
         query.setParameter("primary", primaryId);
         query.setParameter("objclass", objClass);
-        return (IntactCvTerm)query.getSingleResult();
+        try {
+            return (IntactCvTerm) query.getSingleResult();
+        } catch (NoResultException e) {
+            // Nothing to do, the query did not find any result
+            return null;
+        }
     }
 
     public Collection<IntactCvTerm> getByXrefLike(String dbName, String dbMI, String primaryId) {
@@ -737,7 +748,7 @@ public class CvTermDaoImpl extends AbstractIntactBaseDao<CvTerm, IntactCvTerm> i
         Query query = getEntityManager().createQuery("select size(i.synonyms) from IntactCvTerm i " +
                 "where i.ac = :ac");
         query.setParameter("ac", ac);
-        return (Integer)query.getSingleResult();
+        return getIntQueryResult(query);
     }
 
     @Override
@@ -745,7 +756,7 @@ public class CvTermDaoImpl extends AbstractIntactBaseDao<CvTerm, IntactCvTerm> i
         Query query = getEntityManager().createQuery("select size(i.dbXrefs) from IntactCvTerm i " +
                 "where i.ac = :ac");
         query.setParameter("ac", ac);
-        return (Integer)query.getSingleResult();
+        return getIntQueryResult(query);
     }
 
     @Override
@@ -753,7 +764,7 @@ public class CvTermDaoImpl extends AbstractIntactBaseDao<CvTerm, IntactCvTerm> i
         Query query = getEntityManager().createQuery("select size(i.dbAnnotations) from IntactCvTerm i " +
                 "where i.ac = :ac");
         query.setParameter("ac", ac);
-        return (Integer)query.getSingleResult();
+        return getIntQueryResult(query);
     }
 
     @Override

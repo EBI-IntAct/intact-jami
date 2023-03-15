@@ -137,7 +137,7 @@ public class IntactCvTerm extends AbstractIntactCvTerm implements OntologyTerm {
 
         // add new definition if not null
         if (def != null) {
-            CvTerm defTopic = IntactUtils.getCvTopicByShortName("definition", null);
+            CvTerm defTopic = IntactUtils.createMITopic("definition", null);
             // first remove old definition if not null
             if (getDefinition() != null) { //Initialize the annotations too
                 this.definition.setValue(def);
@@ -167,8 +167,10 @@ public class IntactCvTerm extends AbstractIntactCvTerm implements OntologyTerm {
         // initialise persistent annotations and content
         if (this.persistentAnnotations != null) {
             for (Annotation annot : this.persistentAnnotations) {
-                if (!processAddedAnnotations(annot)) {
-                    this.annotations.addOnly(annot);
+                if (annot != null) {
+                    if (!processAddedAnnotations(annot)) {
+                        this.annotations.addOnly(annot);
+                    }
                 }
             }
         } else {
