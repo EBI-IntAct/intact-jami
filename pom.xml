@@ -6,12 +6,12 @@
     <parent>
         <groupId>uk.ac.ebi.intact.maven</groupId>
         <artifactId>intact-hibernate-master</artifactId>
-        <version>46.1-SNAPSHOT</version>
+        <version>46.1</version>
     </parent>
 
     <groupId>uk.ac.ebi.intact.jami</groupId>
     <artifactId>intact-jami</artifactId>
-    <version>2.1.1-SNAPSHOT</version>
+    <version>2.1.1</version>
 
 
     <name>INTACT :: JAMI - Core interfaces, default implementations of IntAct API based on JAMI interfaces</name>
@@ -27,7 +27,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <el.jsr341.version>2.2.4</el.jsr341.version>
         <spring.version>4.3.30.RELEASE</spring.version>
-        <jami.version>3.3.1-SNAPSHOT</jami.version>
+        <jami.version>3.3.1</jami.version>
     </properties>
 
     <build>
