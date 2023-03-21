@@ -6,7 +6,7 @@
     <parent>
         <groupId>uk.ac.ebi.intact.maven</groupId>
         <artifactId>intact-hibernate-master</artifactId>
-        <version>47</version>
+        <version>47-SNAPSHOT</version>
     </parent>
 
     <groupId>uk.ac.ebi.intact.jami</groupId>
@@ -27,7 +27,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <el.jsr341.version>2.2.4</el.jsr341.version>
         <spring.version>4.3.30.RELEASE</spring.version>
-        <jami.version>3.3.1-SNAPSHOT</jami.version>
+        <jami.version>3.3.1</jami.version>
     </properties>
 
     <build>

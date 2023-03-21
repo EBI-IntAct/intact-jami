@@ -19,8 +19,11 @@ package uk.ac.ebi.intact.jami.utils;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+
+import javax.sql.DataSource;
 
 /**
  * @author Marine Dumousseau (marine@ebi.ac.uk)
@@ -30,19 +33,18 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 @ContextConfiguration(locations = {"classpath*:/META-INF/intact-jami-test-spring.xml"})
 public class IntactSchemaUtilsTest {
 
-    @Test
-    public void testGenerateCreateSchemaDDLForOracle() throws Exception {
-        String[] strings = IntactSchemaUtils.generateCreateSchemaDDLForOracle();
+    @Autowired
+    DataSource dataSource;
 
-        for (String sql : strings){
-            System.out.println(sql);
-        }
+    @Test
+    public void testGenerateCreateSchemaDDLForOracle() {
+        String[] strings = IntactSchemaUtils.generateCreateSchemaDDLForOracle(dataSource);
 
         Assert.assertEquals(261, strings.length);
-        Assert.assertEquals(261, IntactSchemaUtils.generateCreateSchemaDDLForPostgreSQL().length);
-        Assert.assertEquals(261, IntactSchemaUtils.generateCreateSchemaDDLForHSQL().length);
-        Assert.assertEquals(261, IntactSchemaUtils.generateCreateSchemaDDLForH2().length);
+        Assert.assertEquals(261, IntactSchemaUtils.generateCreateSchemaDDLForPostgreSQL(dataSource).length);
+        Assert.assertEquals(261, IntactSchemaUtils.generateCreateSchemaDDLForHSQL(dataSource).length);
+        Assert.assertEquals(261, IntactSchemaUtils.generateCreateSchemaDDLForH2(dataSource).length);
 
-        Assert.assertEquals(68, IntactSchemaUtils.getTableNames().length);
+        Assert.assertEquals(68, IntactSchemaUtils.getTableNames(dataSource).length);
     }
 }

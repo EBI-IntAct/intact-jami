@@ -13,13 +13,14 @@ import uk.ac.ebi.intact.jami.model.IntactPrimaryObject;
 import uk.ac.ebi.intact.jami.sequence.SequenceAuxiliaryDatabaseObject;
 import uk.ac.ebi.intact.jami.utils.IntactUtils;
 
+import javax.sql.DataSource;
 import java.util.List;
 import java.util.Properties;
 
 @Component
 public class IntactJamiPersistenceProvider extends HibernatePersistenceProvider {
 
-    public MetadataBuilder getBasicMetaDataBuilder(String dialect) {
+    public MetadataBuilder getBasicMetaDataBuilder(DataSource dataSource, String dialect) {
         StandardServiceRegistryBuilder registryBuilder = new StandardServiceRegistryBuilder();
 
         Properties properties = new Properties();
@@ -29,12 +30,12 @@ public class IntactJamiPersistenceProvider extends HibernatePersistenceProvider 
         }
 
         MetadataSources metadata = new MetadataSources(registryBuilder.build());
-        HibernateConfig basicConfiguration = getBasicConfiguration(properties);
+        HibernateConfig basicConfiguration = getBasicConfiguration(dataSource, properties);
         basicConfiguration.getEntityClasses().forEach(metadata::addAnnotatedClass); // Add package classes
         return configure(metadata.getMetadataBuilder()); // Add custom sequences
     }
 
-    public HibernateConfig getBasicConfiguration(Properties props) {
+    public HibernateConfig getBasicConfiguration(DataSource dataSource, Properties props) {
         if (props == null) props = new Properties();
         final LocalContainerEntityManagerFactoryBean factoryBean = new LocalContainerEntityManagerFactoryBean();
         factoryBean.setPersistenceXmlLocation("classpath*:/META-INF/jami-persistence.xml");
@@ -42,6 +43,7 @@ public class IntactJamiPersistenceProvider extends HibernatePersistenceProvider 
         final IntactHibernateJpaVendorAdapter jpaVendorAdapter = new IntactHibernateJpaVendorAdapter();
         jpaVendorAdapter.setDatabasePlatform(Dialect.getDialect(props).getClass().getName());
         factoryBean.setJpaVendorAdapter(jpaVendorAdapter);
+        factoryBean.setDataSource(dataSource);
         factoryBean.afterPropertiesSet();
 
         factoryBean.getNativeEntityManagerFactory().close();

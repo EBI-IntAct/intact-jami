@@ -767,7 +767,7 @@ public class InteractorDaoImpl<T extends Interactor, F extends IntactInteractor>
         Query query = getEntityManager().createQuery("select size(i.dbAliases) from "+getEntityClass().getSimpleName()+" i " +
                 "where i.ac = :ac");
         query.setParameter("ac", ac);
-        return (Integer)query.getSingleResult();
+        return getIntQueryResult(query);
     }
 
     @Override
@@ -775,7 +775,7 @@ public class InteractorDaoImpl<T extends Interactor, F extends IntactInteractor>
         Query query = getEntityManager().createQuery("select size(i.dbXrefs) from "+getEntityClass().getSimpleName()+" i " +
                 "where i.ac = :ac");
         query.setParameter("ac", ac);
-        return (Integer)query.getSingleResult();
+        return getIntQueryResult(query);
     }
 
     @Override
@@ -783,7 +783,7 @@ public class InteractorDaoImpl<T extends Interactor, F extends IntactInteractor>
         Query query = getEntityManager().createQuery("select size(i.dbAnnotations) from "+getEntityClass().getSimpleName()+" i " +
                 "where i.ac = :ac");
         query.setParameter("ac", ac);
-        return (Integer)query.getSingleResult();
+        return getIntQueryResult(query);
     }
 
     @Override
@@ -792,8 +792,7 @@ public class InteractorDaoImpl<T extends Interactor, F extends IntactInteractor>
                 "join i.organism o " +
                 "where o.ac = :ac");
         query.setParameter("ac", organismAc);
-        Long results = (Long)query.getSingleResult();
-        return results != null ? results.intValue() : 0;
+        return getLongQueryResult(query).intValue();
     }
 
     @Override

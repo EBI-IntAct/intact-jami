@@ -683,7 +683,7 @@ public class PublicationDaoImpl extends AbstractIntactBaseDao<Publication, Intac
         Query query = getEntityManager().createQuery("select size(p.experiments) from IntactPublication p " +
                 "where p.ac = :ac");
         query.setParameter("ac", ac);
-        return (Integer)query.getSingleResult();
+        return getIntQueryResult(query);
     }
 
     @Override
@@ -691,7 +691,7 @@ public class PublicationDaoImpl extends AbstractIntactBaseDao<Publication, Intac
         Query query = getEntityManager().createQuery("select size(i.dbXrefs) from IntactPublication i " +
                 "where i.ac = :ac");
         query.setParameter("ac", ac);
-        return (Integer)query.getSingleResult();
+        return getIntQueryResult(query);
     }
 
     @Override
@@ -699,17 +699,17 @@ public class PublicationDaoImpl extends AbstractIntactBaseDao<Publication, Intac
         Query query = getEntityManager().createQuery("select size(i.dbAnnotations) from IntactPublication i " +
                 "where i.ac = :ac");
         query.setParameter("ac", ac);
-        return (Integer)query.getSingleResult();
+        return getIntQueryResult(query);
     }
 
     @Override
     public int countInteractionsForPublication(String ac) {
-        Query query = getEntityManager().createQuery("select sum(size(e.interactionEvidences)) from IntactPublication i " +
+        String queryStr = "select sum(size(e.interactionEvidences)) from IntactPublication i " +
                 "join i.experiments as e " +
-                "where i.ac = :ac group by e.ac");
+                "where i.ac = :ac";
+        Query query = getEntityManager().createQuery(queryStr);
         query.setParameter("ac", ac);
-        Long res = (Long)query.getSingleResult();
-        return res != null ? res.intValue() : 0;
+        return getLongQueryResult(query).intValue();
     }
 
     @Override

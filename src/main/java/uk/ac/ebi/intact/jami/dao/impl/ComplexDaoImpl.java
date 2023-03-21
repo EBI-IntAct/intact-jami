@@ -633,7 +633,7 @@ public class ComplexDaoImpl extends InteractorDaoImpl<Complex,IntactComplex> imp
         Query query = getEntityManager().createQuery("select size(i.participants) from IntactComplex i " +
                 "where i.ac = :ac");
         query.setParameter("ac", ac);
-        return (Integer)query.getSingleResult();
+        return getIntQueryResult(query);
     }
 
     @Override
@@ -659,7 +659,7 @@ public class ComplexDaoImpl extends InteractorDaoImpl<Complex,IntactComplex> imp
         Query query = getEntityManager().createQuery("select size(i.modelledConfidences) from IntactComplex i " +
                 "where i.ac = :ac");
         query.setParameter("ac", ac);
-        return (Integer)query.getSingleResult();
+        return getIntQueryResult(query);
     }
 
     @Override
@@ -667,7 +667,7 @@ public class ComplexDaoImpl extends InteractorDaoImpl<Complex,IntactComplex> imp
         Query query = getEntityManager().createQuery("select size(i.modelledParameters) from IntactComplex i " +
                 "where i.ac = :ac");
         query.setParameter("ac", ac);
-        return (Integer)query.getSingleResult();
+        return getIntQueryResult(query);
     }
 
     @Override
@@ -676,8 +676,7 @@ public class ComplexDaoImpl extends InteractorDaoImpl<Complex,IntactComplex> imp
                 "join i.participants as p join p.interactor as inter " +
                 "where inter.ac = :ac");
         query.setParameter("ac", ac);
-        Long results = (Long)query.getSingleResult();
-        return results != null ? results.intValue() : 0;
+        return getLongQueryResult(query).intValue();
     }
 
     @Override
@@ -686,7 +685,6 @@ public class ComplexDaoImpl extends InteractorDaoImpl<Complex,IntactComplex> imp
                 "join i.organism o " +
                 "where o.ac = :ac");
         query.setParameter("ac", organismAc);
-        Long results = (Long)query.getSingleResult();
-        return results != null ? results.intValue() : 0;
+        return getLongQueryResult(query).intValue();
     }
 }
