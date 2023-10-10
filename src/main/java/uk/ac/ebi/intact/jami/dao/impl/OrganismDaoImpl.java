@@ -267,7 +267,7 @@ public class OrganismDaoImpl extends AbstractIntactBaseDao<Organism, IntactOrgan
         Query query = getEntityManager().createQuery("select size(i.aliases) from IntactOrganism i " +
                 "where i.ac = :ac");
         query.setParameter("ac", ac);
-        return (Integer)query.getSingleResult();
+        return getIntQueryResult(query);
     }
 
     @Override

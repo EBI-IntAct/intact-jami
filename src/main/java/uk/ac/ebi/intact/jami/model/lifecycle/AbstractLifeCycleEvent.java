@@ -1,7 +1,5 @@
 package uk.ac.ebi.intact.jami.model.lifecycle;
 
-import org.hibernate.annotations.ForeignKey;
-import org.hibernate.annotations.Index;
 import org.hibernate.annotations.Target;
 import org.hibernate.annotations.Type;
 import psidev.psi.mi.jami.model.CvTerm;
@@ -81,10 +79,8 @@ public abstract class AbstractLifeCycleEvent extends AbstractIntactPrimaryObject
         this.cvEvent = this.event.toCvTerm();
     }
 
-    @ManyToOne( optional = false, targetEntity = User.class)
-    @JoinColumn( name = "user_ac", referencedColumnName = "ac")
-    @ForeignKey(name="FK_LIFECYCLE_EVENT_USER")
-    @Index( name = "idx_event_who" )
+    @ManyToOne(optional = false, targetEntity = User.class)
+    @JoinColumn(name = "user_ac", referencedColumnName = "ac", foreignKey = @ForeignKey(name="FK_LIFECYCLE_EVENT_USER"))
     @Target(User.class)
     public User getWho() {
         return who;
@@ -105,7 +101,7 @@ public abstract class AbstractLifeCycleEvent extends AbstractIntactPrimaryObject
     }
 
     @Lob
-    @Type(type = "org.hibernate.type.StringClobType")
+    @Type(type = "org.hibernate.type.MaterializedClobType")
     public String getNote() {
         return note;
     }
@@ -114,10 +110,8 @@ public abstract class AbstractLifeCycleEvent extends AbstractIntactPrimaryObject
         this.note = note;
     }
 
-    @ManyToOne( targetEntity = IntactCvTerm.class, optional = false)
-    @JoinColumn( name = "event_ac", referencedColumnName = "ac")
-    @ForeignKey(name="FK_LIFECYCLE_EVENT_EVENT")
-    @Index( name = "idx_event_event" )
+    @ManyToOne(targetEntity = IntactCvTerm.class, optional = false)
+    @JoinColumn(name = "event_ac", referencedColumnName = "ac", foreignKey = @ForeignKey(name="FK_LIFECYCLE_EVENT_EVENT"))
     @Target(IntactCvTerm.class)
     @Deprecated
     @NotNull

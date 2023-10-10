@@ -5,9 +5,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.context.transaction.TransactionConfiguration;
 import org.springframework.transaction.annotation.Transactional;
 import psidev.psi.mi.jami.model.Publication;
 import uk.ac.ebi.intact.jami.context.DefaultSynchronizerContext;
@@ -33,7 +33,7 @@ import java.text.SimpleDateFormat;
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = {"classpath*:/META-INF/intact-jami-test-spring.xml"})
 @Transactional(value = "jamiTransactionManager")
-@TransactionConfiguration
+@Rollback
 @DirtiesContext
 public class ExperimentSynchronizerTest {
     @PersistenceContext(unitName = "intact-jami")

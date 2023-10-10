@@ -18,7 +18,7 @@ import javax.validation.constraints.Size;
  */
 @Entity
 @DiscriminatorValue("go")
-public class ComplexGOXref extends InteractorXref {
+public class ComplexGOXref extends InteractorXref{
 
     private CvTerm evidenceType;
     private String pubmed;
@@ -26,29 +26,25 @@ public class ComplexGOXref extends InteractorXref {
     protected ComplexGOXref() {
     }
 
-    public ComplexGOXref(String id, CvTerm qualifier) {
-        super(IntactUtils.createMIDatabase(Xref.GO, Xref.GO_MI), id, qualifier);
+    public ComplexGOXref(CvTerm database, String id) {
+        super(database, id);
     }
 
-    public ComplexGOXref(String id, String version, CvTerm qualifier) {
-        super(IntactUtils.createMIDatabase(Xref.GO, Xref.GO_MI), id, version, qualifier);
+    public ComplexGOXref(CvTerm database, String id, CvTerm qualifier) {
+        super(database, id, qualifier);
     }
 
-    public ComplexGOXref(String id, String version) {
-        super(IntactUtils.createMIDatabase(Xref.GO, Xref.GO_MI), id, version);
+    public ComplexGOXref(CvTerm database, String id, String version) {
+        super(database, id, version);
     }
 
     public ComplexGOXref(CvTerm database, String id, String version, CvTerm qualifier) {
         super(database, id, version, qualifier);
     }
 
-    public ComplexGOXref(String id) {
-        super(IntactUtils.createMIDatabase(Xref.GO, Xref.GO_MI), id);
-    }
-
     @Override
     public void setDatabase(CvTerm cvDatabase) {
-        if (cvDatabase != null && !CvTermUtils.isCvTerm(cvDatabase, Xref.GO_MI, Xref.GO)) {
+        if (cvDatabase != null && cvDatabase.getShortName() != null && !CvTermUtils.isCvTerm(cvDatabase, Xref.GO_MI, Xref.GO)) {
             throw new IllegalArgumentException("A Complex GO cross reference can only have GO as a database.");
         }
         super.setDatabase(cvDatabase);

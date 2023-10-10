@@ -26,7 +26,7 @@ import java.util.Collection;
 
 /**
  * Abstract class for intact features
- *
+ * <p>
  * NOTE: The feature ac is automatically added as an identifier in getIdentifiers but is not persisted in getDbXrefs.
  * The getIdentifiers.remove will thrown an UnsupportedOperationException if someone tries to remove the AC identifier from the list of identifiers
  * NOTE: getIdentifiers and getXrefs are not persistent methods annotated with hibernate annotations. All the xrefs present in identifiers
@@ -50,7 +50,7 @@ import java.util.Collection;
  * @since <pre>14/01/14</pre>
  */
 @MappedSuperclass
-public abstract class AbstractIntactFeature<P extends Entity, F extends Feature> extends AbstractIntactPrimaryObject implements Feature<P,F>{
+public abstract class AbstractIntactFeature<P extends Entity, F extends Feature> extends AbstractIntactPrimaryObject implements Feature<P, F> {
 
     private String shortName;
     private String fullName;
@@ -86,6 +86,7 @@ public abstract class AbstractIntactFeature<P extends Entity, F extends Feature>
      * Interactores which only interact in the second complex. As this method
      * creates ambiguities and difficult data structures, it is deprecated.
      * </p>
+     *
      * @deprecated this is only for backward compatibility with intact core. Look at linkedFeatures instead.
      * When intact-core is removed, getLinkedFeatures could become persistent and we could remove getDbLinkedFeatures after updating
      * the database so all 'binds' are also in the dbLinkedFeatures collection.
@@ -94,36 +95,36 @@ public abstract class AbstractIntactFeature<P extends Entity, F extends Feature>
 
     private transient Xref acRef;
 
-    public AbstractIntactFeature(){
+    public AbstractIntactFeature() {
     }
 
-    public AbstractIntactFeature(String shortName, String fullName){
+    public AbstractIntactFeature(String shortName, String fullName) {
         this();
         this.shortName = shortName;
         this.fullName = fullName;
     }
 
-    public AbstractIntactFeature(CvTerm type){
+    public AbstractIntactFeature(CvTerm type) {
         this();
         this.type = type;
     }
 
-    public AbstractIntactFeature(String shortName, String fullName, CvTerm type){
+    public AbstractIntactFeature(String shortName, String fullName, CvTerm type) {
         this(shortName, fullName);
-        this.type =type;
+        this.type = type;
     }
 
-    public AbstractIntactFeature(String shortName, String fullName, String interpro){
+    public AbstractIntactFeature(String shortName, String fullName, String interpro) {
         this(shortName, fullName);
         setInterpro(interpro);
     }
 
-    public AbstractIntactFeature(CvTerm type, String interpro){
+    public AbstractIntactFeature(CvTerm type, String interpro) {
         this(type);
         setInterpro(interpro);
     }
 
-    public AbstractIntactFeature(String shortName, String fullName, CvTerm type, String interpro){
+    public AbstractIntactFeature(String shortName, String fullName, CvTerm type, String interpro) {
         this(shortName, fullName, type);
         setInterpro(interpro);
     }
@@ -132,7 +133,7 @@ public abstract class AbstractIntactFeature<P extends Entity, F extends Feature>
     public void setAc(String ac) {
         super.setAc(ac);
         // only if identifiers are initialised
-        if (this.acRef != null && !this.acRef.getId().equals(ac)){
+        if (this.acRef != null && !this.acRef.getId().equals(ac)) {
             // we don't want to create a persistent xref
             Xref newRef = new DefaultXref(this.acRef.getDatabase(), ac, this.acRef.getQualifier());
             this.identifiers.removeOnly(acRef);
@@ -142,10 +143,10 @@ public abstract class AbstractIntactFeature<P extends Entity, F extends Feature>
     }
 
     @Column(name = "shortlabel", nullable = false)
-    @Size( min = 1, max = IntactUtils.MAX_SHORT_LABEL_LEN )
+    @Size(min = 1, max = IntactUtils.MAX_SHORT_LABEL_LEN)
     @NotNull
     public String getShortName() {
-        if (this.shortName == null){
+        if (this.shortName == null) {
             this.shortName = "N/A";
         }
         return this.shortName;
@@ -155,8 +156,8 @@ public abstract class AbstractIntactFeature<P extends Entity, F extends Feature>
         this.shortName = name;
     }
 
-    @Column( length = IntactUtils.MAX_FULL_NAME_LEN )
-    @Size( max = IntactUtils.MAX_FULL_NAME_LEN )
+    @Column(length = IntactUtils.MAX_FULL_NAME_LEN)
+    @Size(max = IntactUtils.MAX_FULL_NAME_LEN)
     public String getFullName() {
         return this.fullName;
     }
@@ -168,7 +169,7 @@ public abstract class AbstractIntactFeature<P extends Entity, F extends Feature>
     @Transient
     public String getInterpro() {
         // initialise identifiers if not done yet
-        if (identifiers == null){
+        if (identifiers == null) {
             initialiseXrefs();
         }
         return this.interpro != null ? this.interpro.getId() : null;
@@ -178,21 +179,19 @@ public abstract class AbstractIntactFeature<P extends Entity, F extends Feature>
         Collection<Xref> featureIdentifiers = getIdentifiers();
 
         // add new interpro if not null
-        if (interpro != null){
+        if (interpro != null) {
             CvTerm interproDatabase = IntactUtils.createMIDatabase(Xref.INTERPRO, Xref.INTERPRO_MI);
             CvTerm identityQualifier = IntactUtils.createMIQualifier(Xref.IDENTITY, Xref.IDENTITY_MI);
             // first remove old chebi if not null
-            if (this.interpro != null && !interpro.equals(this.interpro)){
-                if (this.interpro instanceof AbstractIntactXref){
+            if (this.interpro != null && !interpro.equals(this.interpro)) {
+                if (this.interpro instanceof AbstractIntactXref) {
                     ((AbstractIntactXref) this.interpro).setId(interpro);
-                }
-                else{
+                } else {
                     featureIdentifiers.remove(this.interpro);
                     this.interpro = new FeatureEvidenceXref(interproDatabase, interpro, identityQualifier);
                     featureIdentifiers.add(this.interpro);
                 }
-            }
-            else if (this.interpro == null){
+            } else if (this.interpro == null) {
                 this.interpro = new FeatureEvidenceXref(interproDatabase, interpro, identityQualifier);
                 featureIdentifiers.add(this.interpro);
             }
@@ -206,7 +205,7 @@ public abstract class AbstractIntactFeature<P extends Entity, F extends Feature>
 
     @Transient
     public Collection<Xref> getIdentifiers() {
-        if (identifiers == null){
+        if (identifiers == null) {
             initialiseXrefs();
         }
         return this.identifiers;
@@ -214,7 +213,7 @@ public abstract class AbstractIntactFeature<P extends Entity, F extends Feature>
 
     @Transient
     public Collection<Xref> getXrefs() {
-        if (xrefs == null){
+        if (xrefs == null) {
             initialiseXrefs();
         }
         return this.xrefs;
@@ -222,26 +221,34 @@ public abstract class AbstractIntactFeature<P extends Entity, F extends Feature>
 
     @Transient
     public Collection<Annotation> getAnnotations() {
-        if (annotations == null){
+        if (annotations == null) {
             initialiseAnnotations();
         }
         return this.annotations;
     }
 
+    protected void setAnnotations(Collection<Annotation> annotations) {
+        this.annotations = annotations;
+    }
+
     @Transient
     public Collection<Alias> getAliases() {
-        if (this.aliases == null){
+        if (this.aliases == null) {
             initialiseAliases();
         }
         return aliases;
     }
 
+    protected void setAliases(Collection<Alias> aliases) {
+        this.aliases = aliases;
+    }
+
     @ManyToOne(targetEntity = IntactCvTerm.class)
-    @JoinColumn( name = "featuretype_ac", referencedColumnName = "ac")
+    @JoinColumn(name = "featuretype_ac", referencedColumnName = "ac")
     @Target(IntactCvTerm.class)
     public CvTerm getType() {
-        if (this.type == null){
-           initialiseDefaultType();
+        if (this.type == null) {
+            initialiseDefaultType();
         }
         return this.type;
     }
@@ -252,14 +259,18 @@ public abstract class AbstractIntactFeature<P extends Entity, F extends Feature>
 
     @Transient
     public Collection<Range> getRanges() {
-        if (ranges == null){
+        if (ranges == null) {
             initialiseRanges();
         }
         return this.ranges;
     }
 
+    protected void setRanges(Collection<Range> ranges) {
+        this.ranges = ranges;
+    }
+
     @ManyToOne(targetEntity = IntactCvTerm.class)
-    @JoinColumn( name = "role_ac", referencedColumnName = "ac")
+    @JoinColumn(name = "role_ac", referencedColumnName = "ac")
     @Target(IntactCvTerm.class)
     public CvTerm getRole() {
         return this.role;
@@ -279,18 +290,18 @@ public abstract class AbstractIntactFeature<P extends Entity, F extends Feature>
     }
 
     public void setParticipantAndAddFeature(P participant) {
-        if (this.participant != null){
+        if (this.participant != null) {
             this.participant.removeFeature(this);
         }
 
-        if (participant != null){
+        if (participant != null) {
             participant.addFeature(this);
         }
     }
 
     @Transient
     public Collection<F> getLinkedFeatures() {
-        if(linkedFeatures == null){
+        if (linkedFeatures == null) {
             initialiseLinkedFeatures();
         }
         return this.linkedFeatures;
@@ -302,47 +313,71 @@ public abstract class AbstractIntactFeature<P extends Entity, F extends Feature>
      * @deprecated use getLinkedFeatures instead
      */
     public Collection<F> getDbLinkedFeatures() {
-        if(persistentLinkedFeatures == null){
+        if (persistentLinkedFeatures == null) {
             this.persistentLinkedFeatures = new PersistentLinkedFeatureList(null);
         }
         return this.persistentLinkedFeatures.getWrappedList();
     }
 
+    protected void setDbLinkedFeatures(Collection<F> linkedFeatures) {
+        if (linkedFeatures instanceof AbstractIntactFeature.PersistentLinkedFeatureList) {
+            this.persistentLinkedFeatures = (PersistentLinkedFeatureList) linkedFeatures;
+            this.linkedFeatures = null;
+        } else {
+            this.persistentLinkedFeatures = new PersistentLinkedFeatureList(linkedFeatures);
+            this.linkedFeatures = null;
+        }
+    }
+
     @Override
     public String toString() {
-        return type != null ? type.toString() : (!ranges.isEmpty() ? "("+ranges.iterator().next().toString()+"...)" : " (-)");
+        return type != null ? type.toString() : (!ranges.isEmpty() ? "(" + ranges.iterator().next().toString() + "...)" : " (-)");
     }
 
     @Transient
     public Collection<Xref> getDbXrefs() {
-        if (this.persistentXrefs == null){
+        if (this.persistentXrefs == null) {
             this.persistentXrefs = new PersistentXrefList(null);
         }
         return this.persistentXrefs.getWrappedList();
     }
 
+    protected void setDbXrefs(Collection<Xref> persistentXrefs) {
+        if (persistentXrefs instanceof AbstractIntactFeature.PersistentXrefList) {
+            this.persistentXrefs = (PersistentXrefList) persistentXrefs;
+            this.identifiers = null;
+            this.xrefs = null;
+            this.interpro = null;
+        } else {
+            this.persistentXrefs = new PersistentXrefList(persistentXrefs);
+            this.identifiers = null;
+            this.xrefs = null;
+            this.interpro = null;
+        }
+    }
+
     @Transient
-    public boolean areXrefsInitialized(){
+    public boolean areXrefsInitialized() {
         return Hibernate.isInitialized(getDbXrefs());
     }
 
     @Transient
-    public boolean areAliasesInitialized(){
+    public boolean areAliasesInitialized() {
         return Hibernate.isInitialized(getAliases());
     }
 
     @Transient
-    public boolean areAnnotationsInitialized(){
+    public boolean areAnnotationsInitialized() {
         return Hibernate.isInitialized(getAnnotations());
     }
 
     @Transient
-    public boolean areRangesInitialized(){
+    public boolean areRangesInitialized() {
         return Hibernate.isInitialized(getRanges());
     }
 
     @Transient
-    public boolean areLinkedFeaturesInitialized(){
+    public boolean areLinkedFeaturesInitialized() {
         return Hibernate.isInitialized(getDbLinkedFeatures());
     }
 
@@ -356,7 +391,6 @@ public abstract class AbstractIntactFeature<P extends Entity, F extends Feature>
     }
 
     /**
-     *
      * @param binds
      * @deprecated for intact-core backward compatibility only. Use linkedFeatures instead
      */
@@ -368,10 +402,14 @@ public abstract class AbstractIntactFeature<P extends Entity, F extends Feature>
 
     @Transient
     public Collection<F> getRelatedLinkedFeatures() {
-        if (this.relatedLinkedFeatures == null){
+        if (this.relatedLinkedFeatures == null) {
             this.relatedLinkedFeatures = new ArrayList<F>();
         }
         return this.relatedLinkedFeatures;
+    }
+
+    protected void setRelatedLinkedFeatures(Collection<F> relatedLinkedFeatures) {
+        this.relatedLinkedFeatures = relatedLinkedFeatures;
     }
 
     @Transient
@@ -379,40 +417,43 @@ public abstract class AbstractIntactFeature<P extends Entity, F extends Feature>
      * The collection of features that have this feature in their binds property
      */
     public Collection<F> getRelatedBindings() {
-        if (this.relatedBindings == null){
+        if (this.relatedBindings == null) {
             this.relatedBindings = new ArrayList<F>();
         }
         return this.relatedBindings;
     }
 
-    protected void initialiseDefaultType(){
+    protected void setRelatedBindings(Collection<F> relatedBindings) {
+        this.relatedBindings = relatedBindings;
+    }
+
+    protected void initialiseDefaultType() {
         // by default do not initialise default type
     }
 
-    protected void initialiseXrefs(){
+    protected void initialiseXrefs() {
         this.identifiers = new FeatureIdentifierList();
         this.xrefs = new FeatureXrefList();
-        if (this.persistentXrefs != null){
-            for (Xref ref : this.persistentXrefs){
-                if (XrefUtils.isXrefAnIdentifier(ref) || XrefUtils.doesXrefHaveQualifier(ref, null, "intact-secondary")){
-                    this.identifiers.addOnly(ref);
-                    processAddedIdentifierEvent(ref);
-                }
-                else{
-                    this.xrefs.addOnly(ref);
+        if (this.persistentXrefs != null) {
+            for (Xref ref : this.persistentXrefs) {
+                if (ref != null) {
+                    if (XrefUtils.isXrefAnIdentifier(ref) || XrefUtils.doesXrefHaveQualifier(ref, null, "intact-secondary")) {
+                        this.identifiers.addOnly(ref);
+                        processAddedIdentifierEvent(ref);
+                    } else {
+                        this.xrefs.addOnly(ref);
+                    }
                 }
             }
-        }
-        else{
+        } else {
             this.persistentXrefs = new PersistentXrefList(null);
         }
         // initialise ac
-        if (getAc() != null){
+        if (getAc() != null) {
             IntactContext intactContext = ApplicationContextProvider.getBean("intactJamiContext");
-            if (intactContext != null){
+            if (intactContext != null) {
                 this.acRef = new DefaultXref(intactContext.getIntactConfiguration().getDefaultInstitution(), getAc(), CvTermUtils.createIdentityQualifier());
-            }
-            else{
+            } else {
                 this.acRef = new DefaultXref(new DefaultCvTerm("unknwon"), getAc(), CvTermUtils.createIdentityQualifier());
             }
             this.identifiers.addOnly(this.acRef);
@@ -421,19 +462,18 @@ public abstract class AbstractIntactFeature<P extends Entity, F extends Feature>
 
     protected void processAddedIdentifierEvent(Xref added) {
         // the added identifier is interpro and it is not the current interpro identifier
-        if (interpro != added && XrefUtils.isXrefFromDatabase(added, Xref.INTERPRO_MI, Xref.INTERPRO)){
+        if (interpro != added && XrefUtils.isXrefFromDatabase(added, Xref.INTERPRO_MI, Xref.INTERPRO)) {
             // the current interpro identifier is not identity, we may want to set interpro Identifier
-            if (!XrefUtils.doesXrefHaveQualifier(interpro, Xref.IDENTITY_MI, Xref.IDENTITY)){
+            if (!XrefUtils.doesXrefHaveQualifier(interpro, Xref.IDENTITY_MI, Xref.IDENTITY)) {
                 // the interpro identifier is not set, we can set the interpro identifier
-                if (interpro == null){
+                if (interpro == null) {
                     interpro = added;
-                }
-                else if (XrefUtils.doesXrefHaveQualifier(added, Xref.IDENTITY_MI, Xref.IDENTITY)){
+                } else if (XrefUtils.doesXrefHaveQualifier(added, Xref.IDENTITY_MI, Xref.IDENTITY)) {
                     interpro = added;
                 }
                 // the added xref is secondary object and the current interpro identifier is not a secondary object, we reset interpro identifier
                 else if (!XrefUtils.doesXrefHaveQualifier(interpro, Xref.SECONDARY_MI, Xref.SECONDARY)
-                        && XrefUtils.doesXrefHaveQualifier(added, Xref.SECONDARY_MI, Xref.SECONDARY)){
+                        && XrefUtils.doesXrefHaveQualifier(added, Xref.SECONDARY_MI, Xref.SECONDARY)) {
                     interpro = added;
                 }
             }
@@ -441,7 +481,7 @@ public abstract class AbstractIntactFeature<P extends Entity, F extends Feature>
     }
 
     protected void processRemovedIdentifierEvent(Xref removed) {
-        if (interpro != null && interpro.equals(removed)){
+        if (interpro != null && interpro.equals(removed)) {
             interpro = XrefUtils.collectFirstIdentifierWithDatabase(getIdentifiers(), Xref.INTERPRO_MI, Xref.INTERPRO);
         }
     }
@@ -450,84 +490,39 @@ public abstract class AbstractIntactFeature<P extends Entity, F extends Feature>
         interpro = null;
     }
 
-    protected void initialiseAnnotations(){
+    protected void initialiseAnnotations() {
         this.annotations = new ArrayList<Annotation>();
     }
 
-    protected void initialiseRanges(){
+    protected void initialiseRanges() {
         this.ranges = new ArrayList<Range>();
     }
 
-    protected void initialiseLinkedFeatures(){
+    protected void initialiseLinkedFeatures() {
         this.linkedFeatures = new LinkedFeatureList();
         // add binds if not null
-        if (this.binds != null){
+        if (this.binds != null) {
             this.linkedFeatures.addOnly(this.binds);
         }
         // initialise persistent feature and content
-        if (this.persistentLinkedFeatures != null){
-            for (F linked : this.persistentLinkedFeatures){
-                this.linkedFeatures.addOnly(linked);
+        if (this.persistentLinkedFeatures != null) {
+            for (F linked : this.persistentLinkedFeatures) {
+                if (linked != null) {
+                    this.linkedFeatures.addOnly(linked);
+                }
             }
-        }
-        else{
+        } else {
             this.persistentLinkedFeatures = new PersistentLinkedFeatureList(null);
         }
     }
 
-    protected void setDbXrefs(Collection<Xref> persistentXrefs){
-        if (persistentXrefs instanceof AbstractIntactFeature.PersistentXrefList){
-            this.persistentXrefs = (PersistentXrefList)persistentXrefs;
-            this.identifiers = null;
-            this.xrefs = null;
-            this.interpro = null;
-        }
-        else{
-            this.persistentXrefs = new PersistentXrefList(persistentXrefs);
-            this.identifiers = null;
-            this.xrefs = null;
-            this.interpro = null;
-        }
-    }
-
-    protected void setAnnotations(Collection<Annotation> annotations) {
-        this.annotations = annotations;
-    }
-
-    protected void initialiseAliases(){
+    protected void initialiseAliases() {
         this.aliases = new ArrayList<Alias>();
     }
 
-    protected void setAliases(Collection<Alias> aliases) {
-        this.aliases = aliases;
-    }
-
-    protected void setRanges(Collection<Range> ranges) {
-        this.ranges = ranges;
-    }
-
-    protected void setDbLinkedFeatures(Collection<F> linkedFeatures) {
-        if (linkedFeatures instanceof AbstractIntactFeature.PersistentLinkedFeatureList){
-            this.persistentLinkedFeatures = (PersistentLinkedFeatureList)linkedFeatures;
-            this.linkedFeatures = null;
-        }
-        else{
-            this.persistentLinkedFeatures = new PersistentLinkedFeatureList(linkedFeatures);
-            this.linkedFeatures = null;
-        }
-    }
-
-    protected void setRelatedLinkedFeatures(Collection<F> relatedLinkedFeatures) {
-        this.relatedLinkedFeatures = relatedLinkedFeatures;
-    }
-
-    protected void setRelatedBindings(Collection<F> relatedBindings) {
-        this.relatedBindings = relatedBindings;
-    }
-
-
     /**
      * Overrides serialization for xrefs and annotations (inner classes not serializable)
+     *
      * @param oos
      * @throws java.io.IOException
      */
@@ -543,6 +538,7 @@ public abstract class AbstractIntactFeature<P extends Entity, F extends Feature>
 
     /**
      * Overrides serialization for xrefs and annotations (inner classes not serializable)
+     *
      * @param ois
      * @throws ClassNotFoundException
      * @throws IOException
@@ -552,15 +548,15 @@ public abstract class AbstractIntactFeature<P extends Entity, F extends Feature>
         // default deserialization
         ois.defaultReadObject();
         // read default xrefs
-        setDbXrefs((Collection<Xref>)ois.readObject());
+        setDbXrefs((Collection<Xref>) ois.readObject());
         // read default linked features
-        setDbLinkedFeatures((Collection<F>)ois.readObject());
+        setDbLinkedFeatures((Collection<F>) ois.readObject());
     }
 
     /**
      * This method can reset all properties that are cached in this object as if it was just loaded from the database
      */
-    public void resetCachedDbProperties(){
+    public void resetCachedDbProperties() {
         this.identifiers = null;
         this.xrefs = null;
         this.interpro = null;
@@ -568,13 +564,13 @@ public abstract class AbstractIntactFeature<P extends Entity, F extends Feature>
     }
 
     protected class FeatureIdentifierList extends AbstractListHavingProperties<Xref> {
-        public FeatureIdentifierList(){
+        public FeatureIdentifierList() {
             super();
         }
 
         @Override
         protected void processAddedObjectEvent(Xref added) {
-            if (!added.equals(acRef)){
+            if (!added.equals(acRef)) {
                 processAddedIdentifierEvent(added);
                 persistentXrefs.add(added);
             }
@@ -582,11 +578,10 @@ public abstract class AbstractIntactFeature<P extends Entity, F extends Feature>
 
         @Override
         protected void processRemovedObjectEvent(Xref removed) {
-            if (!removed.equals(acRef)){
+            if (!removed.equals(acRef)) {
                 processRemovedIdentifierEvent(removed);
                 persistentXrefs.remove(removed);
-            }
-            else{
+            } else {
                 super.addOnly(acRef);
                 throw new UnsupportedOperationException("Cannot remove the database accession of a Feature object from its list of identifiers.");
             }
@@ -596,14 +591,14 @@ public abstract class AbstractIntactFeature<P extends Entity, F extends Feature>
         protected void clearProperties() {
             clearPropertiesLinkedToIdentifiers();
             persistentXrefs.retainAll(getXrefs());
-            if (acRef != null){
+            if (acRef != null) {
                 super.addOnly(acRef);
             }
         }
     }
 
     protected class FeatureXrefList extends AbstractListHavingProperties<Xref> {
-        public FeatureXrefList(){
+        public FeatureXrefList() {
             super();
         }
 
@@ -625,7 +620,7 @@ public abstract class AbstractIntactFeature<P extends Entity, F extends Feature>
 
     protected class PersistentXrefList extends AbstractCollectionWrapper<Xref> {
 
-        public PersistentXrefList(Collection<Xref> persistentBag){
+        public PersistentXrefList(Collection<Xref> persistentBag) {
             super(persistentBag);
         }
 
@@ -651,30 +646,28 @@ public abstract class AbstractIntactFeature<P extends Entity, F extends Feature>
     }
 
     protected class LinkedFeatureList extends AbstractListHavingProperties<F> {
-        public LinkedFeatureList(){
+        public LinkedFeatureList() {
             super();
         }
 
         @Override
         protected void processAddedObjectEvent(F added) {
-            if (binds == null){
+            if (binds == null) {
                 binds = added;
-            }
-            else{
+            } else {
                 persistentLinkedFeatures.add(added);
             }
         }
 
         @Override
         protected void processRemovedObjectEvent(F removed) {
-            if (binds == removed){
+            if (binds == removed) {
                 binds = null;
-                if (!persistentLinkedFeatures.isEmpty()){
+                if (!persistentLinkedFeatures.isEmpty()) {
                     binds = persistentLinkedFeatures.iterator().next();
                     persistentLinkedFeatures.remove(binds);
                 }
-            }
-            else{
+            } else {
                 persistentLinkedFeatures.remove(removed);
             }
         }
@@ -688,7 +681,7 @@ public abstract class AbstractIntactFeature<P extends Entity, F extends Feature>
 
     protected class PersistentLinkedFeatureList extends AbstractCollectionWrapper<F> {
 
-        public PersistentLinkedFeatureList(Collection<F> persistentBag){
+        public PersistentLinkedFeatureList(Collection<F> persistentBag) {
             super(persistentBag);
         }
 

@@ -154,7 +154,8 @@ public class IntactUtils {
             int rest2 = Math.min(Math.max(0, remainingSize - rest1), Math.max(0, label2Size - (maxSize1 + maxSize2)));
 
             // replace non ASCII characters
-            return label1.substring(0, maxSize1 + rest1).replaceAll("[^\\x20-\\x7e]", "") + (label2Size > 0 ? "-" + label2.substring(0, maxSize2 + rest2).replaceAll("[^\\x20-\\x7e]", "") : "");
+            return label1.substring(0, maxSize1 + rest1).replaceAll("[^\\x20-\\x7e]", "")
+                    + (label2Size > 0 ? "-" + label2.substring(0, maxSize2 + rest2).replaceAll("[^\\x20-\\x7e]", "") : "");
         }
 
         return label1.replaceAll("[^\\x20-\\x7e]", "") + (label2 != null ? "-" + label2.replaceAll("[^\\x20-\\x7e]", "") : "-1");
@@ -1146,18 +1147,34 @@ public class IntactUtils {
     }
 
     public static void initialiseModelledFeature(IntactModelledFeature feature) {
+        initialiseModelledFeature(feature, new HashSet<>());
+    }
+
+    private static void initialiseModelledFeature(IntactModelledFeature feature, Set<String> initialisedFeatureAcs) {
         initialiseFeature(feature);
+        initialisedFeatureAcs.add(feature.getAc());
+
         // initialise linked features
         for (ModelledFeature feat : feature.getLinkedFeatures()) {
-            initialiseModelledFeature((IntactModelledFeature) feat);
+            if (!initialisedFeatureAcs.contains(((IntactModelledFeature) feat).getAc())) {
+                initialiseModelledFeature((IntactModelledFeature) feat, initialisedFeatureAcs);
+            }
         }
     }
 
     public static void initialiseFeatureEvidence(IntactFeatureEvidence feature) {
+        initialiseFeatureEvidence(feature, new HashSet<>());
+    }
+
+    private static void initialiseFeatureEvidence(IntactFeatureEvidence feature, Set<String> initialisedFeatureAcs) {
         initialiseFeature(feature);
+        initialisedFeatureAcs.add(feature.getAc());
+
         // initialise linked features
         for (FeatureEvidence feat : feature.getLinkedFeatures()) {
-            initialiseFeatureEvidence((IntactFeatureEvidence) feat);
+            if (!initialisedFeatureAcs.contains(((IntactFeatureEvidence) feat).getAc())) {
+                initialiseFeatureEvidence((IntactFeatureEvidence) feat, initialisedFeatureAcs);
+            }
         }
         // initialise db method
         for (CvTerm cv : feature.getDetectionMethods()) {
@@ -1263,6 +1280,25 @@ public class IntactUtils {
         }
     }
 
+    public static void initialisePublication(IntactPublication publication, boolean loadSiblingInteractionEvidences) {
+        // initialise xrefs
+        for (Object ref : publication.getDbXrefs()) {
+            initialiseXref((AbstractIntactXref) ref);
+        }
+        // initialise annotations
+        for (Object ref : publication.getDbAnnotations()) {
+            initialiseAnnotation((AbstractIntactAnnotation) ref);
+        }
+        // initialise source
+        if (publication.getSource() != null) {
+            initialiseSource((IntactSource) publication.getSource());
+        }
+        // initialise experiment
+        for (Experiment exp : publication.getExperiments()) {
+            initialiseExperiment((IntactExperiment) exp, false, loadSiblingInteractionEvidences);
+        }
+    }
+
     public static void initialiseExperiment(IntactExperiment experiment, boolean initPublication) {
         if (initPublication && experiment.getPublication() != null) {
             // initialise publication
@@ -1293,6 +1329,41 @@ public class IntactUtils {
         // initialise interaction evidences
         for (InteractionEvidence ev : experiment.getInteractionEvidences()) {
             initialiseInteractionEvidence((IntactInteractionEvidence) ev, false);
+        }
+    }
+
+    public static void initialiseExperiment(IntactExperiment experiment, boolean initPublication, boolean loadSiblingInteractionEvidences) {
+        if (initPublication && experiment.getPublication() != null) {
+            // initialise publication
+            initialisePublication((IntactPublication) experiment.getPublication(), loadSiblingInteractionEvidences);
+        }
+        // initialise xrefs
+        for (Object ref : experiment.getXrefs()) {
+            initialiseXref((AbstractIntactXref) ref);
+        }
+        // initialise annotations
+        for (Object ref : experiment.getAnnotations()) {
+            initialiseAnnotation((AbstractIntactAnnotation) ref);
+        }
+        // initialise detection method
+        initialiseCvTerm((IntactCvTerm) experiment.getInteractionDetectionMethod());
+        // initialise host organism
+        if (experiment.getHostOrganism() != null) {
+            initialiseOrganism((IntactOrganism) experiment.getHostOrganism());
+        }
+        // initialise participant method
+        if (experiment.getParticipantIdentificationMethod() != null) {
+            initialiseCvTerm((IntactCvTerm) experiment.getParticipantIdentificationMethod());
+        }
+        // initialise variable parameters
+        for (VariableParameter param : experiment.getVariableParameters()) {
+            initialiseVariableParameter((IntactVariableParameter) param);
+        }
+        // initialise interaction evidences if needed
+        if (loadSiblingInteractionEvidences) {
+            for (InteractionEvidence ev : experiment.getInteractionEvidences()) {
+                initialiseInteractionEvidence((IntactInteractionEvidence) ev, false);
+            }
         }
     }
 
@@ -1383,6 +1454,41 @@ public class IntactUtils {
         // initialise experiment
         if (initExperiment && interaction.getExperiment() != null) {
             initialiseExperiment((IntactExperiment) interaction.getExperiment(), true);
+        }
+        // init participants
+        for (ParticipantEvidence participant : interaction.getParticipants()) {
+            initialiseParticipantEvidence((IntactParticipantEvidence) participant);
+        }
+        // init confidences
+        for (Confidence conf : interaction.getConfidences()) {
+            initialiseConfidence((AbstractIntactConfidence) conf);
+        }
+        // init parameters
+        for (Parameter param : interaction.getParameters()) {
+            initialiseParameter((AbstractIntactParameter) param);
+        }
+        // init interaction type
+        if (interaction.getInteractionType() != null) {
+            initialiseCvTerm((IntactCvTerm) interaction.getInteractionType());
+        }
+        // init evidence type
+        for (VariableParameterValueSet set : interaction.getVariableParameterValues()) {
+            initialiseVariableParameterValueSet((IntactVariableParameterValueSet) set);
+        }
+    }
+
+    public static void initialiseInteractionEvidence(IntactInteractionEvidence interaction, boolean initExperiment, boolean loadSiblingInteractionEvidences) {
+        // initialise xrefs
+        for (Object ref : interaction.getDbXrefs()) {
+            initialiseXref((AbstractIntactXref) ref);
+        }
+        // initialise annotations
+        for (Object ref : interaction.getDbAnnotations()) {
+            initialiseAnnotation((AbstractIntactAnnotation) ref);
+        }
+        // initialise experiment
+        if (initExperiment && interaction.getExperiment() != null) {
+            initialiseExperiment((IntactExperiment) interaction.getExperiment(), true, loadSiblingInteractionEvidences);
         }
         // init participants
         for (ParticipantEvidence participant : interaction.getParticipants()) {

@@ -2,7 +2,6 @@ package uk.ac.ebi.intact.jami.model.extension;
 
 import org.hibernate.Hibernate;
 import org.hibernate.annotations.Cascade;
-import org.hibernate.annotations.ForeignKey;
 import org.hibernate.annotations.Target;
 import psidev.psi.mi.jami.model.Alias;
 import psidev.psi.mi.jami.model.CvTerm;
@@ -134,8 +133,10 @@ public class IntactOrganism extends AbstractIntactPrimaryObject implements Organ
     }
 
     @ManyToOne(targetEntity = IntactCvTerm.class)
-    @JoinColumn( name = "celltype_ac", referencedColumnName = "ac" )
-    @ForeignKey(name = "FK_BIOSOURCE$CELLTYPE")
+    @JoinColumn(
+            name = "celltype_ac",
+            referencedColumnName = "ac",
+            foreignKey = @ForeignKey(name = "FK_BIOSOURCE$CELLTYPE"))
     @Target(IntactCvTerm.class)
     public CvTerm getCellType() {
         return this.cellType;
@@ -155,8 +156,10 @@ public class IntactOrganism extends AbstractIntactPrimaryObject implements Organ
     }
 
     @ManyToOne(targetEntity = IntactCvTerm.class)
-    @JoinColumn( name = "tissue_ac", referencedColumnName = "ac" )
-    @ForeignKey(name = "FK_BIOSOURCE$TISSUE")
+    @JoinColumn(
+            name = "tissue_ac",
+            referencedColumnName = "ac",
+            foreignKey = @ForeignKey(name = "FK_BIOSOURCE$TISSUE"))
     @Target(IntactCvTerm.class)
     public CvTerm getTissue() {
         return this.tissue;

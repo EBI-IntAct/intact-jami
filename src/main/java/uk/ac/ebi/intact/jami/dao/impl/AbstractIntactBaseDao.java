@@ -9,6 +9,7 @@ import uk.ac.ebi.intact.jami.synchronizer.PersisterException;
 import uk.ac.ebi.intact.jami.synchronizer.SynchronizerException;
 
 import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
 import javax.persistence.Query;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -69,7 +70,7 @@ public abstract class AbstractIntactBaseDao<I,T extends Auditable> implements In
                 queryObject.setParameter(param.getKey(), param.getValue());
             }
         }
-        return (Long)queryObject.getSingleResult();
+        return getLongQueryResult(queryObject);
     }
 
     public List<T> getAll() {
@@ -99,8 +100,7 @@ public abstract class AbstractIntactBaseDao<I,T extends Auditable> implements In
         CriteriaBuilder builder = getEntityManager().getCriteriaBuilder();
         CriteriaQuery<Long> criteria = builder.createQuery(Long.class);
         criteria.select(builder.count(criteria.from(getEntityClass())));
-        return this.entityManager.createQuery(criteria)
-                .getSingleResult();
+        return getLongQueryResult(this.entityManager.createQuery(criteria));
     }
 
     public T update(T objToUpdate) throws FinderException,PersisterException,SynchronizerException{
@@ -178,5 +178,29 @@ public abstract class AbstractIntactBaseDao<I,T extends Auditable> implements In
 
     protected SynchronizerContext getSynchronizerContext() {
         return synchronizerContext;
+    }
+
+    protected Long getLongQueryResult(Query query) {
+        try {
+            Long result = (Long) query.getSingleResult();
+            if (result != null) {
+                return result;
+            }
+        } catch (NoResultException e) {
+            // Nothing to do, the query did not find any result
+        }
+        return 0L;
+    }
+
+    protected Integer getIntQueryResult(Query query) {
+        try {
+            Integer result = (Integer) query.getSingleResult();
+            if (result != null) {
+                return result;
+            }
+        } catch (NoResultException e) {
+            // Nothing to do, the query did not find any result
+        }
+        return 0;
     }
 }

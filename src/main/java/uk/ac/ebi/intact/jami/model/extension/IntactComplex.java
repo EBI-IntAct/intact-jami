@@ -21,6 +21,7 @@ import uk.ac.ebi.intact.jami.utils.IntactUtils;
 import javax.persistence.*;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.ForeignKey;
 import javax.persistence.OrderBy;
 import javax.validation.constraints.NotNull;
 import java.io.IOException;
@@ -33,7 +34,7 @@ import java.util.List;
 
 /**
  * Intact implementation of complex
- *
+ * <p>
  * NOTE: The participants have the ownership of the relation between complex and participants. It means that to persist the relationship between interaction and participants,
  * the property getInteraction in the participant must be pointing to the right complex. It is then recommended to use the provided addParticipant and removeParticipant methods to add/remove participants
  * from the complex
@@ -47,11 +48,11 @@ import java.util.List;
  * @since <pre>17/01/14</pre>
  */
 @Entity
-@DiscriminatorValue( "complex" )
+@DiscriminatorValue("complex")
 @EntityListeners(value = {ComplexParameterListener.class})
 @Where(clause = "category = 'complex'")
 @Cacheable
-public class IntactComplex extends IntactInteractor implements Complex,Releasable{
+public class IntactComplex extends IntactInteractor implements Complex, Releasable {
 
     private Collection<InteractionEvidence> interactionEvidences;
     private Collection<ModelledParticipant> components;
@@ -79,10 +80,9 @@ public class IntactComplex extends IntactInteractor implements Complex,Releasabl
     private transient Annotation onHold;
     private transient Annotation accepted;
     private transient Annotation correctionComment;
-
     private transient Xref complexAcXref;
 
-    protected IntactComplex(){
+    protected IntactComplex() {
         super();
     }
 
@@ -180,11 +180,13 @@ public class IntactComplex extends IntactInteractor implements Complex,Releasabl
         return super.getAliases();
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @Override
     @Transient
     public Xref getPreferredIdentifier() {
-        if(complexAcXref == null){
+        if (complexAcXref == null) {
             initialiseXrefs();
         }
         return complexAcXref != null ? complexAcXref : super.getPreferredIdentifier();
@@ -195,7 +197,7 @@ public class IntactComplex extends IntactInteractor implements Complex,Releasabl
      * NOTE: in the future, should be persisted and cvStatus should be removed
      */
     public LifeCycleStatus getStatus() {
-        if (this.status == null){
+        if (this.status == null) {
             initialiseStatus();
         }
         return status;
@@ -207,17 +209,15 @@ public class IntactComplex extends IntactInteractor implements Complex,Releasabl
     }
 
     private void initialiseStatus() {
-        if (this.cvStatus == null){
+        if (this.cvStatus == null) {
             this.status = LifeCycleStatus.NEW;
-        }
-        else{
+        } else {
             this.status = LifeCycleStatus.toLifeCycleStatus(this.cvStatus);
         }
     }
 
     @ManyToOne(targetEntity = IntactCvTerm.class)
-    @JoinColumn( name = "status_ac", referencedColumnName = "ac" )
-    @ForeignKey(name="FK_COMPLEX_STATUS")
+    @JoinColumn(name = "status_ac", referencedColumnName = "ac", foreignKey = @ForeignKey(name = "FK_COMPLEX_STATUS"))
     @Target(IntactCvTerm.class)
     /**
      * NOTE: in the future, should be persisted and cvStatus should be removed
@@ -225,44 +225,41 @@ public class IntactComplex extends IntactInteractor implements Complex,Releasabl
      */
     @Deprecated
     public CvTerm getCvStatus() {
-        if (this.cvStatus == null){
+        if (this.cvStatus == null) {
             this.cvStatus = getStatus().toCvTerm();
         }
         return this.cvStatus;
     }
 
     /**
-     *
      * @param status
      * @deprecated use setStatus instead
      */
     @Deprecated
-    public void setCvStatus( CvTerm status ) {
+    public void setCvStatus(CvTerm status) {
         this.cvStatus = status;
         this.status = null;
     }
 
-    @ManyToOne( targetEntity = User.class )
-    @JoinColumn( name = "owner_pk", referencedColumnName = "ac" )
-    @ForeignKey(name="FK_COMPLEX_OWNER")
+    @ManyToOne(targetEntity = User.class)
+    @JoinColumn(name = "owner_pk", referencedColumnName = "ac", foreignKey = @ForeignKey(name = "FK_COMPLEX_OWNER"))
     @Target(User.class)
     public User getCurrentOwner() {
         return currentOwner;
     }
 
-    public void setCurrentOwner( User currentOwner ) {
+    public void setCurrentOwner(User currentOwner) {
         this.currentOwner = currentOwner;
     }
 
-    @ManyToOne( targetEntity = User.class )
-    @JoinColumn( name = "reviewer_pk", referencedColumnName = "ac" )
-    @ForeignKey(name="FK_COMPLEX_REVIEWER")
+    @ManyToOne(targetEntity = User.class)
+    @JoinColumn(name = "reviewer_pk", referencedColumnName = "ac", foreignKey = @ForeignKey(name = "FK_COMPLEX_REVIEWER"))
     @Target(User.class)
     public User getCurrentReviewer() {
         return currentReviewer;
     }
 
-    public void setCurrentReviewer( User currentReviewer ) {
+    public void setCurrentReviewer(User currentReviewer) {
         this.currentReviewer = currentReviewer;
     }
 
@@ -271,14 +268,13 @@ public class IntactComplex extends IntactInteractor implements Complex,Releasabl
         return Hibernate.isInitialized(getLifecycleEvents());
     }
 
-    @OneToMany( orphanRemoval = true, cascade = CascadeType.ALL, targetEntity = ComplexLifeCycleEvent.class)
-    @JoinColumn(name="complex_ac", referencedColumnName="ac")
-    @ForeignKey(name="FK_LIFECYCLE_EVENT_COMPLEX")
-    @Cascade( value = {org.hibernate.annotations.CascadeType.SAVE_UPDATE} )
+    @OneToMany(orphanRemoval = true, cascade = CascadeType.ALL, targetEntity = ComplexLifeCycleEvent.class)
+    @JoinColumn(name = "complex_ac", referencedColumnName = "ac", foreignKey = @ForeignKey(name = "FK_LIFECYCLE_EVENT_COMPLEX"))
+    @Cascade(value = {org.hibernate.annotations.CascadeType.SAVE_UPDATE})
     @OrderBy("when, created")
     @Target(ComplexLifeCycleEvent.class)
     public List<LifeCycleEvent> getLifecycleEvents() {
-        if (this.lifecycleEvents == null){
+        if (this.lifecycleEvents == null) {
             this.lifecycleEvents = new ArrayList<LifeCycleEvent>();
         }
         return lifecycleEvents;
@@ -316,10 +312,9 @@ public class IntactComplex extends IntactInteractor implements Complex,Releasabl
     public void onToBeReviewed(String message) {
         Collection<Annotation> complexAnnotationList = getAnnotations();
 
-        if (toBeReviewed != null){
+        if (toBeReviewed != null) {
             this.toBeReviewed.setValue(message);
-        }
-        else  {
+        } else {
             CvTerm toBeReviewedTopic = IntactUtils.createMITopic(Releasable.TO_BE_REVIEWED, null);
             this.toBeReviewed = new InteractorAnnotation(toBeReviewedTopic, message);
             complexAnnotationList.add(this.toBeReviewed);
@@ -330,10 +325,9 @@ public class IntactComplex extends IntactInteractor implements Complex,Releasabl
     public void onAccepted(String message) {
         Collection<Annotation> complexAnnotationList = getAnnotations();
 
-        if (accepted != null){
+        if (accepted != null) {
             this.accepted.setValue(message);
-        }
-        else  {
+        } else {
             CvTerm acceptedTopic = IntactUtils.createMITopic(Releasable.ACCEPTED, null);
             this.accepted = new InteractorAnnotation(acceptedTopic, message);
             complexAnnotationList.add(this.accepted);
@@ -353,11 +347,12 @@ public class IntactComplex extends IntactInteractor implements Complex,Releasabl
 
     /**
      * Overrides the method in IntactInteractor to give back complex preferred name.
+     *
      * @return
      */
     @Override
     @Transient
-    public String getPreferredName(){
+    public String getPreferredName() {
         return this.getShortName();
     }
 
@@ -365,10 +360,9 @@ public class IntactComplex extends IntactInteractor implements Complex,Releasabl
     public void onCorrectionComment(String message) {
         Collection<Annotation> complexAnnotationList = getAnnotations();
 
-        if (correctionComment != null){
+        if (correctionComment != null) {
             this.correctionComment.setValue(message);
-        }
-        else  {
+        } else {
             CvTerm onHoldTopic = IntactUtils.createMITopic(Releasable.CORRECTION_COMMENT, null);
             this.correctionComment = new InteractorAnnotation(onHoldTopic, message);
             complexAnnotationList.add(this.correctionComment);
@@ -411,10 +405,9 @@ public class IntactComplex extends IntactInteractor implements Complex,Releasabl
     public void onHold(String message) {
         Collection<Annotation> complexAnnotationList = getAnnotations();
 
-        if (onHold != null){
+        if (onHold != null) {
             this.onHold.setValue(message);
-        }
-        else  {
+        } else {
             CvTerm onHoldTopic = IntactUtils.createMITopic(Releasable.ON_HOLD, null);
             this.onHold = new InteractorAnnotation(onHoldTopic, message);
             complexAnnotationList.add(this.onHold);
@@ -435,7 +428,7 @@ public class IntactComplex extends IntactInteractor implements Complex,Releasabl
     }
 
     @ManyToOne(targetEntity = IntactSource.class)
-    @JoinColumn( name = "owner_ac", referencedColumnName = "ac")
+    @JoinColumn(name = "owner_ac", referencedColumnName = "ac")
     @Target(IntactSource.class)
     @NotNull
     public Source getSource() {
@@ -447,7 +440,7 @@ public class IntactComplex extends IntactInteractor implements Complex,Releasabl
     }
 
     @ManyToOne(targetEntity = IntactCvTerm.class)
-    @JoinColumn( name = "evidence_type_ac", referencedColumnName = "ac")
+    @JoinColumn(name = "evidence_type_ac", referencedColumnName = "ac")
     @Target(IntactCvTerm.class)
     @NotNull
     public CvTerm getEvidenceType() {
@@ -458,17 +451,17 @@ public class IntactComplex extends IntactInteractor implements Complex,Releasabl
         this.evidenceType = evidenceType;
     }
 
-    @OneToMany( mappedBy = "dbParentInteraction", orphanRemoval = true,
+    @OneToMany(mappedBy = "dbParentInteraction", orphanRemoval = true,
             cascade = {CascadeType.ALL}, targetEntity = IntactModelledParticipant.class)
-    @Cascade( value = {org.hibernate.annotations.CascadeType.SAVE_UPDATE} )
+    @Cascade(value = {org.hibernate.annotations.CascadeType.SAVE_UPDATE})
     @Target(IntactModelledParticipant.class)
     /**
-    * NOTE: The participants have the ownership of the relation between complex and participants. It means that to persist the relationship between interaction and participants,
-    * the property getInteraction in the participant must be pointing to the right complex. It is then recommended to use the provided addParticipant and removeParticipant methods to add/remove participants
-    * from the complex
-    **/
+     * NOTE: The participants have the ownership of the relation between complex and participants. It means that to persist the relationship between interaction and participants,
+     * the property getInteraction in the participant must be pointing to the right complex. It is then recommended to use the provided addParticipant and removeParticipant methods to add/remove participants
+     * from the complex
+     **/
     public Collection<ModelledParticipant> getParticipants() {
-        if (components == null){
+        if (components == null) {
             initialiseComponents();
         }
         return this.components;
@@ -479,10 +472,10 @@ public class IntactComplex extends IntactInteractor implements Complex,Releasabl
     }
 
     public boolean addParticipant(ModelledParticipant part) {
-        if (part == null){
+        if (part == null) {
             return false;
         }
-        if (components == null){
+        if (components == null) {
             initialiseComponents();
         }
         part.setInteraction(this);
@@ -490,10 +483,10 @@ public class IntactComplex extends IntactInteractor implements Complex,Releasabl
     }
 
     public boolean removeParticipant(ModelledParticipant part) {
-        if (part == null){
+        if (part == null) {
             return false;
         }
-        if (components == null){
+        if (components == null) {
             initialiseComponents();
         }
         part.setInteraction(null);
@@ -501,13 +494,13 @@ public class IntactComplex extends IntactInteractor implements Complex,Releasabl
     }
 
     public boolean addAllParticipants(Collection<? extends ModelledParticipant> participants) {
-        if (participants == null){
+        if (participants == null) {
             return false;
         }
 
         boolean added = false;
-        for (ModelledParticipant p : participants){
-            if (addParticipant(p)){
+        for (ModelledParticipant p : participants) {
+            if (addParticipant(p)) {
                 added = true;
             }
         }
@@ -515,26 +508,26 @@ public class IntactComplex extends IntactInteractor implements Complex,Releasabl
     }
 
     public boolean removeAllParticipants(Collection<? extends ModelledParticipant> participants) {
-        if (participants == null){
+        if (participants == null) {
             return false;
         }
 
         boolean removed = false;
-        for (ModelledParticipant p : participants){
-            if (removeParticipant(p)){
+        for (ModelledParticipant p : participants) {
+            if (removeParticipant(p)) {
                 removed = true;
             }
         }
         return removed;
     }
 
-    @OneToMany( orphanRemoval = true,
+    @OneToMany(orphanRemoval = true,
             cascade = {CascadeType.ALL}, targetEntity = ComplexConfidence.class)
-    @JoinColumn(name="interaction_ac", referencedColumnName="ac")
-    @Cascade( value = {org.hibernate.annotations.CascadeType.SAVE_UPDATE} )
+    @JoinColumn(name = "interaction_ac", referencedColumnName = "ac")
+    @Cascade(value = {org.hibernate.annotations.CascadeType.SAVE_UPDATE})
     @Target(ComplexConfidence.class)
     public Collection<ModelledConfidence> getModelledConfidences() {
-        if (confidences == null){
+        if (confidences == null) {
             initialiseConfidences();
         }
         return this.confidences;
@@ -544,13 +537,13 @@ public class IntactComplex extends IntactInteractor implements Complex,Releasabl
         this.confidences = confidences;
     }
 
-    @OneToMany( orphanRemoval = true,
+    @OneToMany(orphanRemoval = true,
             cascade = {CascadeType.ALL}, targetEntity = ComplexParameter.class)
-    @JoinColumn(name="interaction_ac", referencedColumnName="ac")
-    @Cascade( value = {org.hibernate.annotations.CascadeType.SAVE_UPDATE} )
+    @JoinColumn(name = "interaction_ac", referencedColumnName = "ac")
+    @Cascade(value = {org.hibernate.annotations.CascadeType.SAVE_UPDATE})
     @Target(ComplexParameter.class)
     public Collection<ModelledParameter> getModelledParameters() {
-        if (parameters == null){
+        if (parameters == null) {
             initialiseParameters();
         }
         return this.parameters;
@@ -570,7 +563,7 @@ public class IntactComplex extends IntactInteractor implements Complex,Releasabl
      * For the time being, cooperative effects are not persisted in IntAct. We may want to do so in the future using the commented hibernate mapping
      */
     public Collection<CooperativeEffect> getCooperativeEffects() {
-        if (cooperativeEffects == null){
+        if (cooperativeEffects == null) {
             initialiseCooperativeEffects();
         }
         return this.cooperativeEffects;
@@ -664,14 +657,13 @@ public class IntactComplex extends IntactInteractor implements Complex,Releasabl
         Collection<Annotation> complexAnnotationList = getAnnotations();
 
         // add new physical properties if not null
-        if (properties != null){
-
+        if (properties != null) {
             CvTerm complexPhysicalProperties = IntactUtils.createMITopic(Annotation.COMPLEX_PROPERTIES, Annotation.COMPLEX_PROPERTIES_MI);
+
             // first remove old physical property if not null
-            if (this.physicalProperties != null){
+            if (this.physicalProperties != null) {
                 this.physicalProperties.setValue(properties);
-            }
-            else{
+            } else {
                 this.physicalProperties = new InteractorAnnotation(complexPhysicalProperties, properties);
                 complexAnnotationList.add(this.physicalProperties);
             }
@@ -694,21 +686,19 @@ public class IntactComplex extends IntactInteractor implements Complex,Releasabl
         Collection<Alias> complexAliasList = getAliases();
 
         // add new recommended name if not null
-        if (name != null){
+        if (name != null) {
 
             CvTerm recommendedName = IntactUtils.createMIAliasType(Alias.COMPLEX_RECOMMENDED_NAME, Alias.COMPLEX_RECOMMENDED_NAME_MI);
             // first remove old recommended name if not null
-            if (this.recommendedName != null && !name.equals(this.recommendedName.getName())){
-                if (this.recommendedName instanceof AbstractIntactAlias){
+            if (this.recommendedName != null && !name.equals(this.recommendedName.getName())) {
+                if (this.recommendedName instanceof AbstractIntactAlias) {
                     ((AbstractIntactAlias) this.recommendedName).setName(name);
-                }
-                else{
+                } else {
                     complexAliasList.remove(this.recommendedName);
                     this.recommendedName = new InteractorAlias(recommendedName, name);
                     complexAliasList.add(this.recommendedName);
                 }
-            }
-            else if (this.recommendedName == null){
+            } else if (this.recommendedName == null) {
                 this.recommendedName = new InteractorAlias(recommendedName, name);
                 complexAliasList.add(this.recommendedName);
             }
@@ -731,21 +721,19 @@ public class IntactComplex extends IntactInteractor implements Complex,Releasabl
         Collection<Alias> complexAliasList = getAliases();
 
         // add new systematic name if not null
-        if (name != null){
+        if (name != null) {
 
             CvTerm systematicName = IntactUtils.createMIAliasType(Alias.COMPLEX_SYSTEMATIC_NAME, Alias.COMPLEX_SYSTEMATIC_NAME_MI);
             // first remove systematic name  if not null
-            if (this.systematicName != null && !name.equals(this.systematicName)){
-                if (this.systematicName instanceof AbstractIntactAlias){
+            if (this.systematicName != null && !name.equals(this.systematicName)) {
+                if (this.systematicName instanceof AbstractIntactAlias) {
                     ((AbstractIntactAlias) this.systematicName).setName(name);
-                }
-                else{
+                } else {
                     complexAliasList.remove(this.systematicName);
                     this.systematicName = new InteractorAlias(systematicName, name);
                     complexAliasList.add(this.systematicName);
                 }
-            }
-            else if (this.systematicName == null){
+            } else if (this.systematicName == null) {
                 this.systematicName = new InteractorAlias(systematicName, name);
                 complexAliasList.add(this.systematicName);
             }
@@ -760,8 +748,8 @@ public class IntactComplex extends IntactInteractor implements Complex,Releasabl
     @ManyToMany(targetEntity = IntactExperiment.class)
     @JoinTable(
             name = "ia_int2exp",
-            joinColumns = {@JoinColumn( name = "interaction_ac" )},
-            inverseJoinColumns = {@JoinColumn( name = "experiment_ac" )}
+            joinColumns = {@JoinColumn(name = "interaction_ac")},
+            inverseJoinColumns = {@JoinColumn(name = "experiment_ac")}
     )
     @Target(IntactExperiment.class)
     @LazyCollection(LazyCollectionOption.FALSE)  //It will contain only one experiment for complexes, should be OK
@@ -772,7 +760,7 @@ public class IntactComplex extends IntactInteractor implements Complex,Releasabl
      * @deprecated Only kept for backward compatibility with intact core. Complexes should not have experiments
      */
     public Collection<Experiment> getExperiments() {
-        if (experiments == null){
+        if (experiments == null) {
             experiments = new ArrayList<Experiment>();
         }
         return experiments;
@@ -791,10 +779,11 @@ public class IntactComplex extends IntactInteractor implements Complex,Releasabl
 
     public void setRigid(String rigid) {
         Collection<Checksum> checksums = getChecksums();
-        if (rigid != null){
+        if (rigid != null) {
             CvTerm rigidMethod = IntactUtils.createMITopic(Checksum.RIGID, null);
+
             // first remove old rigid
-            if (this.rigid != null){
+            if (this.rigid != null) {
                 checksums.remove(this.rigid);
             }
             this.rigid = new DefaultChecksum(rigidMethod, rigid);
@@ -826,7 +815,7 @@ public class IntactComplex extends IntactInteractor implements Complex,Releasabl
     }
 
     @ManyToOne(targetEntity = IntactCvTerm.class)
-    @JoinColumn( name = "interactiontype_ac", referencedColumnName = "ac")
+    @JoinColumn(name = "interactiontype_ac", referencedColumnName = "ac")
     @Target(IntactCvTerm.class)
     public CvTerm getInteractionType() {
         return this.interactionType;
@@ -845,7 +834,7 @@ public class IntactComplex extends IntactInteractor implements Complex,Releasabl
     @Target(IntactInteractionEvidence.class) */
     @Transient
     public Collection<InteractionEvidence> getInteractionEvidences() {
-        if (interactionEvidences == null){
+        if (interactionEvidences == null) {
             initialiseInteractionEvidences();
         }
         return this.interactionEvidences;
@@ -856,27 +845,27 @@ public class IntactComplex extends IntactInteractor implements Complex,Releasabl
     }
 
     @Transient
-    public boolean areParticipantsInitialized(){
+    public boolean areParticipantsInitialized() {
         return Hibernate.isInitialized(getParticipants());
     }
 
     @Transient
-    public boolean areCooperativeEffectsInitialized(){
+    public boolean areCooperativeEffectsInitialized() {
         return Hibernate.isInitialized(getCooperativeEffects());
     }
 
     @Transient
-    public boolean areParametersInitialized(){
+    public boolean areParametersInitialized() {
         return Hibernate.isInitialized(getModelledParameters());
     }
 
     @Transient
-    public boolean areConfidencesInitialized(){
+    public boolean areConfidencesInitialized() {
         return Hibernate.isInitialized(getModelledConfidences());
     }
 
     @Transient
-    public boolean areExperimentsInitialized(){
+    public boolean areExperimentsInitialized() {
         return Hibernate.isInitialized(getExperiments());
     }
 
@@ -891,7 +880,7 @@ public class IntactComplex extends IntactInteractor implements Complex,Releasabl
     }
 
     @Override
-    protected void initialiseChecksums(){
+    protected void initialiseChecksums() {
         super.initialiseChecksumsWith(new ComplexChecksumList());
     }
 
@@ -933,10 +922,10 @@ public class IntactComplex extends IntactInteractor implements Complex,Releasabl
     @Override
     protected void processRemovedIdentifierEvent(Xref removed) {
         // the removed identifier is pubmed
-        if (complexAcXref != null && complexAcXref.equals(removed)){
+        if (complexAcXref != null && complexAcXref.equals(removed)) {
             Collection<Xref> existingComplexAcXref = XrefUtils.collectAllXrefsHavingDatabaseAndQualifier(getXrefs(),
                     Xref.COMPLEX_PORTAL_MI, Xref.COMPLEX_PORTAL, Xref.COMPLEX_PRIMARY_MI, Xref.COMPLEX_PRIMARY);
-            if (!existingComplexAcXref.isEmpty()){
+            if (!existingComplexAcXref.isEmpty()) {
                 complexAcXref = existingComplexAcXref.iterator().next();
             }
         }
@@ -950,23 +939,19 @@ public class IntactComplex extends IntactInteractor implements Complex,Releasabl
     @Override
     protected void processAddedAnnotation(Annotation added) {
         if (physicalProperties == null &&
-                AnnotationUtils.doesAnnotationHaveTopic(added, Annotation.COMPLEX_PROPERTIES_MI, Annotation.COMPLEX_PROPERTIES)){
+                AnnotationUtils.doesAnnotationHaveTopic(added, Annotation.COMPLEX_PROPERTIES_MI, Annotation.COMPLEX_PROPERTIES)) {
             physicalProperties = added;
-        }
-        else if (toBeReviewed == null &&
-                AnnotationUtils.doesAnnotationHaveTopic(added, null, Releasable.TO_BE_REVIEWED)){
+        } else if (toBeReviewed == null &&
+                AnnotationUtils.doesAnnotationHaveTopic(added, null, Releasable.TO_BE_REVIEWED)) {
             toBeReviewed = added;
-        }
-        else if (accepted == null &&
-                AnnotationUtils.doesAnnotationHaveTopic(added, null, Releasable.ACCEPTED)){
+        } else if (accepted == null &&
+                AnnotationUtils.doesAnnotationHaveTopic(added, null, Releasable.ACCEPTED)) {
             accepted = added;
-        }
-        else if (onHold == null &&
-                AnnotationUtils.doesAnnotationHaveTopic(added, null, Releasable.ON_HOLD)){
+        } else if (onHold == null &&
+                AnnotationUtils.doesAnnotationHaveTopic(added, null, Releasable.ON_HOLD)) {
             onHold = added;
-        }
-        else if (correctionComment == null &&
-                AnnotationUtils.doesAnnotationHaveTopic(added, null, Releasable.CORRECTION_COMMENT)){
+        } else if (correctionComment == null &&
+                AnnotationUtils.doesAnnotationHaveTopic(added, null, Releasable.CORRECTION_COMMENT)) {
             correctionComment = added;
         }
     }
@@ -974,23 +959,23 @@ public class IntactComplex extends IntactInteractor implements Complex,Releasabl
 
     @Override
     protected void processRemovedAnnotation(Annotation removed) {
-        if (physicalProperties != null && physicalProperties.equals(removed)){
+        if (physicalProperties != null && physicalProperties.equals(removed)) {
             physicalProperties = AnnotationUtils.collectFirstAnnotationWithTopic(getAnnotations(),
                     Annotation.COMPLEX_PROPERTIES_MI, Annotation.COMPLEX_PROPERTIES);
         }
-        if (toBeReviewed != null && toBeReviewed.equals(removed)){
+        if (toBeReviewed != null && toBeReviewed.equals(removed)) {
             toBeReviewed = AnnotationUtils.collectFirstAnnotationWithTopic(getAnnotations(),
                     null, Releasable.TO_BE_REVIEWED);
         }
-        if (accepted != null && accepted.equals(removed)){
+        if (accepted != null && accepted.equals(removed)) {
             accepted = AnnotationUtils.collectFirstAnnotationWithTopic(getAnnotations(),
                     null, Releasable.ACCEPTED);
         }
-        if (onHold != null && onHold.equals(removed)){
+        if (onHold != null && onHold.equals(removed)) {
             onHold = AnnotationUtils.collectFirstAnnotationWithTopic(getAnnotations(),
                     null, Releasable.ON_HOLD);
         }
-        if (correctionComment != null && correctionComment.equals(removed)){
+        if (correctionComment != null && correctionComment.equals(removed)) {
             correctionComment = AnnotationUtils.collectFirstAnnotationWithTopic(getAnnotations(),
                     null, Releasable.CORRECTION_COMMENT);
         }
@@ -998,20 +983,18 @@ public class IntactComplex extends IntactInteractor implements Complex,Releasabl
 
     @Override
     protected void processAddedAlias(Alias added) {
-        if (recommendedName == null && AliasUtils.doesAliasHaveType(added, Alias.COMPLEX_RECOMMENDED_NAME_MI, Alias.COMPLEX_RECOMMENDED_NAME)){
+        if (recommendedName == null && AliasUtils.doesAliasHaveType(added, Alias.COMPLEX_RECOMMENDED_NAME_MI, Alias.COMPLEX_RECOMMENDED_NAME)) {
             recommendedName = added;
-        }
-        else if (systematicName == null && AliasUtils.doesAliasHaveType(added, Alias.COMPLEX_SYSTEMATIC_NAME_MI, Alias.COMPLEX_SYSTEMATIC_NAME)){
+        } else if (systematicName == null && AliasUtils.doesAliasHaveType(added, Alias.COMPLEX_SYSTEMATIC_NAME_MI, Alias.COMPLEX_SYSTEMATIC_NAME)) {
             systematicName = added;
         }
     }
 
     @Override
     protected void processRemovedAlias(Alias removed) {
-        if (recommendedName != null && recommendedName.equals(removed)){
+        if (recommendedName != null && recommendedName.equals(removed)) {
             recommendedName = AliasUtils.collectFirstAliasWithType(getAliases(), Alias.COMPLEX_RECOMMENDED_NAME_MI, Alias.COMPLEX_RECOMMENDED_NAME);
-        }
-        else if (systematicName != null && systematicName.equals(removed)){
+        } else if (systematicName != null && systematicName.equals(removed)) {
             systematicName = AliasUtils.collectFirstAliasWithType(getAliases(), Alias.COMPLEX_SYSTEMATIC_NAME_MI, Alias.COMPLEX_SYSTEMATIC_NAME);
         }
     }
@@ -1099,6 +1082,7 @@ public class IntactComplex extends IntactInteractor implements Complex,Releasabl
 
     /**
      * Overrides serialization for xrefs and annotations (inner classes not serializable)
+     *
      * @param oos
      * @throws java.io.IOException
      */
@@ -1112,6 +1096,7 @@ public class IntactComplex extends IntactInteractor implements Complex,Releasabl
 
     /**
      * Overrides serialization for xrefs and annotations (inner classes not serializable)
+     *
      * @param ois
      * @throws ClassNotFoundException
      * @throws IOException
@@ -1121,11 +1106,11 @@ public class IntactComplex extends IntactInteractor implements Complex,Releasabl
         // default deserialization
         ois.defaultReadObject();
         // read default status
-        setCvStatus((CvTerm)ois.readObject());
+        setCvStatus((CvTerm) ois.readObject());
     }
 
     private class ComplexChecksumList extends AbstractListHavingProperties<Checksum> {
-        public ComplexChecksumList(){
+        public ComplexChecksumList() {
             super();
         }
 

@@ -52,7 +52,7 @@ public class InteractorPoolDaoImpl extends InteractorDaoImpl<InteractorPool,Inta
         Query query = getEntityManager().createQuery("select size(i.interactors) from IntactInteractorPool i " +
                 "where i.ac = :ac");
         query.setParameter("ac", ac);
-        return (Integer)query.getSingleResult();
+        return getIntQueryResult(query);
     }
 
     @Override
@@ -61,7 +61,6 @@ public class InteractorPoolDaoImpl extends InteractorDaoImpl<InteractorPool,Inta
                 "join i.interactors as inter " +
                 "where inter.ac = :ac");
         query.setParameter("ac", ac);
-        Long results = (Long)query.getSingleResult();
-        return results != null ? results.intValue() : 0;
+        return getLongQueryResult(query).intValue();
     }
 }

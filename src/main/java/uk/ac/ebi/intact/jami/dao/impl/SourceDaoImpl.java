@@ -589,7 +589,7 @@ public class SourceDaoImpl extends AbstractIntactBaseDao<Source, IntactSource> i
         Query query = getEntityManager().createQuery("select size(i.synonyms) from IntactSource i " +
                 "where i.ac = :ac");
         query.setParameter("ac", ac);
-        return (Integer)query.getSingleResult();
+        return getIntQueryResult(query);
     }
 
     @Override
@@ -597,7 +597,7 @@ public class SourceDaoImpl extends AbstractIntactBaseDao<Source, IntactSource> i
         Query query = getEntityManager().createQuery("select size(i.dbXrefs) from IntactSource i " +
                 "where i.ac = :ac");
         query.setParameter("ac", ac);
-        return (Integer)query.getSingleResult();
+        return getIntQueryResult(query);
     }
 
     @Override
@@ -605,7 +605,7 @@ public class SourceDaoImpl extends AbstractIntactBaseDao<Source, IntactSource> i
         Query query = getEntityManager().createQuery("select size(i.dbAnnotations) from IntactSource i " +
                 "where i.ac = :ac");
         query.setParameter("ac", ac);
-        return (Integer)query.getSingleResult();
+        return getIntQueryResult(query);
     }
 
     @Override

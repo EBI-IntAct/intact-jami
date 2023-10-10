@@ -7,6 +7,7 @@ import uk.ac.ebi.intact.jami.model.AbstractIntactPrimaryObject;
 import javax.persistence.CascadeType;
 import javax.persistence.*;
 import javax.persistence.Entity;
+import javax.persistence.ForeignKey;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
@@ -58,7 +59,7 @@ public class Application extends AbstractIntactPrimaryObject {
     }
 
     @Lob
-    @Type(type = "org.hibernate.type.StringClobType")
+    @Type(type = "org.hibernate.type.MaterializedClobType")
     public String getDescription() {
         return description;
     }
@@ -69,10 +70,9 @@ public class Application extends AbstractIntactPrimaryObject {
 
 
     @OneToMany( cascade = {CascadeType.ALL}, orphanRemoval = true)
-    @JoinColumn(name="application_ac", referencedColumnName="ac")
+    @JoinColumn(name="application_ac", referencedColumnName="ac",foreignKey = @ForeignKey(name="FK_PROP_APPLICATION"))
     @Cascade( value = {org.hibernate.annotations.CascadeType.SAVE_UPDATE} )
     @LazyCollection(LazyCollectionOption.FALSE)
-    @ForeignKey(name="FK_PROP_APPLICATION")
     public Collection<ApplicationProperty> getProperties() {
         if (this.properties == null){
             this.properties = new ArrayList<ApplicationProperty>();

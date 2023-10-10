@@ -1097,7 +1097,7 @@ public class FeatureDaoImpl<T extends Feature, F extends AbstractIntactFeature> 
         Query query = getEntityManager().createQuery("select size(i.aliases) from "+getEntityClass().getSimpleName()+" i " +
                 "where i.ac = :ac");
         query.setParameter("ac", ac);
-        return (Integer)query.getSingleResult();
+        return getIntQueryResult(query);
     }
 
     @Override
@@ -1105,7 +1105,7 @@ public class FeatureDaoImpl<T extends Feature, F extends AbstractIntactFeature> 
         Query query = getEntityManager().createQuery("select size(i.dbXrefs) from "+getEntityClass().getSimpleName()+" i " +
                 "where i.ac = :ac");
         query.setParameter("ac", ac);
-        return (Integer)query.getSingleResult();
+        return getIntQueryResult(query);
     }
 
     @Override
@@ -1113,7 +1113,7 @@ public class FeatureDaoImpl<T extends Feature, F extends AbstractIntactFeature> 
         Query query = getEntityManager().createQuery("select size(i.annotations) from "+getEntityClass().getSimpleName()+" i " +
                 "where i.ac = :ac");
         query.setParameter("ac", ac);
-        return (Integer)query.getSingleResult();
+        return getIntQueryResult(query);
     }
 
     @Override
@@ -1121,7 +1121,7 @@ public class FeatureDaoImpl<T extends Feature, F extends AbstractIntactFeature> 
         Query query = getEntityManager().createQuery("select size(i.ranges) from "+getEntityClass().getSimpleName()+" i " +
                 "where i.ac = :ac");
         query.setParameter("ac", ac);
-        return (Integer)query.getSingleResult();
+        return getIntQueryResult(query);
     }
 
     @Override

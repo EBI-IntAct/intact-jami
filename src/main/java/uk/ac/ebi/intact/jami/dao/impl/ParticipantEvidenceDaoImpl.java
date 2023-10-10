@@ -432,7 +432,7 @@ public class ParticipantEvidenceDaoImpl extends ParticipantDaoImpl<ParticipantEv
         Query query = getEntityManager().createQuery("select size(i.confidences) from IntactParticipantEvidence i " +
                 "where i.ac = :ac");
         query.setParameter("ac", ac);
-        return (Integer)query.getSingleResult();
+        return getIntQueryResult(query);
     }
 
     @Override
@@ -440,7 +440,7 @@ public class ParticipantEvidenceDaoImpl extends ParticipantDaoImpl<ParticipantEv
         Query query = getEntityManager().createQuery("select size(i.parameters) from IntactParticipantEvidence i " +
                 "where i.ac = :ac");
         query.setParameter("ac", ac);
-        return (Integer)query.getSingleResult();
+        return getIntQueryResult(query);
     }
 
     @Override
@@ -448,7 +448,7 @@ public class ParticipantEvidenceDaoImpl extends ParticipantDaoImpl<ParticipantEv
         Query query = getEntityManager().createQuery("select size(i.experimentalPreparations) from IntactParticipantEvidence i " +
                 "where i.ac = :ac");
         query.setParameter("ac", ac);
-        return (Integer)query.getSingleResult();
+        return getIntQueryResult(query);
     }
 
     @Override
@@ -456,7 +456,7 @@ public class ParticipantEvidenceDaoImpl extends ParticipantDaoImpl<ParticipantEv
         Query query = getEntityManager().createQuery("select size(i.dbIdentificationMethods) from IntactParticipantEvidence i " +
                 "where i.ac = :ac");
         query.setParameter("ac", ac);
-        return (Integer)query.getSingleResult();
+        return getIntQueryResult(query);
     }
 
     @Override
@@ -465,7 +465,6 @@ public class ParticipantEvidenceDaoImpl extends ParticipantDaoImpl<ParticipantEv
                 "join i.expressedInOrganism o " +
                 "where o.ac = :ac");
         query.setParameter("ac", organismAc);
-        Long results = (Long)query.getSingleResult();
-        return results != null ? results.intValue() : 0;
+        return getLongQueryResult(query).intValue();
     }
 }

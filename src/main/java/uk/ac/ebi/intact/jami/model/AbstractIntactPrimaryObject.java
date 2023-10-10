@@ -8,10 +8,7 @@ package uk.ac.ebi.intact.jami.model;
 import org.hibernate.annotations.GenericGenerator;
 import uk.ac.ebi.intact.jami.model.audit.AbstractAuditable;
 
-import javax.persistence.Column;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.MappedSuperclass;
+import javax.persistence.*;
 
 /**
  * Abstract Implementation for IntAct primary objects
@@ -28,9 +25,9 @@ public abstract class AbstractIntactPrimaryObject extends AbstractAuditable impl
     //access methods for attributes
 
     @Id
-    @GeneratedValue( generator = "intact-id-generator" )
-    @GenericGenerator( name = "intact-id-generator", strategy = "uk.ac.ebi.intact.jami.model.IntactAcGenerator")
-    @Column( name = "ac", length = 30 )
+    @GeneratedValue(generator = "intact-id-generator", strategy = GenerationType.SEQUENCE)
+    @GenericGenerator(name = "intact-id-generator", strategy = "uk.ac.ebi.intact.jami.model.IntactAcGenerator")
+    @Column(name = "ac", length = 30, unique = true)
     public String getAc() {
         return ac;
     }

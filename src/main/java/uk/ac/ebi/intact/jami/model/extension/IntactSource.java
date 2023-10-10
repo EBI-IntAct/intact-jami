@@ -20,7 +20,7 @@ import java.util.Collection;
 
 /**
  * Intact implementation of a source. It replaces Institution from intact core
- *
+ * <p>
  * NOTE: dbUrl and dbPostalAddress are private methods as they are deprecated and only there for backward compatibility with intact-core.
  * Only getUrl and getPostalAddress should be used. These methods are not persistent, if a URL/postal address is attached to an institution, it
  * should always be stored in the annotations of the institution.
@@ -50,7 +50,7 @@ public class IntactSource extends AbstractIntactCvTerm implements Source {
     private transient SourceAnnotationList annotations;
     private transient SourcePersistentAnnotationList persistentAnnotations;
 
-    protected IntactSource(){
+    protected IntactSource() {
         super();
     }
 
@@ -110,7 +110,7 @@ public class IntactSource extends AbstractIntactCvTerm implements Source {
     }
 
     @Column(name = "shortlabel", nullable = false, unique = true)
-    @Size( min = 1, max = IntactUtils.MAX_SHORT_LABEL_LEN )
+    @Size(min = 1, max = IntactUtils.MAX_SHORT_LABEL_LEN)
     @NotNull
     public String getShortName() {
         return super.getShortName();
@@ -134,14 +134,13 @@ public class IntactSource extends AbstractIntactCvTerm implements Source {
         Collection<Annotation> sourceAnnotationList = getAnnotations();
 
         // add new url if not null
-        if (url != null){
+        if (url != null) {
             CvTerm urlTopic = IntactUtils.createMITopic(Annotation.URL, Annotation.URL_MI);
-            // first remove old url if not null
 
-            if (this.url != null){
-               this.url.setValue(url);
-            }
-            else {
+            // first remove old url if not null
+            if (this.url != null) {
+                this.url.setValue(url);
+            } else {
                 this.url = new SourceAnnotation(urlTopic, url);
                 sourceAnnotationList.add(this.url);
             }
@@ -164,13 +163,12 @@ public class IntactSource extends AbstractIntactCvTerm implements Source {
         Collection<Annotation> sourceAnnotationList = getAnnotations();
 
         // add new url if not null
-        if (address != null){
+        if (address != null) {
             CvTerm addressTopic = IntactUtils.createMITopic(Annotation.POSTAL_ADDRESS, null);
 
-            if (this.postalAddress != null){
+            if (this.postalAddress != null) {
                 this.postalAddress.setValue(address);
-            }
-            else{
+            } else {
                 this.postalAddress = new SourceAnnotation(addressTopic, address);
                 sourceAnnotationList.add(this.postalAddress);
             }
@@ -195,14 +193,14 @@ public class IntactSource extends AbstractIntactCvTerm implements Source {
     public void setPublication(Publication ref) {
         // initialise refs
         getXrefs();
-        if (this.bibRef != null){
+        if (this.bibRef != null) {
             getDbXrefs().removeAll(this.bibRef.getIdentifiers());
         }
         this.bibRef = ref;
-        if (this.bibRef != null){
-            if (!ref.getIdentifiers().isEmpty()){
+        if (this.bibRef != null) {
+            if (!ref.getIdentifiers().isEmpty()) {
                 resetXrefs();
-                for (Xref primary : this.bibRef.getIdentifiers()){
+                for (Xref primary : this.bibRef.getIdentifiers()) {
                     getDbXrefs().add(new SourceXref(primary.getDatabase(), primary.getId(), primary.getVersion(),
                             IntactUtils.createMIQualifier(Xref.PRIMARY, Xref.PRIMARY_MI)));
                 }
@@ -210,9 +208,9 @@ public class IntactSource extends AbstractIntactCvTerm implements Source {
         }
     }
 
-    @OneToMany( cascade = {CascadeType.ALL}, orphanRemoval = true, targetEntity = SourceAlias.class)
-    @JoinColumn(name="parent_ac", referencedColumnName="ac")
-    @Cascade( value = {org.hibernate.annotations.CascadeType.SAVE_UPDATE} )
+    @OneToMany(cascade = {CascadeType.ALL}, orphanRemoval = true, targetEntity = SourceAlias.class)
+    @JoinColumn(name = "parent_ac", referencedColumnName = "ac")
+    @Cascade(value = {org.hibernate.annotations.CascadeType.SAVE_UPDATE})
     @Target(SourceAlias.class)
     public Collection<Alias> getSynonyms() {
         return super.getSynonyms();
@@ -220,36 +218,37 @@ public class IntactSource extends AbstractIntactCvTerm implements Source {
 
     @Transient
     public Collection<Annotation> getAnnotations() {
-        if (annotations == null){
+        if (annotations == null) {
             initialiseAnnotations();
         }
         return this.annotations;
     }
 
-    protected void initialiseAnnotations(){
+    protected void initialiseAnnotations() {
         this.annotations = new SourceAnnotationList(null);
 
         // initialise persistent annotations and content
-        if (this.persistentAnnotations != null){
-            for (Annotation annot : this.persistentAnnotations){
-                if (!processAddedAnnotations(annot)){
-                    this.annotations.addOnly(annot);
+        if (this.persistentAnnotations != null) {
+            for (Annotation annot : this.persistentAnnotations) {
+                if (annot != null) {
+                    if (!processAddedAnnotations(annot)) {
+                        this.annotations.addOnly(annot);
+                    }
                 }
             }
-        }
-        else{
+        } else {
             this.persistentAnnotations = new SourcePersistentAnnotationList(null);
         }
     }
 
 
-    @OneToMany( cascade = {CascadeType.ALL}, orphanRemoval = true, targetEntity = SourceAnnotation.class)
+    @OneToMany(cascade = {CascadeType.ALL}, orphanRemoval = true, targetEntity = SourceAnnotation.class)
     @JoinTable(
-            name="ia_institution2annot",
-            joinColumns = @JoinColumn( name="institution_ac"),
-            inverseJoinColumns = @JoinColumn( name="annotation_ac")
+            name = "ia_institution2annot",
+            joinColumns = @JoinColumn(name = "institution_ac"),
+            inverseJoinColumns = @JoinColumn(name = "annotation_ac")
     )
-    @Cascade( value = {org.hibernate.annotations.CascadeType.SAVE_UPDATE} )
+    @Cascade(value = {org.hibernate.annotations.CascadeType.SAVE_UPDATE})
     @Target(SourceAnnotation.class)
     /**
      * WARNING: The join table is for backward compatibility with intact-core.
@@ -268,12 +267,11 @@ public class IntactSource extends AbstractIntactCvTerm implements Source {
         return this.persistentAnnotations.getWrappedList();
     }
 
-    protected void setDbAnnotations(Collection<Annotation> annotations){
-        if (annotations instanceof SourcePersistentAnnotationList){
-            this.persistentAnnotations = (SourcePersistentAnnotationList)annotations;
+    protected void setDbAnnotations(Collection<Annotation> annotations) {
+        if (annotations instanceof SourcePersistentAnnotationList) {
+            this.persistentAnnotations = (SourcePersistentAnnotationList) annotations;
             resetFieldsLinkedToAnnotations();
-        }
-        else{
+        } else {
             this.persistentAnnotations = new SourcePersistentAnnotationList(annotations);
             resetFieldsLinkedToAnnotations();
         }
@@ -281,10 +279,9 @@ public class IntactSource extends AbstractIntactCvTerm implements Source {
 
     @Override
     protected boolean processAddedAnnotations(Annotation annot) {
-        if (url == null && AnnotationUtils.doesAnnotationHaveTopic(annot, Annotation.URL_MI, Annotation.URL)){
+        if (url == null && AnnotationUtils.doesAnnotationHaveTopic(annot, Annotation.URL_MI, Annotation.URL)) {
             url = annot;
-        }
-        else if (postalAddress == null && AnnotationUtils.doesAnnotationHaveTopic(annot, null, Annotation.POSTAL_ADDRESS)){
+        } else if (postalAddress == null && AnnotationUtils.doesAnnotationHaveTopic(annot, null, Annotation.POSTAL_ADDRESS)) {
             postalAddress = annot;
         }
         return false;
@@ -298,9 +295,9 @@ public class IntactSource extends AbstractIntactCvTerm implements Source {
     }
 
 
-    @OneToMany( cascade = {CascadeType.ALL}, orphanRemoval = true, targetEntity = SourceXref.class)
-    @JoinColumn(name="parent_ac", referencedColumnName="ac")
-    @Cascade( value = {org.hibernate.annotations.CascadeType.SAVE_UPDATE} )
+    @OneToMany(cascade = {CascadeType.ALL}, orphanRemoval = true, targetEntity = SourceXref.class)
+    @JoinColumn(name = "parent_ac", referencedColumnName = "ac")
+    @Cascade(value = {org.hibernate.annotations.CascadeType.SAVE_UPDATE})
     @Target(SourceXref.class)
     @LazyCollection(LazyCollectionOption.FALSE)
     /**
@@ -319,19 +316,18 @@ public class IntactSource extends AbstractIntactCvTerm implements Source {
 
     @Override
     protected void processAddedXrefEvent(Xref ref) {
-        if (this.bibRef == null && XrefUtils.doesXrefHaveQualifier(ref, Xref.PRIMARY_MI, Xref.PRIMARY)){
+        if (this.bibRef == null && XrefUtils.doesXrefHaveQualifier(ref, Xref.PRIMARY_MI, Xref.PRIMARY)) {
             this.bibRef = new IntactPublication(ref);
-        }
-        else if (XrefUtils.doesXrefHaveQualifier(ref, Xref.PRIMARY_MI, Xref.PRIMARY)){
+        } else if (XrefUtils.doesXrefHaveQualifier(ref, Xref.PRIMARY_MI, Xref.PRIMARY)) {
             this.bibRef.getIdentifiers().add(ref);
         }
     }
 
     @Override
     protected void processRemovedXrefEvent(Xref removed) {
-        if (this.bibRef != null && this.bibRef.getIdentifiers().contains(removed)){
+        if (this.bibRef != null && this.bibRef.getIdentifiers().contains(removed)) {
             this.bibRef.getIdentifiers().remove(removed);
-            if (this.bibRef.getIdentifiers().isEmpty()){
+            if (this.bibRef.getIdentifiers().isEmpty()) {
                 this.bibRef = null;
             }
         }
@@ -350,23 +346,23 @@ public class IntactSource extends AbstractIntactCvTerm implements Source {
     }
 
     @Transient
-    public boolean areXrefsInitialized(){
+    public boolean areXrefsInitialized() {
         return Hibernate.isInitialized(getDbXrefs());
     }
 
     @Transient
-    public boolean areSynonymsInitialized(){
+    public boolean areSynonymsInitialized() {
         return Hibernate.isInitialized(getSynonyms());
     }
 
     @Transient
-    public boolean areAnnotationsInitialized(){
+    public boolean areAnnotationsInitialized() {
         return Hibernate.isInitialized(getDbAnnotations());
     }
 
 
     private class SourceAnnotationList extends AbstractListHavingProperties<Annotation> {
-        public SourceAnnotationList(Collection<Annotation> annots){
+        public SourceAnnotationList(Collection<Annotation> annots) {
             super();
         }
 
@@ -379,10 +375,9 @@ public class IntactSource extends AbstractIntactCvTerm implements Source {
         @Override
         protected void processRemovedObjectEvent(Annotation removed) {
             persistentAnnotations.remove(removed);
-            if (url != null && url.equals(removed)){
+            if (url != null && url.equals(removed)) {
                 url = AnnotationUtils.collectFirstAnnotationWithTopic(getAnnotations(), Annotation.URL_MI, Annotation.URL);
-            }
-            else if (postalAddress != null && postalAddress.equals(removed)){
+            } else if (postalAddress != null && postalAddress.equals(removed)) {
                 postalAddress = AnnotationUtils.collectFirstAnnotationWithTopic(getAnnotations(), null, Annotation.POSTAL_ADDRESS);
             }
         }
@@ -397,7 +392,7 @@ public class IntactSource extends AbstractIntactCvTerm implements Source {
 
     protected class SourcePersistentAnnotationList extends AbstractCollectionWrapper<Annotation> {
 
-        public SourcePersistentAnnotationList(Collection<Annotation> persistentBag){
+        public SourcePersistentAnnotationList(Collection<Annotation> persistentBag) {
             super(persistentBag);
         }
 

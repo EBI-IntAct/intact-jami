@@ -5,22 +5,22 @@
  */
 package uk.ac.ebi.intact.jami.model;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.hibernate.HibernateException;
 import org.hibernate.MappingException;
 import org.hibernate.dialect.Dialect;
-import org.hibernate.engine.spi.SessionImplementor;
-import org.hibernate.id.IdentifierGeneratorHelper;
-import org.hibernate.id.IntegralDataTypeHolder;
-import org.hibernate.id.SequenceGenerator;
+import org.hibernate.engine.jdbc.env.spi.JdbcEnvironment;
+import org.hibernate.engine.spi.SharedSessionContractImplementor;
+import org.hibernate.id.enhanced.SequenceStyleGenerator;
 import org.hibernate.internal.util.config.ConfigurationHelper;
+import org.hibernate.service.ServiceRegistry;
 import org.hibernate.type.Type;
 import uk.ac.ebi.intact.jami.ApplicationContextProvider;
 import uk.ac.ebi.intact.jami.context.IntactContext;
 
-
 import java.io.Serializable;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.util.Properties;
 
 /**
@@ -28,67 +28,60 @@ import java.util.Properties;
  *
  * @author Marine Dumousseau (marine@ebi.ac.uk)
  */
-public class IntactAcGenerator extends SequenceGenerator {
+public class IntactAcGenerator extends SequenceStyleGenerator {
 
-    private static final Log log = LogFactory.getLog( IntactAcGenerator.class );
-
-    /**
-     * The sequence parameter
-     */
-    public static final String SEQUENCE = "sequence";
+    private String sequenceCallSyntax;
     public static final String INTACT_AC_SEQUENCE_NAME = "intact_ac";
 
-    /**
-     * @HACK if we don't override this method with the specific Long type, the generator cannot be initialized.
-     * @return
-     */
-    @Override
-    protected IntegralDataTypeHolder buildHolder() {
-        return IdentifierGeneratorHelper.getIntegralDataTypeHolder(Long.class);
-    }
 
     @Override
-    public void configure( Type type, Properties properties, Dialect dialect ) throws MappingException {
-        String defaultSeqValue = "hibernate_sequence";
-        String sequenceName = ConfigurationHelper.getString(SEQUENCE, properties, defaultSeqValue);
+    public void configure(Type type, Properties properties, ServiceRegistry serviceRegistry) throws MappingException {
+        final JdbcEnvironment jdbcEnvironment = serviceRegistry.getService(JdbcEnvironment.class);
+        final Dialect dialect = jdbcEnvironment.getDialect();
+
+        String sequenceName = ConfigurationHelper.getString(SEQUENCE_PARAM, properties, DEF_SEQUENCE_NAME);
 
         // use "intact_ac" only if the default sequence name is provided
-        if ( sequenceName.equals( defaultSeqValue ) ) {
+        if (sequenceName.equals(DEF_SEQUENCE_NAME)) {
             sequenceName = INTACT_AC_SEQUENCE_NAME;
-            properties.put( SEQUENCE, sequenceName );
+            properties.put(SEQUENCE_PARAM, sequenceName);
         }
-        super.configure( type, properties, dialect );
+
+        final String sequencePerEntitySuffix = ConfigurationHelper.getString(CONFIG_SEQUENCE_PER_ENTITY_SUFFIX, properties, DEF_SEQUENCE_SUFFIX);
+
+        final String defaultSequenceName = ConfigurationHelper.getBoolean(CONFIG_PREFER_SEQUENCE_PER_ENTITY, properties, false)
+                ? properties.getProperty(JPA_ENTITY_NAME) + sequencePerEntitySuffix
+                : DEF_SEQUENCE_NAME;
+
+        sequenceCallSyntax = dialect.getSequenceNextValString(ConfigurationHelper.getString(SEQUENCE_PARAM, properties, defaultSequenceName));
+        super.configure(type, properties, serviceRegistry);
     }
 
-    /**
-     * The ID is the concatenation of the prefix and a sequence provided by the database, separated
-     * by a dash.
-     *
-     * @param sessionImplementor a hibernate session implementor
-     * @param object             the object being persisted
-     *
-     * @return the new generated ID
-     *
-     * @throws org.hibernate.HibernateException if something goes wrong
-     */
     @Override
-    public Serializable generate( SessionImplementor sessionImplementor, Object object ) throws HibernateException {
-        String prefix="UNK";
+    public Serializable generate(SharedSessionContractImplementor sessionImplementor, Object object) throws HibernateException {
+        //TODO... Change the logic
+        String prefix = "UNK";
+        String stringId = null;
         IntactContext intactContext = ApplicationContextProvider.getBean("intactJamiContext");
         if (intactContext != null) {
             prefix = intactContext.getIntactConfiguration().getAcPrefix();
         }
 
-        String id = prefix + "-" + super.generate( sessionImplementor, object );
+        Connection connection = sessionImplementor.connection();
+        try {
+            try (PreparedStatement ps = connection.prepareStatement(sequenceCallSyntax)) {
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (rs.next()) {
+                        long id = rs.getLong(1);
+                        stringId = prefix + "-" + id;
+                    }
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
-        log.trace( "Assigning Id: " + id );
-
-        return id;
+        return stringId;
     }
 
-
-    @Override
-    public String getSequenceName() {
-        return INTACT_AC_SEQUENCE_NAME;
-    }
 }

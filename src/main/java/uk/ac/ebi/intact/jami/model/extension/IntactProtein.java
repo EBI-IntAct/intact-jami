@@ -16,7 +16,7 @@ import java.util.Collection;
 
 /**
  * Intact implementation of protein.
- *
+ * <p>
  * Only the crc64 is persisted as a checksum
  *
  * @author Marine Dumousseau (marine@ebi.ac.uk)
@@ -24,17 +24,17 @@ import java.util.Collection;
  * @since <pre>17/01/14</pre>
  */
 @Entity
-@DiscriminatorValue( "protein" )
+@DiscriminatorValue("protein")
 @Cacheable
 @Where(clause = "category = 'protein'")
-public class IntactProtein extends IntactPolymer implements Protein{
+public class IntactProtein extends IntactPolymer implements Protein {
 
     private transient Xref uniprotkb;
     private transient Xref refseq;
     private transient Alias geneName;
     private transient Checksum rogid;
 
-    protected IntactProtein(){
+    protected IntactProtein() {
         super();
     }
 
@@ -104,6 +104,7 @@ public class IntactProtein extends IntactPolymer implements Protein{
 
     /**
      * The first uniprokb if provided, then the first refseq identifier if provided, otherwise the first identifier in the list
+     *
      * @return
      */
     @Override
@@ -116,6 +117,7 @@ public class IntactProtein extends IntactPolymer implements Protein{
 
     /**
      * Overrides the method in IntactInteractor to give back protein preferred name.
+     *
      * @return
      */
     @Override
@@ -148,22 +150,20 @@ public class IntactProtein extends IntactPolymer implements Protein{
         Collection<Xref> proteinIdentifiers = getIdentifiers();
 
         // add new uniprotkb if not null
-        if (ac != null){
+        if (ac != null) {
             CvTerm uniprotkbDatabase = IntactUtils.createMIDatabase(Xref.UNIPROTKB, Xref.UNIPROTKB_MI);
             CvTerm identityQualifier = IntactUtils.createMIQualifier(Xref.IDENTITY, Xref.IDENTITY_MI);
             // first remove old uniprotkb if not null
 
-            if (this.uniprotkb != null && !ac.equals(this.uniprotkb.getId())){
-                if (this.uniprotkb instanceof AbstractIntactXref){
+            if (this.uniprotkb != null && !ac.equals(this.uniprotkb.getId())) {
+                if (this.uniprotkb instanceof AbstractIntactXref) {
                     ((AbstractIntactXref) this.uniprotkb).setId(ac);
-                }
-                else{
+                } else {
                     proteinIdentifiers.remove(this.uniprotkb);
                     this.uniprotkb = new InteractorXref(uniprotkbDatabase, ac, identityQualifier);
                     proteinIdentifiers.add(this.uniprotkb);
                 }
-            }
-            else if (this.uniprotkb == null){
+            } else if (this.uniprotkb == null) {
                 this.uniprotkb = new InteractorXref(uniprotkbDatabase, ac, identityQualifier);
                 proteinIdentifiers.add(this.uniprotkb);
             }
@@ -186,21 +186,19 @@ public class IntactProtein extends IntactPolymer implements Protein{
         Collection<Xref> proteinIdentifiers = getIdentifiers();
 
         // add new refseq if not null
-        if (ac != null){
+        if (ac != null) {
             CvTerm refseqDatabase = IntactUtils.createMIDatabase(Xref.REFSEQ, Xref.REFSEQ_MI);
             CvTerm identityQualifier = IntactUtils.createMIQualifier(Xref.IDENTITY, Xref.IDENTITY_MI);
             // first remove old refseq if not null
-            if (this.refseq != null && !ac.equals(this.refseq.getId())){
-                if (this.refseq instanceof AbstractIntactXref){
+            if (this.refseq != null && !ac.equals(this.refseq.getId())) {
+                if (this.refseq instanceof AbstractIntactXref) {
                     ((AbstractIntactXref) this.refseq).setId(ac);
-                }
-                else{
+                } else {
                     proteinIdentifiers.remove(this.refseq);
                     this.refseq = new InteractorXref(refseqDatabase, ac, identityQualifier);
                     proteinIdentifiers.add(this.refseq);
                 }
-            }
-            else if (this.refseq == null){
+            } else if (this.refseq == null) {
                 this.refseq = new InteractorXref(refseqDatabase, ac, identityQualifier);
                 proteinIdentifiers.add(this.refseq);
             }
@@ -223,20 +221,18 @@ public class IntactProtein extends IntactPolymer implements Protein{
         Collection<Alias> proteinAliases = getAliases();
 
         // add new gene name if not null
-        if (name != null){
+        if (name != null) {
             CvTerm geneNameType = IntactUtils.createMIAliasType(Alias.GENE_NAME, Alias.GENE_NAME_MI);
             // first remove old gene name if not null
-            if (this.geneName != null && !name.equals(this.geneName.getName())){
-                if (this.geneName instanceof AbstractIntactAlias){
+            if (this.geneName != null && !name.equals(this.geneName.getName())) {
+                if (this.geneName instanceof AbstractIntactAlias) {
                     ((AbstractIntactAlias) this.geneName).setName(name);
-                }
-                else{
+                } else {
                     proteinAliases.remove(this.geneName);
                     this.geneName = new InteractorAlias(geneNameType, name);
                     proteinAliases.add(this.geneName);
                 }
-            }
-            else if (this.geneName == null){
+            } else if (this.geneName == null) {
                 this.geneName = new InteractorAlias(geneNameType, name);
                 proteinAliases.add(this.geneName);
             }
@@ -258,10 +254,11 @@ public class IntactProtein extends IntactPolymer implements Protein{
     public void setRogid(String rogid) {
         Collection<Checksum> proteinChecksums = getChecksums();
 
-        if (rogid != null){
+        if (rogid != null) {
             CvTerm rogidMethod = IntactUtils.createMITopic(Checksum.ROGID, null);
+
             // first remove old rogid
-            if (this.rogid != null){
+            if (this.rogid != null) {
                 proteinChecksums.remove(this.rogid);
             }
             this.rogid = new DefaultChecksum(rogidMethod, rogid);
@@ -308,7 +305,7 @@ public class IntactProtein extends IntactPolymer implements Protein{
     @Override
     protected void processAddedChecksumEvent(Checksum added) {
         super.processAddedChecksumEvent(added);
-        if (rogid == null && ChecksumUtils.doesChecksumHaveMethod(added, Checksum.ROGID_MI, Checksum.ROGID)){
+        if (rogid == null && ChecksumUtils.doesChecksumHaveMethod(added, Checksum.ROGID_MI, Checksum.ROGID)) {
             // the rogid is not set, we can set the rogid
             rogid = added;
         }
@@ -317,7 +314,7 @@ public class IntactProtein extends IntactPolymer implements Protein{
     @Override
     protected void processRemovedChecksumEvent(Checksum removed) {
         super.processRemovedChecksumEvent(removed);
-        if (rogid != null && rogid.equals(removed)){
+        if (rogid != null && rogid.equals(removed)) {
             rogid = ChecksumUtils.collectFirstChecksumWithMethod(getChecksums(), Checksum.ROGID_MI, Checksum.ROGID);
         }
     }
@@ -331,37 +328,35 @@ public class IntactProtein extends IntactPolymer implements Protein{
     @Override
     protected void processAddedIdentifierEvent(Xref added) {
         // the added identifier is uniprotkb and it is not the current uniprotkb identifier
-        if (uniprotkb != added && XrefUtils.isXrefFromDatabase(added, Xref.UNIPROTKB_MI, Xref.UNIPROTKB)){
+        if (uniprotkb != added && XrefUtils.isXrefFromDatabase(added, Xref.UNIPROTKB_MI, Xref.UNIPROTKB)) {
             // the current uniprotkb identifier is not identity, we may want to set uniprotkb Identifier
-            if (!XrefUtils.doesXrefHaveQualifier(uniprotkb, Xref.IDENTITY_MI, Xref.IDENTITY)){
+            if (!XrefUtils.doesXrefHaveQualifier(uniprotkb, Xref.IDENTITY_MI, Xref.IDENTITY)) {
                 // the uniprotkb identifier is not set, we can set the uniprotkb identifier
-                if (uniprotkb == null){
+                if (uniprotkb == null) {
                     uniprotkb = added;
-                }
-                else if (XrefUtils.doesXrefHaveQualifier(added, Xref.IDENTITY_MI, Xref.IDENTITY)){
+                } else if (XrefUtils.doesXrefHaveQualifier(added, Xref.IDENTITY_MI, Xref.IDENTITY)) {
                     uniprotkb = added;
                 }
                 // the added xref is secondary object and the current uniprotkb identifier is not a secondary object, we reset uniprotkb identifier
                 else if (!XrefUtils.doesXrefHaveQualifier(uniprotkb, Xref.SECONDARY_MI, Xref.SECONDARY)
-                        && XrefUtils.doesXrefHaveQualifier(added, Xref.SECONDARY_MI, Xref.SECONDARY)){
+                        && XrefUtils.doesXrefHaveQualifier(added, Xref.SECONDARY_MI, Xref.SECONDARY)) {
                     uniprotkb = added;
                 }
             }
         }
         // the added identifier is refseq id and it is not the current refseq id
-        else if (refseq != added && XrefUtils.isXrefFromDatabase(added, Xref.REFSEQ_MI, Xref.REFSEQ)){
+        else if (refseq != added && XrefUtils.isXrefFromDatabase(added, Xref.REFSEQ_MI, Xref.REFSEQ)) {
             // the current refseq id is not identity, we may want to set refseq id
-            if (!XrefUtils.doesXrefHaveQualifier(refseq, Xref.IDENTITY_MI, Xref.IDENTITY)){
+            if (!XrefUtils.doesXrefHaveQualifier(refseq, Xref.IDENTITY_MI, Xref.IDENTITY)) {
                 // the refseq id is not set, we can set the refseq id
-                if (refseq == null){
+                if (refseq == null) {
                     refseq = added;
-                }
-                else if (XrefUtils.doesXrefHaveQualifier(added, Xref.IDENTITY_MI, Xref.IDENTITY)){
+                } else if (XrefUtils.doesXrefHaveQualifier(added, Xref.IDENTITY_MI, Xref.IDENTITY)) {
                     refseq = added;
                 }
                 // the added xref is secondary object and the current refseq id is not a secondary object, we reset refseq id
                 else if (!XrefUtils.doesXrefHaveQualifier(refseq, Xref.SECONDARY_MI, Xref.SECONDARY)
-                        && XrefUtils.doesXrefHaveQualifier(added, Xref.SECONDARY_MI, Xref.SECONDARY)){
+                        && XrefUtils.doesXrefHaveQualifier(added, Xref.SECONDARY_MI, Xref.SECONDARY)) {
                     refseq = added;
                 }
             }
@@ -370,10 +365,9 @@ public class IntactProtein extends IntactPolymer implements Protein{
 
     @Override
     protected void processRemovedIdentifierEvent(Xref removed) {
-        if (uniprotkb != null && uniprotkb.equals(removed)){
+        if (uniprotkb != null && uniprotkb.equals(removed)) {
             uniprotkb = XrefUtils.collectFirstIdentifierWithDatabase(getIdentifiers(), Xref.UNIPROTKB_MI, Xref.UNIPROTKB);
-        }
-        else if (refseq != null && refseq.equals(removed)){
+        } else if (refseq != null && refseq.equals(removed)) {
             refseq = XrefUtils.collectFirstIdentifierWithDatabase(getIdentifiers(), Xref.REFSEQ_MI, Xref.REFSEQ);
         }
     }
@@ -407,14 +401,14 @@ public class IntactProtein extends IntactPolymer implements Protein{
     @Override
     protected void processAddedAlias(Alias added) {
         // the added alias is gene name and it is not the current gene name
-        if (geneName == null && AliasUtils.doesAliasHaveType(added, Alias.GENE_NAME_MI, Alias.GENE_NAME)){
+        if (geneName == null && AliasUtils.doesAliasHaveType(added, Alias.GENE_NAME_MI, Alias.GENE_NAME)) {
             geneName = added;
         }
     }
 
     @Override
     protected void processRemovedAlias(Alias removed) {
-        if (geneName != null && geneName.equals(removed)){
+        if (geneName != null && geneName.equals(removed)) {
             geneName = AliasUtils.collectFirstAliasWithType(getAliases(), Alias.GENE_NAME_MI, Alias.GENE_NAME);
         }
     }

@@ -11,6 +11,7 @@ import uk.ac.ebi.intact.jami.utils.IntactUtils;
 import javax.persistence.*;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.Index;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
@@ -37,7 +38,9 @@ import java.util.Collection;
  * @since <pre>07/01/14</pre>
  */
 @Entity
-@Table(name = "ia_controlledvocab", uniqueConstraints = {@UniqueConstraint(columnNames = {"objclass", "shortlabel"})})
+@Table(name = "ia_controlledvocab", indexes = {@Index(columnList = ("identifier"), name = ("cvobject_id_idx"))},
+        uniqueConstraints = {@UniqueConstraint(columnNames = {"objclass", "shortlabel"})})
+
 @Cacheable
 public class IntactCvTerm extends AbstractIntactCvTerm implements OntologyTerm {
 
@@ -152,31 +155,32 @@ public class IntactCvTerm extends AbstractIntactCvTerm implements OntologyTerm {
 
     @Transient
     public Collection<Annotation> getAnnotations() {
-        if (annotations == null){
+        if (annotations == null) {
             initialiseAnnotations();
         }
         return this.annotations;
     }
 
-    protected void initialiseAnnotations(){
+    protected void initialiseAnnotations() {
         this.annotations = new CvTermAnnotationList();
         this.definition = null;
         // initialise persistent annotations and content
-        if (this.persistentAnnotations != null){
-            for (Annotation annot : this.persistentAnnotations){
-                if (!processAddedAnnotations(annot)){
-                    this.annotations.addOnly(annot);
+        if (this.persistentAnnotations != null) {
+            for (Annotation annot : this.persistentAnnotations) {
+                if (annot != null) {
+                    if (!processAddedAnnotations(annot)) {
+                        this.annotations.addOnly(annot);
+                    }
                 }
             }
-        }
-        else{
+        } else {
             this.persistentAnnotations = new CvTermPersistentAnnotationList(null);
         }
     }
 
     @Override
     protected boolean processAddedAnnotations(Annotation annot) {
-        if (annot.getTopic().getShortName().equalsIgnoreCase("definition")  && annot.getValue() != null) {
+        if (annot.getTopic().getShortName().equalsIgnoreCase("definition") && annot.getValue() != null) {
             this.definition = annot;
             return true;
         }
@@ -209,12 +213,11 @@ public class IntactCvTerm extends AbstractIntactCvTerm implements OntologyTerm {
         return this.persistentAnnotations.getWrappedList();
     }
 
-    protected void setDbAnnotations(Collection<Annotation> annotations){
-        if (annotations instanceof CvTermPersistentAnnotationList){
-            this.persistentAnnotations = (CvTermPersistentAnnotationList)annotations;
+    protected void setDbAnnotations(Collection<Annotation> annotations) {
+        if (annotations instanceof CvTermPersistentAnnotationList) {
+            this.persistentAnnotations = (CvTermPersistentAnnotationList) annotations;
             resetFieldsLinkedToAnnotations();
-        }
-        else{
+        } else {
             this.persistentAnnotations = new CvTermPersistentAnnotationList(annotations);
             resetFieldsLinkedToAnnotations();
         }
@@ -279,8 +282,8 @@ public class IntactCvTerm extends AbstractIntactCvTerm implements OntologyTerm {
     @ManyToMany(targetEntity = IntactCvTerm.class)
     @JoinTable(
             name = "ia_cv2cv",
-            joinColumns = {@JoinColumn( name = "child_ac", referencedColumnName = "ac" )},
-            inverseJoinColumns = {@JoinColumn( name = "parent_ac", referencedColumnName = "ac" )}
+            joinColumns = {@JoinColumn(name = "child_ac", referencedColumnName = "ac")},
+            inverseJoinColumns = {@JoinColumn(name = "parent_ac", referencedColumnName = "ac")}
     )
     @Target(IntactCvTerm.class)
     public Collection<OntologyTerm> getParents() {
@@ -310,8 +313,6 @@ public class IntactCvTerm extends AbstractIntactCvTerm implements OntologyTerm {
     }
 
 
-
-
     @OneToMany(cascade = {CascadeType.ALL}, orphanRemoval = true, targetEntity = CvTermXref.class)
     @Cascade(value = {org.hibernate.annotations.CascadeType.SAVE_UPDATE})
     @JoinColumn(name = "parent_ac", referencedColumnName = "ac")
@@ -336,7 +337,6 @@ public class IntactCvTerm extends AbstractIntactCvTerm implements OntologyTerm {
      */
     @Column(name = "identifier", length = 30)
     @Size(max = 30)
-    @Index(name = "cvobject_id_idx")
     @Deprecated
     protected String getIdentifier() {
         return this.identifier;
@@ -396,7 +396,7 @@ public class IntactCvTerm extends AbstractIntactCvTerm implements OntologyTerm {
     }
 
     private class CvTermAnnotationList extends AbstractListHavingProperties<Annotation> {
-        public CvTermAnnotationList(){
+        public CvTermAnnotationList() {
             super();
         }
 
@@ -406,7 +406,7 @@ public class IntactCvTerm extends AbstractIntactCvTerm implements OntologyTerm {
             // We remove the definition from the list of annotations because it is planned in the future to be persisted
             // as a new column in the cv table. To have the code ready it have to be stored in the definition field
             //(not as annotation). isNegative in the interaction is a similar case.
-            if (added.getTopic().getShortName().equalsIgnoreCase("definition")){
+            if (added.getTopic().getShortName().equalsIgnoreCase("definition")) {
                 annotations.remove(added);
                 definition = added;
             }
@@ -430,7 +430,7 @@ public class IntactCvTerm extends AbstractIntactCvTerm implements OntologyTerm {
 
     protected class CvTermPersistentAnnotationList extends AbstractCollectionWrapper<Annotation> {
 
-        public CvTermPersistentAnnotationList(Collection<Annotation> persistentBag){
+        public CvTermPersistentAnnotationList(Collection<Annotation> persistentBag) {
             super(persistentBag);
         }
 
