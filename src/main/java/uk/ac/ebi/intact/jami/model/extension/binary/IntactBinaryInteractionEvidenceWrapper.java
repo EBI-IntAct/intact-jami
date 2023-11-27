@@ -279,4 +279,9 @@ public class IntactBinaryInteractionEvidenceWrapper implements BinaryInteraction
     public void setCausalRegulatoryMechanism(CvTerm causalRegulatoryMechanism) {
         //TODO
     }
+
+    @Override
+    public Confidence getMiScore() {
+        return null;
+    }
 }

@@ -300,4 +300,9 @@ public class IntactModelledBinaryInteractionWrapper implements ModelledBinaryInt
     public void setCausalRegulatoryMechanism(CvTerm causalRegulatoryMechanism) {
         //TODO
     }
+
+    @Override
+    public Confidence getMiScore() {
+        return null;
+    }
 }
