@@ -7,7 +7,6 @@ import psidev.psi.mi.jami.model.Xref;
 import psidev.psi.mi.jami.utils.comparator.range.ResultingSequenceComparator;
 
 import javax.persistence.Column;
-import javax.persistence.Lob;
 import javax.persistence.MappedSuperclass;
 import javax.persistence.Transient;
 import java.util.ArrayList;
@@ -37,15 +36,13 @@ public abstract class AbstractIntactResultingSequence implements ResultingSequen
         this.newSequence = newSequence;
     }
 
-    @Lob
-    @Type(type = "org.hibernate.type.MaterializedClobType")
+    @Type(type = "org.hibernate.type.TextType")
     @Column(name = "resulting_sequence")
     public String getNewSequence() {
         return newSequence;
     }
 
-    @Lob
-    @Type(type = "org.hibernate.type.MaterializedClobType")
+    @Type(type = "org.hibernate.type.TextType")
     @Column(name = "full_sequence")
     public String getOriginalSequence() {
         return originalSequence;
