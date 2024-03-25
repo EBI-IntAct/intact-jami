@@ -40,7 +40,7 @@ public class ComplexAcGenerator extends SequenceStyleGenerator {
     // create public synonym COMPLEX_AC for INTACT.COMPLEX_AC;
     // grant select,delete,insert,update on IA_COMPLEX_AC to REPLACE_SCHEMA_USER;
     // create public synonym IA_COMPLEX_AC for INTACT.IA_COMPLEX_AC;
-    public static final String COMPLEX_AC_SEQUENCE_NAME = "complex_ac";
+    public static final String COMPLEX_AC_SEQUENCE_NAME = "intact.complex_ac";
 
     @Override
     public void configure(Type type, Properties properties, ServiceRegistry serviceRegistry) throws MappingException {
