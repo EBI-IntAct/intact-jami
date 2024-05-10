@@ -606,13 +606,7 @@ public abstract class AbstractIntactDbSynchronizer<I, T extends Auditable> imple
         T newObject;
         try {
             newObject = instantiateNewPersistentInstance(object, this.intactClass);
-        } catch (InstantiationException e) {
-            throw new SynchronizerException("Impossible to create a new instance of type "+this.intactClass, e);
-        } catch (IllegalAccessException e) {
-            throw new SynchronizerException("Impossible to create a new instance of type "+this.intactClass, e);
-        } catch (InvocationTargetException e) {
-            throw new SynchronizerException("Impossible to create a new instance of type "+this.intactClass, e);
-        } catch (NoSuchMethodException e) {
+        } catch (InstantiationException|IllegalAccessException|InvocationTargetException|NoSuchMethodException e) {
             throw new SynchronizerException("Impossible to create a new instance of type "+this.intactClass, e);
         }
         return newObject;

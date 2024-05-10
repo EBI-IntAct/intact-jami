@@ -236,11 +236,7 @@ public abstract class AbstractDbParticipantEnricherListener<T extends Participan
         try {
             t.setBiologicalRole(
                     context.getBiologicalRoleSynchronizer().synchronize(t.getBiologicalRole(), true));
-        } catch (FinderException e) {
-            throw new IntactMergerException("Cannot synchronize biological role", e);
-        } catch (PersisterException e) {
-            throw new IntactMergerException("Cannot synchronize biological role", e);
-        } catch (SynchronizerException e) {
+        } catch (FinderException|PersisterException|SynchronizerException e) {
             throw new IntactMergerException("Cannot synchronize biological role", e);
         }
     }
@@ -292,11 +288,7 @@ public abstract class AbstractDbParticipantEnricherListener<T extends Participan
         try {
             t.setInteractor(
                     context.getInteractorSynchronizer().synchronize(t.getInteractor(), true));
-        } catch (FinderException e) {
-            throw new IntactMergerException("Cannot synchronize interactor", e);
-        } catch (PersisterException e) {
-            throw new IntactMergerException("Cannot synchronize interactor", e);
-        } catch (SynchronizerException e) {
+        } catch (FinderException|PersisterException|SynchronizerException e) {
             throw new IntactMergerException("Cannot synchronize interactor", e);
         }
     }

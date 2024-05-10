@@ -40,11 +40,7 @@ public class IntactDbMergerIgnoringPersistentObject<I,T extends Auditable> exten
             try {
                 this.dbSynchronizer.synchronizeProperties(obj1);
                 return obj1;
-            }  catch (FinderException e) {
-                throw new IntactMergerException("Cannot synchronize local object", e);
-            } catch (PersisterException e) {
-                throw new IntactMergerException("Cannot synchronize local object", e);
-            } catch (SynchronizerException e) {
+            }  catch (FinderException|PersisterException|SynchronizerException e) {
                 throw new IntactMergerException("Cannot synchronize local object", e);
             }
         }
