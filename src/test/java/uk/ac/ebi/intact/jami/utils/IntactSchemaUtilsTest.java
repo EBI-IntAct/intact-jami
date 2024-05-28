@@ -37,11 +37,11 @@ public class IntactSchemaUtilsTest {
     DataSource dataSource;
 
     @Test
-    public void testGenerateCreateSchemaDDLForOracle() {
-        String[] strings = IntactSchemaUtils.generateCreateSchemaDDLForOracle(dataSource);
+    public void testGenerateCreateSchemaDDLForPostgres() {
+        String[] strings = IntactSchemaUtils.generateCreateSchemaDDLForPostgreSQL(dataSource);
 
         Assert.assertEquals(261, strings.length);
-        Assert.assertEquals(261, IntactSchemaUtils.generateCreateSchemaDDLForPostgreSQL(dataSource).length);
+        Assert.assertEquals(261, IntactSchemaUtils.generateCreateSchemaDDLForOracle(dataSource).length);
         Assert.assertEquals(261, IntactSchemaUtils.generateCreateSchemaDDLForHSQL(dataSource).length);
         Assert.assertEquals(261, IntactSchemaUtils.generateCreateSchemaDDLForH2(dataSource).length);
 

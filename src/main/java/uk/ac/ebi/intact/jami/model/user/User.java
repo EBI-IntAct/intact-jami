@@ -177,6 +177,7 @@ public class User extends AbstractIntactPrimaryObject {
         return false;
     }
 
+    @Type(type = "org.hibernate.type.NumericBooleanType")
     public boolean isDisabled() {
         return disabled;
     }

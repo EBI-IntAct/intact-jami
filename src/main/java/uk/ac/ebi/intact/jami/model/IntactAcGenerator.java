@@ -31,7 +31,7 @@ import java.util.Properties;
 public class IntactAcGenerator extends SequenceStyleGenerator {
 
     private String sequenceCallSyntax;
-    public static final String INTACT_AC_SEQUENCE_NAME = "intact_ac";
+    public static final String INTACT_AC_SEQUENCE_NAME = "intact.intact_ac";
 
 
     @Override
