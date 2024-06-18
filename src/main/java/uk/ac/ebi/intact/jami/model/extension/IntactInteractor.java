@@ -219,7 +219,10 @@ public class IntactInteractor extends AbstractIntactPrimaryObject implements Int
      */
     @Transient
     public Xref getPreferredIdentifier() {
-        return !getIdentifiers().isEmpty() ? getIdentifiers().iterator().next() : null;
+        return getIdentifiers().stream()
+                .filter(id -> XrefUtils.doesXrefHaveQualifier(id, Xref.IDENTITY_MI, Xref.IDENTITY))
+                .findFirst()
+                .orElse(!getIdentifiers().isEmpty() ? getIdentifiers().iterator().next() : null);
     }
 
     /**
