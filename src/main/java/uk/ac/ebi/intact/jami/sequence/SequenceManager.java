@@ -126,7 +126,7 @@ public class SequenceManager {
      * @param sequenceName The sequence name to query
      * @return The next value for that sequence; null if the sequence does not exist;
      */
-    @Transactional(readOnly = true, value = "jamiTransactionManager")
+    @Transactional(value = "jamiTransactionManager")
     public Long getNextValueForSequence(String sequenceName ) {
         if ( !sequenceExists(sequenceName ) ) {
             log.error( "Sequence does not exist: " + sequenceName +
