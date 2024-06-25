@@ -45,6 +45,7 @@ public class InteractorPoolSynchronizer extends InteractorSynchronizerTemplate<I
         intactEntity.setLocalUserContext(getContext().getUserContext());
         if (needToSynchronize) {
             synchronizePartiallyInitialisedProperties(object, intactEntity);
+            needToSynchronize = false;
         }
         return super.processCachedObject(object, intactEntity, mode, needToSynchronize);
     }
@@ -60,6 +61,7 @@ public class InteractorPoolSynchronizer extends InteractorSynchronizerTemplate<I
         newObject.setLocalUserContext(getContext().getUserContext());
         if (needToSynchronizeProperties) {
             synchronizePartiallyInitialisedProperties(object, newObject);
+            needToSynchronizeProperties = false;
         }
         return super.processTransientObject(object, persist, mode, newObject, needToSynchronizeProperties);
     }
