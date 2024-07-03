@@ -680,6 +680,21 @@ public class ComplexDaoImpl extends InteractorDaoImpl<Complex,IntactComplex> imp
     }
 
     @Override
+    public Collection<IntactComplex> getComplexesInvolvingInteractors(String databaseId, Collection<String> interactorIds) {
+        Query query = getEntityManager().createQuery("select distinct c " +
+                "from IntactComplex c " +
+                "join c.participants as p " +
+                "join p.interactor as i " +
+                "join i.dbXrefs as xref " +
+                "join xref.database as database " +
+                "where database.identifier = :db " +
+                "and xref.id in (:ids) ");
+        query.setParameter("db", databaseId);
+        query.setParameter("ids", interactorIds);
+        return query.getResultList();
+    }
+
+    @Override
     public int countComplexesByOrganism(String organismAc) {
         Query query = getEntityManager().createQuery("select count (distinct i.ac) from IntactComplex i " +
                 "join i.organism o " +

@@ -79,5 +79,7 @@ public interface ComplexDao extends InteractorDao<IntactComplex>{
 
     public int countComplexesInvolvingInteractor(String ac);
 
+    public Collection<IntactComplex> getComplexesInvolvingInteractors(String databaseId, Collection<String> interactorIds);
+
     public int countComplexesByOrganism(String organismAc);
 }
