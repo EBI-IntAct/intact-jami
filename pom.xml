@@ -27,7 +27,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <el.jsr341.version>2.2.4</el.jsr341.version>
         <spring.version>4.3.30.RELEASE</spring.version>
-        <jami.version>3.5.2-SNAPSHOT</jami.version>
+        <jami.version>3.6.0-SNAPSHOT</jami.version>
     </properties>
 
     <build>

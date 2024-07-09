@@ -235,7 +235,7 @@ public class ComplexSynchronizer extends InteractorSynchronizerTemplate<Complex,
         if (term.getComparableParticipants() != null && !term.getComparableParticipants().isEmpty()) {
             List<String> proteinIdList =
                     term.getComparableParticipants().stream()
-                            .map(ModelledComparableParticipant::getProteinId)
+                            .map(ModelledComparableParticipant::getInteractorId)
                             .collect(Collectors.toList());
 
 
