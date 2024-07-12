@@ -82,6 +82,8 @@ public class IntactComplex extends IntactInteractor implements Complex, Releasab
     private transient Annotation correctionComment;
     private transient Xref complexAcXref;
 
+    private boolean isManuallyCurated = true;
+
     protected IntactComplex() {
         super();
     }
@@ -1107,6 +1109,15 @@ public class IntactComplex extends IntactInteractor implements Complex, Releasab
         ois.defaultReadObject();
         // read default status
         setCvStatus((CvTerm) ois.readObject());
+    }
+
+    @Transient
+    public boolean isManuallyCurated() {
+        return isManuallyCurated;
+    }
+
+    public void setManuallyCurated(boolean manuallyCurated) {
+        isManuallyCurated = manuallyCurated;
     }
 
     private class ComplexChecksumList extends AbstractListHavingProperties<Checksum> {

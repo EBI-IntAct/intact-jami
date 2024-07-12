@@ -332,6 +332,11 @@ public class ComplexSynchronizer extends InteractorSynchronizerTemplate<Complex,
                     cvXref = enableSynchronization ?
                             getContext().getComplexGOXrefSynchronizer().synchronize(xref, false) :
                             getContext().getComplexGOXrefSynchronizer().convertToPersistentObject(xref);
+                } else if (CvTermUtils.isCvTerm(xref.getDatabase(), ComplexHumapXref.HUMAP_DATABASE_MI, ComplexHumapXref.HUMAP_DATABASE)) {
+                    // do not persist or merge xrefs because of cascades
+                    cvXref = enableSynchronization ?
+                            getContext().getComplexHumapXrefSynchronizer().synchronize(xref, false) :
+                            getContext().getComplexHumapXrefSynchronizer().convertToPersistentObject(xref);
                 } else {
                     // do not persist or merge xrefs because of cascades
                     cvXref = enableSynchronization ?
@@ -395,9 +400,12 @@ public class ComplexSynchronizer extends InteractorSynchronizerTemplate<Complex,
     @Override
     protected void prepareAnnotations(IntactComplex intactInteractor, boolean enableSynchronization) throws FinderException, PersisterException, SynchronizerException {
         if (intactInteractor.areAnnotationsInitialized()) {
-            if (AnnotationUtils.collectFirstAnnotationWithTopic(intactInteractor.getAnnotations(), null, "curated-complex") == null) {
+            // TODO: update when we have a proper flag to check curated vs predicted complexes
+            if (intactInteractor.isManuallyCurated() &&
+                    AnnotationUtils.collectFirstAnnotationWithTopic(intactInteractor.getAnnotations(), null, "curated-complex") == null) {
                 intactInteractor.getAnnotations().add(new InteractorAnnotation(IntactUtils.createMITopic("curated-complex", null)));
             }
+            // TODO: should we add an annotation for predicted complexes?
         }
         super.prepareAnnotations(intactInteractor, enableSynchronization);
     }

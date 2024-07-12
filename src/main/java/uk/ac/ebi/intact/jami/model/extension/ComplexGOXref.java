@@ -1,6 +1,5 @@
 package uk.ac.ebi.intact.jami.model.extension;
 
-import org.hibernate.annotations.Target;
 import psidev.psi.mi.jami.model.CvTerm;
 import psidev.psi.mi.jami.model.Xref;
 import psidev.psi.mi.jami.utils.CvTermUtils;
@@ -18,9 +17,8 @@ import javax.validation.constraints.Size;
  */
 @Entity
 @DiscriminatorValue("go")
-public class ComplexGOXref extends InteractorXref{
+public class ComplexGOXref extends AbstractXrefWithEvidenceType {
 
-    private CvTerm evidenceType;
     private String pubmed;
 
     protected ComplexGOXref() {
@@ -49,18 +47,6 @@ public class ComplexGOXref extends InteractorXref{
         }
         super.setDatabase(cvDatabase);
     }
-
-    @ManyToOne(targetEntity = IntactCvTerm.class)
-    @JoinColumn(name = "evidencetype_ac")
-    @Target(IntactCvTerm.class)
-    public CvTerm getEvidenceType() {
-        return evidenceType;
-    }
-
-    public void setEvidenceType(CvTerm evidenceType) {
-        this.evidenceType = evidenceType;
-    }
-
 
     @Column(name = "pubmed")
     @Size(max = IntactUtils.MAX_ID_LEN)
