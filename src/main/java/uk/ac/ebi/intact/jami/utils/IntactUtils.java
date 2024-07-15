@@ -980,11 +980,11 @@ public class IntactUtils {
             // initialise qualifier
             initialiseCvTerm((IntactCvTerm) xref.getQualifier());
         }
-        if (xref instanceof AbstractXrefWithEvidenceType) {
-            AbstractXrefWithEvidenceType xrefWithEvidenceType = (AbstractXrefWithEvidenceType) xref;
-            if (xrefWithEvidenceType.getEvidenceType() != null) {
+        if (xref instanceof ComplexGOXref) {
+            ComplexGOXref goRef = (ComplexGOXref) xref;
+            if (goRef.getEvidenceType() != null) {
                 // initialise evidence type
-                initialiseCvTerm((IntactCvTerm) xrefWithEvidenceType.getEvidenceType());
+                initialiseCvTerm((IntactCvTerm) goRef.getEvidenceType());
             }
         }
     }

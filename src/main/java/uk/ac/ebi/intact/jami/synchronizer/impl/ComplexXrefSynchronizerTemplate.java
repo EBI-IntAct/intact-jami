@@ -5,7 +5,7 @@ import org.apache.commons.logging.LogFactory;
 import psidev.psi.mi.jami.model.CvTerm;
 import psidev.psi.mi.jami.model.Xref;
 import uk.ac.ebi.intact.jami.context.SynchronizerContext;
-import uk.ac.ebi.intact.jami.model.extension.AbstractXrefWithEvidenceType;
+import uk.ac.ebi.intact.jami.model.extension.ComplexGOXref;
 import uk.ac.ebi.intact.jami.model.extension.InteractorXref;
 import uk.ac.ebi.intact.jami.synchronizer.FinderException;
 import uk.ac.ebi.intact.jami.synchronizer.PersisterException;
@@ -49,13 +49,13 @@ public class ComplexXrefSynchronizerTemplate extends XrefSynchronizerTemplate<In
 
     public void synchronizeProperties(InteractorXref object) throws FinderException, PersisterException, SynchronizerException {
         super.synchronizeProperties(object);
-        if (object instanceof AbstractXrefWithEvidenceType) {
+        if (object instanceof ComplexGOXref) {
             // prepare ECO code
-            prepareEvidenceType((AbstractXrefWithEvidenceType) object, true);
+            prepareEvidenceType((ComplexGOXref) object, true);
         }
     }
 
-    protected void prepareEvidenceType(AbstractXrefWithEvidenceType object, boolean enableSynchronization) throws FinderException, PersisterException, SynchronizerException {
+    protected void prepareEvidenceType(ComplexGOXref object, boolean enableSynchronization) throws FinderException, PersisterException, SynchronizerException {
         if (object.getEvidenceType() != null) {
             CvTerm qualifier = object.getEvidenceType();
             object.setEvidenceType(enableSynchronization ?
@@ -72,9 +72,9 @@ public class ComplexXrefSynchronizerTemplate extends XrefSynchronizerTemplate<In
     @Override
     protected void convertPersistableProperties(InteractorXref object) throws SynchronizerException, PersisterException, FinderException {
         super.convertPersistableProperties(object);
-        if (object instanceof AbstractXrefWithEvidenceType) {
+        if (object instanceof ComplexGOXref) {
             // prepare ECO code
-            prepareEvidenceType((AbstractXrefWithEvidenceType) object, false);
+            prepareEvidenceType((ComplexGOXref) object, false);
         }
     }
 }

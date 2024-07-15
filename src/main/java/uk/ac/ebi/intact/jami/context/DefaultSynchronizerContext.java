@@ -151,9 +151,6 @@ public class DefaultSynchronizerContext implements SynchronizerContext {
     // complex go xref synchronizer
     private XrefSynchronizer<InteractorXref> complexGOXrefSynchronizer;
 
-    // complex go xref synchronizer
-    private XrefSynchronizer<InteractorXref> complexHumapXrefSynchronizer;
-
     // db info snchronizer
     private IntactDbSynchronizer<DbInfo, DbInfo> dbInfoSynchronizer;
     // application synchronizer
@@ -926,15 +923,6 @@ public class DefaultSynchronizerContext implements SynchronizerContext {
             this.complexGOXrefSynchronizer.setListener(listener);
         }
         return complexGOXrefSynchronizer;
-    }
-
-    @Override
-    public XrefSynchronizer<InteractorXref> getComplexHumapXrefSynchronizer() {
-        if (this.complexHumapXrefSynchronizer == null) {
-            this.complexHumapXrefSynchronizer = new ComplexXrefSynchronizerTemplate(this, ComplexHumapXref.class);
-            this.complexHumapXrefSynchronizer.setListener(listener);
-        }
-        return complexHumapXrefSynchronizer;
     }
 
     @Override

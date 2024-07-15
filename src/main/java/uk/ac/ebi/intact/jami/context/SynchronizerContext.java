@@ -137,8 +137,6 @@ public interface SynchronizerContext {
 
     public XrefSynchronizer<InteractorXref> getComplexGOXrefSynchronizer();
 
-    public XrefSynchronizer<InteractorXref> getComplexHumapXrefSynchronizer();
-
     public XrefSynchronizer<FeatureEvidenceXref> getFeatureEvidenceXrefSynchronizer();
 
     public XrefSynchronizer<ModelledFeatureXref> getModelledFeatureXrefSynchronizer();

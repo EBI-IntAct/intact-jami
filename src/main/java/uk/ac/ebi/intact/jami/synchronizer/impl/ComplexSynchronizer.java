@@ -332,11 +332,6 @@ public class ComplexSynchronizer extends InteractorSynchronizerTemplate<Complex,
                     cvXref = enableSynchronization ?
                             getContext().getComplexGOXrefSynchronizer().synchronize(xref, false) :
                             getContext().getComplexGOXrefSynchronizer().convertToPersistentObject(xref);
-                } else if (CvTermUtils.isCvTerm(xref.getDatabase(), ComplexHumapXref.HUMAP_DATABASE_MI, ComplexHumapXref.HUMAP_DATABASE)) {
-                    // do not persist or merge xrefs because of cascades
-                    cvXref = enableSynchronization ?
-                            getContext().getComplexHumapXrefSynchronizer().synchronize(xref, false) :
-                            getContext().getComplexHumapXrefSynchronizer().convertToPersistentObject(xref);
                 } else {
                     // do not persist or merge xrefs because of cascades
                     cvXref = enableSynchronization ?
