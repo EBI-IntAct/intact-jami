@@ -82,7 +82,7 @@ public class IntactComplex extends IntactInteractor implements Complex, Releasab
     private transient Annotation correctionComment;
     private transient Xref complexAcXref;
 
-    private boolean isManuallyCurated = true;
+    private Boolean predictedComplex;
 
     protected IntactComplex() {
         super();
@@ -1111,13 +1111,16 @@ public class IntactComplex extends IntactInteractor implements Complex, Releasab
         setCvStatus((CvTerm) ois.readObject());
     }
 
-    @Transient
-    public boolean isManuallyCurated() {
-        return isManuallyCurated;
+    @Type(type = "org.hibernate.type.NumericBooleanType")
+    @Column(name = "predicted_complex")
+    public boolean isPredictedComplex() {
+        return predictedComplex != null && predictedComplex;
     }
 
-    public void setManuallyCurated(boolean manuallyCurated) {
-        isManuallyCurated = manuallyCurated;
+    @Type(type = "org.hibernate.type.NumericBooleanType")
+    @Column(name = "predicted_complex")
+    public void setPredictedComplex(Boolean predictedComplex) {
+        this.predictedComplex = predictedComplex;
     }
 
     private class ComplexChecksumList extends AbstractListHavingProperties<Checksum> {
