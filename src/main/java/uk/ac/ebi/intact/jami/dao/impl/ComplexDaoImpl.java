@@ -680,22 +680,13 @@ public class ComplexDaoImpl extends InteractorDaoImpl<Complex,IntactComplex> imp
     }
 
     @Override
-    public Collection<IntactComplex> getComplexesInvolvingProteins(Collection<String> proteinIds) {
+    public Collection<IntactComplex> getComplexesInvolvingProteinsWithEbiAcs(Collection<String> proteinAcs) {
         Query query = getEntityManager().createQuery("select distinct c " +
                 "from IntactComplex c " +
                 "join c.participants as p " +
                 "join p.interactor as i " +
-                "join i.dbXrefs as xref " +
-                "join xref.database as database " +
-                "join xref.qualifier as qualifier " +
-                "where database.identifier = :db " +
-                "and qualifier.identifier in (:identityMi, :secondaryMi, :chainParentMi) " +
-                "and xref.id in (:ids) ");
-        query.setParameter("db", Xref.UNIPROTKB_MI);
-        query.setParameter("ids", proteinIds);
-        query.setParameter("identityMi", Xref.IDENTITY_MI);
-        query.setParameter("secondaryMi", Xref.SECONDARY_MI);
-        query.setParameter("chainParentMi", Xref.CHAIN_PARENT_MI);
+                "where i.ac in (:acs)");
+        query.setParameter("acs", proteinAcs);
         return query.getResultList();
     }
 
