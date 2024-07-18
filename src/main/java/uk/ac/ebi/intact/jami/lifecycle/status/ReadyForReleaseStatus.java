@@ -18,6 +18,7 @@ package uk.ac.ebi.intact.jami.lifecycle.status;
 import org.springframework.stereotype.Component;
 import uk.ac.ebi.intact.jami.lifecycle.IllegalTransitionException;
 import uk.ac.ebi.intact.jami.lifecycle.LifecycleEventListener;
+import uk.ac.ebi.intact.jami.model.extension.IntactComplex;
 import uk.ac.ebi.intact.jami.model.lifecycle.LifeCycleEventType;
 import uk.ac.ebi.intact.jami.model.lifecycle.LifeCycleStatus;
 import uk.ac.ebi.intact.jami.model.lifecycle.Releasable;
@@ -30,6 +31,39 @@ public class ReadyForReleaseStatus extends GlobalStatus {
 
     public ReadyForReleaseStatus() {
         setLifecycleStatus(LifeCycleStatus.READY_FOR_RELEASE);
+    }
+
+    /**
+     * The curator starts to work on a specific publication.
+     *
+     * @param releasable the releasable
+     */
+    public void startCuration(Releasable releasable, User who) {
+        if (!canChangeStatus(releasable)){
+            throw new IllegalTransitionException("Transition ready for release to curation in progress cannot be applied to object '" +
+                    releasable +
+                    "' with state: '" +
+                    releasable.getStatus() +
+                    "'");
+        }
+
+        if (releasable instanceof IntactComplex) {
+            if (((IntactComplex) releasable).isPredictedComplex()) {
+                changeStatus(releasable, LifeCycleStatus.CURATION_IN_PROGRESS, LifeCycleEventType.CURATION_STARTED, "", who);
+
+                for ( LifecycleEventListener listener : getListeners() ) {
+                    listener.fireCurationInProgress( releasable );
+                }
+            } else {
+                throw new IllegalTransitionException("Transition ready for release to curation in progress cannot be applied to curated complex '" +
+                        releasable +
+                        "'");
+            }
+        } else {
+            throw new IllegalTransitionException("Transition ready for release to curation in progress cannot be applied to object '" +
+                    releasable +
+                    "', it can only be applied to predicted complexes");
+        }
     }
 
     /**
