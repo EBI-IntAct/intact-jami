@@ -1,5 +1,7 @@
 package uk.ac.ebi.intact.jami.dao.impl;
 
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import psidev.psi.mi.jami.model.*;
 import uk.ac.ebi.intact.jami.context.SynchronizerContext;
 import uk.ac.ebi.intact.jami.dao.InteractorDao;
@@ -8,6 +10,7 @@ import uk.ac.ebi.intact.jami.synchronizer.IntactDbSynchronizer;
 
 import javax.persistence.EntityManager;
 import javax.persistence.NonUniqueResultException;
+import javax.persistence.PersistenceException;
 import javax.persistence.Query;
 import java.util.Collection;
 import java.util.List;
@@ -29,10 +32,18 @@ public class InteractorDaoImpl<T extends Interactor, F extends IntactInteractor>
         super(entityClass, entityManager, context);
     }
 
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public F getByAc(String ac) {
         return getEntityManager().find(getEntityClass(), ac);
     }
 
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public F getByShortName(String value) {
         Query query = getEntityManager().createQuery("select f from "+getEntityClass().getSimpleName()+" f " +
                 "where f.shortName = :name");
@@ -49,6 +60,10 @@ public class InteractorDaoImpl<T extends Interactor, F extends IntactInteractor>
         }
     }
 
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public Collection<F> getByShortNameLike(String value) {
         Query query = getEntityManager().createQuery("select distinct f from "+getEntityClass().getSimpleName()+" f " +
                 "where upper(f.shortName) like :name");
@@ -56,6 +71,10 @@ public class InteractorDaoImpl<T extends Interactor, F extends IntactInteractor>
         return query.getResultList();
     }
 
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public Collection<F> getByXref(String primaryId) {
         Query query = getEntityManager().createQuery("select distinct f from "+getEntityClass().getSimpleName()+" f "  +
                 "join f.dbXrefs as x " +
@@ -64,6 +83,10 @@ public class InteractorDaoImpl<T extends Interactor, F extends IntactInteractor>
         return query.getResultList();
     }
 
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public Collection<F> getByXrefLike(String primaryId) {
         Query query = getEntityManager().createQuery("select distinct f from "+getEntityClass().getSimpleName()+" f "  +
                 "join f.dbXrefs as x " +
@@ -72,6 +95,10 @@ public class InteractorDaoImpl<T extends Interactor, F extends IntactInteractor>
         return query.getResultList();
     }
 
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public Collection<F> getByXref(String dbName, String dbMI, String primaryId) {
         Query query;
         if (dbMI != null){
@@ -103,6 +130,10 @@ public class InteractorDaoImpl<T extends Interactor, F extends IntactInteractor>
         return query.getResultList();
     }
 
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public Collection<F> getByXrefLike(String dbName, String dbMI, String primaryId) {
         Query query;
         if (dbMI != null){
@@ -134,6 +165,10 @@ public class InteractorDaoImpl<T extends Interactor, F extends IntactInteractor>
         return query.getResultList();
     }
 
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public Collection<F> getByXrefQualifier(String qualifierName, String qualifierMI, String primaryId) {
         Query query;
         if (qualifierMI != null){
@@ -165,6 +200,10 @@ public class InteractorDaoImpl<T extends Interactor, F extends IntactInteractor>
         return query.getResultList();
     }
 
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public Collection<F> getByXrefQualifierLike(String qualifierName, String qualifierMI, String primaryId) {
         Query query;
         if (qualifierMI != null){
@@ -196,6 +235,10 @@ public class InteractorDaoImpl<T extends Interactor, F extends IntactInteractor>
         return query.getResultList();
     }
 
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public Collection<F> getByXref(String dbName, String dbMI, String primaryId, String qualifierName, String qualifierMI) {
         Query query;
         if (dbMI != null){
@@ -310,6 +353,10 @@ public class InteractorDaoImpl<T extends Interactor, F extends IntactInteractor>
         return query.getResultList();
     }
 
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public Collection<F> getByXref(String dbName, String dbMI, String primaryId, String version, String qualifierName, String qualifierMI) {
         Query query;
         if (dbMI != null){
@@ -436,6 +483,10 @@ public class InteractorDaoImpl<T extends Interactor, F extends IntactInteractor>
         return query.getResultList();
     }
 
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public Collection<F> getByXrefLike(String dbName, String dbMI, String primaryId, String qualifierName, String qualifierMI) {
         Query query;
         if (dbMI != null){
@@ -550,6 +601,10 @@ public class InteractorDaoImpl<T extends Interactor, F extends IntactInteractor>
         return query.getResultList();
     }
 
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public Collection<F> getByAnnotationTopic(String topicName, String topicMI) {
         Query query;
         if (topicMI != null){
@@ -577,6 +632,10 @@ public class InteractorDaoImpl<T extends Interactor, F extends IntactInteractor>
         return query.getResultList();
     }
 
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public Collection<F> getByAnnotationTopicAndValue(String topicName, String topicMI, String value) {
         Query query;
         if (topicMI != null){
@@ -610,6 +669,10 @@ public class InteractorDaoImpl<T extends Interactor, F extends IntactInteractor>
         return query.getResultList();
     }
 
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public Collection<F> getByAliasName(String name) {
         Query query = getEntityManager().createQuery("select distinct f from "+getEntityClass().getSimpleName()+" f "  +
                 "join f.dbAliases as s " +
@@ -618,6 +681,10 @@ public class InteractorDaoImpl<T extends Interactor, F extends IntactInteractor>
         return query.getResultList();
     }
 
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public Collection<F> getByAliasNameLike(String name) {
         Query query = getEntityManager().createQuery("select distinct f from "+getEntityClass().getSimpleName()+" f " +
                 "join f.dbAliases as s " +
@@ -626,6 +693,10 @@ public class InteractorDaoImpl<T extends Interactor, F extends IntactInteractor>
         return query.getResultList();
     }
 
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public Collection<F> getByAliasTypeAndName(String typeName, String typeMI, String name) {
         Query query;
         if (typeName == null && typeMI == null){
@@ -664,6 +735,10 @@ public class InteractorDaoImpl<T extends Interactor, F extends IntactInteractor>
         return query.getResultList();
     }
 
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public Collection<F> getByAliasTypeAndNameLike(String typeName, String typeMI, String name) {
         Query query;
         if (typeName == null && typeMI == null){
@@ -702,6 +777,10 @@ public class InteractorDaoImpl<T extends Interactor, F extends IntactInteractor>
         return query.getResultList();
     }
 
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public Collection<F> getByInteractorType(String typeName, String typeMI) {
         Query query;
         if (typeMI != null){
@@ -727,6 +806,10 @@ public class InteractorDaoImpl<T extends Interactor, F extends IntactInteractor>
         return query.getResultList();
     }
 
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public Collection<F> getByTaxId(int taxid) {
         Query query = getEntityManager().createQuery("select f from "+getEntityClass().getSimpleName()+" f "  +
                 "join f.organism as o " +
@@ -736,6 +819,10 @@ public class InteractorDaoImpl<T extends Interactor, F extends IntactInteractor>
     }
 
     @Override
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public Collection<Xref> getXrefsForInteractor(String ac) {
         Query query = getEntityManager().createQuery("select x from "+getEntityClass().getSimpleName()+" i " +
                 "join i.dbXrefs as x " +
@@ -745,6 +832,10 @@ public class InteractorDaoImpl<T extends Interactor, F extends IntactInteractor>
     }
 
     @Override
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public Collection<Annotation> getAnnotationsForInteractor(String ac) {
         Query query = getEntityManager().createQuery("select a from "+getEntityClass().getSimpleName()+" i " +
                 "join i.dbAnnotations as a " +
@@ -754,6 +845,10 @@ public class InteractorDaoImpl<T extends Interactor, F extends IntactInteractor>
     }
 
     @Override
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public Collection<Alias> getAliasesForInteractor(String ac) {
         Query query = getEntityManager().createQuery("select a from "+getEntityClass().getSimpleName()+" i " +
                 "join i.dbAliases as a " +
@@ -763,6 +858,10 @@ public class InteractorDaoImpl<T extends Interactor, F extends IntactInteractor>
     }
 
     @Override
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public int countAliasesForInteractor(String ac) {
         Query query = getEntityManager().createQuery("select size(i.dbAliases) from "+getEntityClass().getSimpleName()+" i " +
                 "where i.ac = :ac");
@@ -771,6 +870,10 @@ public class InteractorDaoImpl<T extends Interactor, F extends IntactInteractor>
     }
 
     @Override
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public int countXrefsForInteractor(String ac) {
         Query query = getEntityManager().createQuery("select size(i.dbXrefs) from "+getEntityClass().getSimpleName()+" i " +
                 "where i.ac = :ac");
@@ -779,6 +882,10 @@ public class InteractorDaoImpl<T extends Interactor, F extends IntactInteractor>
     }
 
     @Override
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public int countAnnotationsForInteractor(String ac) {
         Query query = getEntityManager().createQuery("select size(i.dbAnnotations) from "+getEntityClass().getSimpleName()+" i " +
                 "where i.ac = :ac");
@@ -787,6 +894,10 @@ public class InteractorDaoImpl<T extends Interactor, F extends IntactInteractor>
     }
 
     @Override
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public int countInteractorsByOrganism(String organismAc) {
         Query query = getEntityManager().createQuery("select count (distinct i.ac) from "+getEntityClass().getSimpleName()+" i " +
                 "join i.organism o " +

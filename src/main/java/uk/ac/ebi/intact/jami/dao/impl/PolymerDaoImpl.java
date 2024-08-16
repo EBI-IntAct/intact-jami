@@ -1,5 +1,7 @@
 package uk.ac.ebi.intact.jami.dao.impl;
 
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import psidev.psi.mi.jami.model.Polymer;
 import psidev.psi.mi.jami.model.Xref;
 import uk.ac.ebi.intact.jami.context.SynchronizerContext;
@@ -8,6 +10,7 @@ import uk.ac.ebi.intact.jami.model.extension.IntactPolymer;
 import uk.ac.ebi.intact.jami.synchronizer.IntactDbSynchronizer;
 
 import javax.persistence.EntityManager;
+import javax.persistence.PersistenceException;
 import javax.persistence.Query;
 import java.util.Collection;
 
@@ -28,6 +31,10 @@ public class PolymerDaoImpl<T extends Polymer, P extends IntactPolymer> extends 
         super(entityClass, entityManager, context);
     }
 
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public String getSequenceByPolymerAc(String ac) {
         IntactPolymer polymer = getEntityManager().find(IntactPolymer.class, ac);
         if (polymer == null){
@@ -36,6 +43,10 @@ public class PolymerDaoImpl<T extends Polymer, P extends IntactPolymer> extends 
         return polymer.getSequence();
     }
 
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public Collection<P> getByCanonicalIds(String dbMI, Collection<String> primaryIds) {
         Query query = getEntityManager().createQuery("select distinct f " +
                 "from " + getEntityClass().getSimpleName() + " f "  +

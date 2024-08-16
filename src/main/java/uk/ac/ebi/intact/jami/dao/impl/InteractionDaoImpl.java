@@ -1,5 +1,7 @@
 package uk.ac.ebi.intact.jami.dao.impl;
 
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import psidev.psi.mi.jami.model.*;
 import uk.ac.ebi.intact.jami.context.SynchronizerContext;
 import uk.ac.ebi.intact.jami.dao.InteractionDao;
@@ -8,6 +10,7 @@ import uk.ac.ebi.intact.jami.synchronizer.IntactDbSynchronizer;
 
 import javax.persistence.EntityManager;
 import javax.persistence.NonUniqueResultException;
+import javax.persistence.PersistenceException;
 import javax.persistence.Query;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -31,10 +34,18 @@ public class InteractionDaoImpl extends AbstractIntactBaseDao<InteractionEvidenc
         return getSynchronizerContext().getInteractionSynchronizer();
     }
 
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public IntactInteractionEvidence getByAc(String ac) {
         return getEntityManager().find(getEntityClass(), ac);
     }
 
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public IntactInteractionEvidence getByShortName(String value) {
         Query query = getEntityManager().createQuery("select f from IntactInteractionEvidence f " +
                 "where f.shortName = :name");
@@ -51,6 +62,10 @@ public class InteractionDaoImpl extends AbstractIntactBaseDao<InteractionEvidenc
         }
     }
 
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public Collection<IntactInteractionEvidence> getByShortNameLike(String value) {
         Query query = getEntityManager().createQuery("select f from IntactInteractionEvidence f " +
                 "where upper(f.shortName) like :name");
@@ -58,6 +73,10 @@ public class InteractionDaoImpl extends AbstractIntactBaseDao<InteractionEvidenc
         return query.getResultList();
     }
 
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public Collection<IntactInteractionEvidence> getByXref(String primaryId) {
         Query query = getEntityManager().createQuery("select distinct f from IntactInteractionEvidence f "  +
                 "join f.dbXrefs as x " +
@@ -67,6 +86,10 @@ public class InteractionDaoImpl extends AbstractIntactBaseDao<InteractionEvidenc
     }
 
     @Override
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public Collection<IntactInteractionEvidence> getByInteractorsPrimaryId(String... primaryIds) {
         if (primaryIds.length > 5) {
             return getByInteractorsPrimaryIdExactComponents(primaryIds);
@@ -147,6 +170,10 @@ public class InteractionDaoImpl extends AbstractIntactBaseDao<InteractionEvidenc
         return results;
     }
 
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public Collection<IntactInteractionEvidence> getByXrefLike(String primaryId) {
         Query query = getEntityManager().createQuery("select distinct f from IntactInteractionEvidence f "  +
                 "join f.dbXrefs as x " +
@@ -155,6 +182,10 @@ public class InteractionDaoImpl extends AbstractIntactBaseDao<InteractionEvidenc
         return query.getResultList();
     }
 
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public Collection<IntactInteractionEvidence> getByXref(String dbName, String dbMI, String primaryId) {
         Query query;
         if (dbMI != null){
@@ -186,6 +217,10 @@ public class InteractionDaoImpl extends AbstractIntactBaseDao<InteractionEvidenc
         return query.getResultList();
     }
 
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public Collection<IntactInteractionEvidence> getByXrefLike(String dbName, String dbMI, String primaryId) {
         Query query;
         if (dbMI != null){
@@ -217,6 +252,10 @@ public class InteractionDaoImpl extends AbstractIntactBaseDao<InteractionEvidenc
         return query.getResultList();
     }
 
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public Collection<IntactInteractionEvidence> getByXref(String dbName, String dbMI, String primaryId, String qualifierName, String qualifierMI) {
         Query query;
         if (dbMI != null){
@@ -331,6 +370,10 @@ public class InteractionDaoImpl extends AbstractIntactBaseDao<InteractionEvidenc
         return query.getResultList();
     }
 
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public Collection<IntactInteractionEvidence> getByXrefLike(String dbName, String dbMI, String primaryId, String qualifierName, String qualifierMI) {
         Query query;
         if (dbMI != null){
@@ -445,6 +488,10 @@ public class InteractionDaoImpl extends AbstractIntactBaseDao<InteractionEvidenc
         return query.getResultList();
     }
 
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public Collection<IntactInteractionEvidence> getByAnnotationTopic(String topicName, String topicMI) {
         Query query;
         if (topicMI != null){
@@ -472,6 +519,10 @@ public class InteractionDaoImpl extends AbstractIntactBaseDao<InteractionEvidenc
         return query.getResultList();
     }
 
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public Collection<IntactInteractionEvidence> getByAnnotationTopicAndValue(String topicName, String topicMI, String value) {
         Query query;
         if (topicMI != null){
@@ -505,6 +556,10 @@ public class InteractionDaoImpl extends AbstractIntactBaseDao<InteractionEvidenc
         return query.getResultList();
     }
 
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public Collection<IntactInteractionEvidence> getByInteractionType(String typeName, String typeMI, int first, int max) {
         Query query;
         if (typeName == null && typeMI == null){
@@ -534,6 +589,10 @@ public class InteractionDaoImpl extends AbstractIntactBaseDao<InteractionEvidenc
         return query.getResultList();
     }
 
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public Collection<IntactInteractionEvidence> getByExperimentAc(String ac) {
         Query query = getEntityManager().createQuery("select distinct f from IntactInteractionEvidence f "  +
                 "join f.dbExperiments as e " +
@@ -542,6 +601,10 @@ public class InteractionDaoImpl extends AbstractIntactBaseDao<InteractionEvidenc
         return query.getResultList();
     }
 
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public Collection<IntactInteractionEvidence> getByConfidence(String typeName, String typeMI, String value) {
         Query query;
         if (typeName == null && typeMI == null){
@@ -581,6 +644,10 @@ public class InteractionDaoImpl extends AbstractIntactBaseDao<InteractionEvidenc
         return query.getResultList();
     }
 
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public Collection<IntactInteractionEvidence> getByParameterType(String typeName, String typeMI) {
         Query query;
         if (typeMI != null){
@@ -608,6 +675,10 @@ public class InteractionDaoImpl extends AbstractIntactBaseDao<InteractionEvidenc
         return query.getResultList();
     }
 
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public Collection<IntactInteractionEvidence> getByParameterUnit(String unitName, String unitMI) {
         Query query;
         if (unitMI == null && unitName == null){
@@ -640,6 +711,10 @@ public class InteractionDaoImpl extends AbstractIntactBaseDao<InteractionEvidenc
         return query.getResultList();
     }
 
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public Collection<IntactInteractionEvidence> getByParameterTypeAndUnit(String typeName, String typeMI, String unitName, String unitMI) {
         Query query;
         if (typeMI != null){
@@ -743,6 +818,10 @@ public class InteractionDaoImpl extends AbstractIntactBaseDao<InteractionEvidenc
     }
 
     @Override
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public int countParticipantsForInteraction(String ac) {
         Query query = getEntityManager().createQuery("select size(i.participants) from IntactInteractionEvidence i " +
                 "where i.ac = :ac");
@@ -751,6 +830,10 @@ public class InteractionDaoImpl extends AbstractIntactBaseDao<InteractionEvidenc
     }
 
     @Override
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public Collection<Xref> getXrefsForInteraction(String ac) {
         Query query = getEntityManager().createQuery("select x from IntactInteractionEvidence i " +
                 "join i.dbXrefs as x " +
@@ -760,6 +843,10 @@ public class InteractionDaoImpl extends AbstractIntactBaseDao<InteractionEvidenc
     }
 
     @Override
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public Collection<Annotation> getAnnotationsForInteraction(String ac) {
         Query query = getEntityManager().createQuery("select a from IntactInteractionEvidence i " +
                 "join i.dbAnnotations as a " +
@@ -769,6 +856,10 @@ public class InteractionDaoImpl extends AbstractIntactBaseDao<InteractionEvidenc
     }
 
     @Override
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public Collection<Confidence> getConfidencesForInteraction(String ac) {
         Query query = getEntityManager().createQuery("select x from IntactInteractionEvidence i " +
                 "join i.confidences as x " +
@@ -778,6 +869,10 @@ public class InteractionDaoImpl extends AbstractIntactBaseDao<InteractionEvidenc
     }
 
     @Override
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public Collection<Parameter> getParametersForInteraction(String ac) {
         Query query = getEntityManager().createQuery("select x from IntactInteractionEvidence i " +
                 "join i.parameters as x " +
@@ -787,6 +882,10 @@ public class InteractionDaoImpl extends AbstractIntactBaseDao<InteractionEvidenc
     }
 
     @Override
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public int countConfidencesForInteraction(String ac) {
         Query query = getEntityManager().createQuery("select size(i.confidences) from IntactInteractionEvidence i " +
                 "where i.ac = :ac");
@@ -795,6 +894,10 @@ public class InteractionDaoImpl extends AbstractIntactBaseDao<InteractionEvidenc
     }
 
     @Override
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public int countParametersForInteraction(String ac) {
         Query query = getEntityManager().createQuery("select size(i.parameters) from IntactInteractionEvidence i " +
                 "where i.ac = :ac");
@@ -803,6 +906,10 @@ public class InteractionDaoImpl extends AbstractIntactBaseDao<InteractionEvidenc
     }
 
     @Override
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public int countXrefsForInteraction(String ac) {
         Query query = getEntityManager().createQuery("select size(i.dbXrefs) from IntactInteractionEvidence i " +
                 "where i.ac = :ac");
@@ -811,6 +918,10 @@ public class InteractionDaoImpl extends AbstractIntactBaseDao<InteractionEvidenc
     }
 
     @Override
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public int countAnnotationsForInteraction(String ac) {
         Query query = getEntityManager().createQuery("select size(i.dbAnnotations) from IntactInteractionEvidence i " +
                 "where i.ac = :ac");
@@ -819,6 +930,10 @@ public class InteractionDaoImpl extends AbstractIntactBaseDao<InteractionEvidenc
     }
 
     @Override
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public int countVariableParameterValuesSetsForInteraction(String ac) {
         Query query = getEntityManager().createQuery("select size(i.variableParameterValues) from IntactInteractionEvidence i " +
                 "where i.ac = :ac");
@@ -827,6 +942,10 @@ public class InteractionDaoImpl extends AbstractIntactBaseDao<InteractionEvidenc
     }
 
     @Override
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public int countInteractionsInvolvingInteractor(String ac) {
         Query query = getEntityManager().createQuery("select count(distinct i.ac) from IntactInteractionEvidence i " +
                 "join i.participants as p join p.interactor as inter " +

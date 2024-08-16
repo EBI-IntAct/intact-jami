@@ -1,5 +1,7 @@
 package uk.ac.ebi.intact.jami.dao.impl;
 
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import psidev.psi.mi.jami.model.Alias;
 import psidev.psi.mi.jami.model.CvTerm;
 import psidev.psi.mi.jami.model.Organism;
@@ -11,6 +13,7 @@ import uk.ac.ebi.intact.jami.synchronizer.IntactDbSynchronizer;
 
 import javax.persistence.EntityManager;
 import javax.persistence.NonUniqueResultException;
+import javax.persistence.PersistenceException;
 import javax.persistence.Query;
 import java.util.Collection;
 import java.util.List;
@@ -29,10 +32,18 @@ public class OrganismDaoImpl extends AbstractIntactBaseDao<Organism, IntactOrgan
         super(IntactOrganism.class, entityManager, context);
     }
 
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public IntactOrganism getByAc(String ac) {
         return getEntityManager().find(getEntityClass(), ac);
     }
 
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public IntactOrganism getByShortName(String value) {
         Query query = getEntityManager().createQuery("select o from IntactOrganism o " +
                 "where o.commonName = :name ");
@@ -49,6 +60,10 @@ public class OrganismDaoImpl extends AbstractIntactBaseDao<Organism, IntactOrgan
         }
     }
 
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public Collection<IntactOrganism> getByShortNameLike(String value) {
         Query query = getEntityManager().createQuery("select o from IntactOrganism o " +
                 "where upper(o.commonName) like :name");
@@ -56,6 +71,10 @@ public class OrganismDaoImpl extends AbstractIntactBaseDao<Organism, IntactOrgan
         return query.getResultList();
     }
 
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public Collection<IntactOrganism> getByScientificName(String value) {
         Query query = getEntityManager().createQuery("select o from IntactOrganism o " +
                 "where o.scientificName = :name");
@@ -63,6 +82,10 @@ public class OrganismDaoImpl extends AbstractIntactBaseDao<Organism, IntactOrgan
         return query.getResultList();
     }
 
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public Collection<IntactOrganism> getByScientificNameLike(String value) {
         Query query = getEntityManager().createQuery("select o from IntactOrganism o " +
                 "where upper(o.scientificName) like :name");
@@ -70,6 +93,10 @@ public class OrganismDaoImpl extends AbstractIntactBaseDao<Organism, IntactOrgan
         return query.getResultList();
     }
 
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public Collection<IntactOrganism> getByTaxid(int taxid) {
         Query query = getEntityManager().createQuery("select o from IntactOrganism o " +
                 "where o.dbTaxid = :taxid");
@@ -77,6 +104,10 @@ public class OrganismDaoImpl extends AbstractIntactBaseDao<Organism, IntactOrgan
         return query.getResultList();
     }
 
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public IntactOrganism getByTaxidOnly(int taxid) {
         Query query = getEntityManager().createQuery("select o from IntactOrganism o " +
                 "where o.dbTaxid = :taxid " +
@@ -95,6 +126,10 @@ public class OrganismDaoImpl extends AbstractIntactBaseDao<Organism, IntactOrgan
         }
     }
 
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public Collection<IntactOrganism> getByAliasName(String name) {
         Query query = getEntityManager().createQuery("select distinct o from IntactOrganism o " +
                 "join o.aliases as s " +
@@ -103,6 +138,10 @@ public class OrganismDaoImpl extends AbstractIntactBaseDao<Organism, IntactOrgan
         return query.getResultList();
     }
 
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public Collection<IntactOrganism> getByAliasNameLike(String name) {
         Query query = getEntityManager().createQuery("select distinct o from IntactOrganism o " +
                 "join o.aliases as s " +
@@ -111,6 +150,10 @@ public class OrganismDaoImpl extends AbstractIntactBaseDao<Organism, IntactOrgan
         return query.getResultList();
     }
 
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public Collection<IntactOrganism> getByAliasTypeAndName(String typeName, String typeMI, String name) {
         Query query;
         if (typeName == null && typeMI == null){
@@ -149,6 +192,10 @@ public class OrganismDaoImpl extends AbstractIntactBaseDao<Organism, IntactOrgan
         return query.getResultList();
     }
 
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public Collection<IntactOrganism> getByAliasTypeAndNameLike(String typeName, String typeMI, String name) {
         Query query;
         if (typeName == null && typeMI == null){
@@ -187,6 +234,10 @@ public class OrganismDaoImpl extends AbstractIntactBaseDao<Organism, IntactOrgan
         return query.getResultList();
     }
 
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public Collection<IntactOrganism> getByCellTypeAc(String cellAc) {
         Query query = getEntityManager().createQuery("select o from IntactOrganism o " +
                 "join o.cellType as c " +
@@ -195,6 +246,10 @@ public class OrganismDaoImpl extends AbstractIntactBaseDao<Organism, IntactOrgan
         return query.getResultList();
     }
 
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public Collection<IntactOrganism> getByTissueAc(String tissueAc) {
         Query query = getEntityManager().createQuery("select o from IntactOrganism o " +
                 "join o.tissue as t " +
@@ -203,6 +258,10 @@ public class OrganismDaoImpl extends AbstractIntactBaseDao<Organism, IntactOrgan
         return query.getResultList();
     }
 
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public Collection<IntactOrganism> getByCellTypeName(String cellName) {
         Query query = getEntityManager().createQuery("select o from IntactOrganism o " +
                 "join o.cellType as c " +
@@ -211,6 +270,10 @@ public class OrganismDaoImpl extends AbstractIntactBaseDao<Organism, IntactOrgan
         return query.getResultList();
     }
 
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public Collection<IntactOrganism> getByTissueName(String tissueName) {
         Query query = getEntityManager().createQuery("select o from IntactOrganism o " +
                 "join o.tissue as t " +
@@ -219,6 +282,10 @@ public class OrganismDaoImpl extends AbstractIntactBaseDao<Organism, IntactOrgan
         return query.getResultList();
     }
 
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public Collection<IntactOrganism> getByCellTypeNameLike(String cellName) {
         Query query = getEntityManager().createQuery("select o from IntactOrganism o " +
                 "join o.cellType as c " +
@@ -227,6 +294,10 @@ public class OrganismDaoImpl extends AbstractIntactBaseDao<Organism, IntactOrgan
         return query.getResultList();
     }
 
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public Collection<IntactOrganism> getByTissueNameLike(String tissueName) {
         Query query = getEntityManager().createQuery("select o from IntactOrganism o " +
                 "join o.tissue as t " +
@@ -236,6 +307,10 @@ public class OrganismDaoImpl extends AbstractIntactBaseDao<Organism, IntactOrgan
     }
 
     @Override
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public Collection<Alias> getAliasesForOrganism(String ac) {
         Query query = getEntityManager().createQuery("select a from IntactOrganism i " +
                 "join i.aliases as a " +
@@ -244,6 +319,10 @@ public class OrganismDaoImpl extends AbstractIntactBaseDao<Organism, IntactOrgan
         return query.getResultList();
     }
 
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public Collection<IntactOrganism> getAllOrganisms(boolean allowOrganismWithCellType, boolean allowOrganismWithTissue) {
         String queryString = "select o from IntactOrganism o ";
         Query query;
@@ -263,6 +342,10 @@ public class OrganismDaoImpl extends AbstractIntactBaseDao<Organism, IntactOrgan
     }
 
     @Override
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public int countAliasesForOrganism(String ac) {
         Query query = getEntityManager().createQuery("select size(i.aliases) from IntactOrganism i " +
                 "where i.ac = :ac");

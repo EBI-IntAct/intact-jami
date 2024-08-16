@@ -1,5 +1,7 @@
 package uk.ac.ebi.intact.jami.dao.impl;
 
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import uk.ac.ebi.intact.jami.context.SynchronizerContext;
 import uk.ac.ebi.intact.jami.dao.LifeCycleEventDao;
 import uk.ac.ebi.intact.jami.model.lifecycle.AbstractLifeCycleEvent;
@@ -7,6 +9,7 @@ import uk.ac.ebi.intact.jami.model.lifecycle.LifeCycleEvent;
 import uk.ac.ebi.intact.jami.synchronizer.IntactDbSynchronizer;
 
 import javax.persistence.EntityManager;
+import javax.persistence.PersistenceException;
 import javax.persistence.Query;
 import java.util.Collection;
 import java.util.Date;
@@ -28,6 +31,10 @@ public class LifeCycleDaoImpl<A extends AbstractLifeCycleEvent> extends Abstract
         super(entityClass, entityManager, context);
     }
 
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public Collection<A> getByNote(String note, int first, int max) {
         Query query;
         if (note == null){
@@ -42,6 +49,10 @@ public class LifeCycleDaoImpl<A extends AbstractLifeCycleEvent> extends Abstract
         return query.getResultList();
     }
 
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public Collection<A> getByNoteLike(String note, int first, int max) {
         Query query;
         if (note == null){
@@ -56,6 +67,10 @@ public class LifeCycleDaoImpl<A extends AbstractLifeCycleEvent> extends Abstract
         return query.getResultList();
     }
 
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public Collection<A> getByEvent(String eventName, int first, int max) {
         Query query = getEntityManager().createQuery("select l from "+getEntityClass().getSimpleName()+" l " +
                 "join l.event as e " +
@@ -66,6 +81,10 @@ public class LifeCycleDaoImpl<A extends AbstractLifeCycleEvent> extends Abstract
         return query.getResultList();
     }
 
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public Collection<A> getByUser(String user, int first, int max) {
         Query query = getEntityManager().createQuery("select l from " + getEntityClass().getSimpleName() + " l " +
                 "join l.who as w " +
@@ -76,6 +95,10 @@ public class LifeCycleDaoImpl<A extends AbstractLifeCycleEvent> extends Abstract
         return query.getResultList();
     }
 
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public Collection<A> getByDate(Date date, int first, int max) {
         Query query;
         if (date == null){

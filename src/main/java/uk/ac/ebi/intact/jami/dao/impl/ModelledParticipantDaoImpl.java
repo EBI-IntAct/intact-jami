@@ -1,5 +1,7 @@
 package uk.ac.ebi.intact.jami.dao.impl;
 
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import psidev.psi.mi.jami.model.CvTerm;
 import psidev.psi.mi.jami.model.ModelledParticipant;
 import psidev.psi.mi.jami.model.Xref;
@@ -9,6 +11,7 @@ import uk.ac.ebi.intact.jami.model.extension.IntactModelledParticipant;
 import uk.ac.ebi.intact.jami.synchronizer.IntactDbSynchronizer;
 
 import javax.persistence.EntityManager;
+import javax.persistence.PersistenceException;
 import javax.persistence.Query;
 import java.util.Collection;
 
@@ -31,6 +34,10 @@ public class ModelledParticipantDaoImpl extends ParticipantDaoImpl<ModelledParti
         return getSynchronizerContext().getModelledParticipantSynchronizer();
     }
 
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public Collection<IntactModelledParticipant> getByInteractionAc(String ac) {
         Query query = getEntityManager().createQuery("select f from IntactModelledParticipant f "  +
                 "join f.dbParentInteraction as i " +
@@ -39,6 +46,10 @@ public class ModelledParticipantDaoImpl extends ParticipantDaoImpl<ModelledParti
         return query.getResultList();
     }
 
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public Collection<IntactModelledParticipant> getByCausalRelationType(String typeName, String typeMI) {
         Query query;
         if (typeMI != null){
@@ -66,6 +77,10 @@ public class ModelledParticipantDaoImpl extends ParticipantDaoImpl<ModelledParti
         return query.getResultList();
     }
 
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public Collection<IntactModelledParticipant> getByCausalRelationshipTargetAc(String parentAc) {
         Query query = getEntityManager().createQuery("select distinct e from IntactModelledParticipant e  " +
                 "join e.causalRelationships as c " +
@@ -75,6 +90,10 @@ public class ModelledParticipantDaoImpl extends ParticipantDaoImpl<ModelledParti
         return query.getResultList();
     }
 
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public Collection<IntactModelledParticipant> getByCausalRelationship(String name, String mi, String targetAc) {
         Query query;
         if (mi != null){

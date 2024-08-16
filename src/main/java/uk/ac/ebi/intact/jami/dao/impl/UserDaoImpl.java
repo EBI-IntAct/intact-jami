@@ -1,5 +1,7 @@
 package uk.ac.ebi.intact.jami.dao.impl;
 
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Repository;
 import uk.ac.ebi.intact.jami.context.DefaultSynchronizerContext;
 import uk.ac.ebi.intact.jami.context.SynchronizerContext;
@@ -11,6 +13,7 @@ import uk.ac.ebi.intact.jami.synchronizer.impl.UserSynchronizer;
 
 import javax.persistence.EntityManager;
 import javax.persistence.NonUniqueResultException;
+import javax.persistence.PersistenceException;
 import javax.persistence.Query;
 import java.util.Collection;
 
@@ -28,10 +31,18 @@ public class UserDaoImpl extends AbstractIntactBaseDao<User, User> implements Us
     }
 
     @Override
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public User getByAc(String ac) {
         return getEntityManager().find(User.class, ac);
     }
 
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public User getByLogin(String login) {
         Query query = getEntityManager().createQuery("select u from User u " +
                 "where u.login = :login ");
@@ -48,6 +59,10 @@ public class UserDaoImpl extends AbstractIntactBaseDao<User, User> implements Us
         }
     }
 
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public Collection<User> getByFirstName(String name) {
         Query query = getEntityManager().createQuery("select u from User u " +
                 "where u.firstName = :name ");
@@ -55,6 +70,10 @@ public class UserDaoImpl extends AbstractIntactBaseDao<User, User> implements Us
         return query.getResultList();
     }
 
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public Collection<User> getByLastName(String name) {
         Query query = getEntityManager().createQuery("select u from User u " +
                 "where u.lastName = :name ");
@@ -62,6 +81,10 @@ public class UserDaoImpl extends AbstractIntactBaseDao<User, User> implements Us
         return query.getResultList();
     }
 
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public User getByEMail(String mail) {
         Query query = getEntityManager().createQuery("select u from User u " +
                 "where u.email = :mail ");
@@ -78,6 +101,10 @@ public class UserDaoImpl extends AbstractIntactBaseDao<User, User> implements Us
         }
     }
 
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public Collection<User> getByDisabled(boolean disabled) {
         Query query = getEntityManager().createQuery("select u from User u " +
                 "where u.disabled = :dis ");
@@ -85,6 +112,10 @@ public class UserDaoImpl extends AbstractIntactBaseDao<User, User> implements Us
         return query.getResultList();
     }
 
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public Collection<User> getByRole(String role) {
         Query query = getEntityManager().createQuery("select distinct u from User u " +
                 "join u.roles as r " +
@@ -93,6 +124,10 @@ public class UserDaoImpl extends AbstractIntactBaseDao<User, User> implements Us
         return query.getResultList();
     }
 
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public Collection<User> getByPreference(String key, String value) {
         Query query = getEntityManager().createQuery("select distinct u from User u " +
                 "join u.preferences as p " +
