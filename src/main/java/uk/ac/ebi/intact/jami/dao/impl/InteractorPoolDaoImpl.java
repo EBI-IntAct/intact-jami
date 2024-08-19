@@ -1,5 +1,7 @@
 package uk.ac.ebi.intact.jami.dao.impl;
 
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Repository;
 import psidev.psi.mi.jami.model.InteractorPool;
 import uk.ac.ebi.intact.jami.context.DefaultSynchronizerContext;
@@ -11,6 +13,7 @@ import uk.ac.ebi.intact.jami.synchronizer.IntactDbSynchronizer;
 import uk.ac.ebi.intact.jami.synchronizer.impl.InteractorPoolSynchronizer;
 
 import javax.persistence.EntityManager;
+import javax.persistence.PersistenceException;
 import javax.persistence.Query;
 import java.util.Collection;
 
@@ -31,6 +34,10 @@ public class InteractorPoolDaoImpl extends InteractorDaoImpl<InteractorPool,Inta
         return getSynchronizerContext().getInteractorPoolSynchronizer();
     }
 
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public Collection<IntactInteractorPool> getByInteractorAc(String ac) {
         Query query = getEntityManager().createQuery("select distinct f from IntactInteractorPool f " +
                 "join f.interactors as i " +
@@ -39,6 +46,10 @@ public class InteractorPoolDaoImpl extends InteractorDaoImpl<InteractorPool,Inta
         return query.getResultList();
     }
 
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public Collection<IntactInteractorPool> getByInteractorShortName(String value) {
         Query query = getEntityManager().createQuery("select distinct f from IntactInteractorPool f " +
                 "join f.interactors as i " +
@@ -48,6 +59,10 @@ public class InteractorPoolDaoImpl extends InteractorDaoImpl<InteractorPool,Inta
     }
 
     @Override
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public int countMembersOfPool(String ac) {
         Query query = getEntityManager().createQuery("select size(i.interactors) from IntactInteractorPool i " +
                 "where i.ac = :ac");
@@ -56,6 +71,10 @@ public class InteractorPoolDaoImpl extends InteractorDaoImpl<InteractorPool,Inta
     }
 
     @Override
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public int countMoleculeSetsInvolvingInteractor(String ac) {
         Query query = getEntityManager().createQuery("select count(distinct i.ac) from IntactInteractorPool i " +
                 "join i.interactors as inter " +

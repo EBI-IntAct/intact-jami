@@ -1,5 +1,7 @@
 package uk.ac.ebi.intact.jami.dao.impl;
 
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import psidev.psi.mi.jami.model.*;
 import uk.ac.ebi.intact.jami.context.SynchronizerContext;
 import uk.ac.ebi.intact.jami.dao.ParticipantEvidenceDao;
@@ -7,6 +9,7 @@ import uk.ac.ebi.intact.jami.model.extension.IntactParticipantEvidence;
 import uk.ac.ebi.intact.jami.synchronizer.IntactDbSynchronizer;
 
 import javax.persistence.EntityManager;
+import javax.persistence.PersistenceException;
 import javax.persistence.Query;
 import java.util.Collection;
 
@@ -29,6 +32,10 @@ public class ParticipantEvidenceDaoImpl extends ParticipantDaoImpl<ParticipantEv
         return getSynchronizerContext().getParticipantEvidenceSynchronizer();
     }
 
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public Collection<IntactParticipantEvidence> getByExperimentalRole(String typeName, String typeMI, int first, int max) {
         Query query;
         if (typeMI != null){
@@ -56,6 +63,10 @@ public class ParticipantEvidenceDaoImpl extends ParticipantDaoImpl<ParticipantEv
         return query.getResultList();
     }
 
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public Collection<IntactParticipantEvidence> getByExperimentalPreparation(String name, String mi, int first, int max) {
         Query query;
         if (mi != null){
@@ -83,6 +94,10 @@ public class ParticipantEvidenceDaoImpl extends ParticipantDaoImpl<ParticipantEv
         return query.getResultList();
     }
 
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public Collection<IntactParticipantEvidence> getByDetectionMethod(String name, String mi, int first, int max) {
         Query query;
         if (name == null && mi == null){
@@ -114,6 +129,10 @@ public class ParticipantEvidenceDaoImpl extends ParticipantDaoImpl<ParticipantEv
         return query.getResultList();
     }
 
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public Collection<IntactParticipantEvidence> getByExpressedInTaxid(String taxid, int first, int max) {
         Query query = getEntityManager().createQuery("select f from IntactParticipantEvidence f "  +
                 "join f.expressedInOrganism as o " +
@@ -124,6 +143,10 @@ public class ParticipantEvidenceDaoImpl extends ParticipantDaoImpl<ParticipantEv
         return query.getResultList();
     }
 
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public Collection<IntactParticipantEvidence> getByExpressedInAc(String ac, int first, int max) {
         Query query = getEntityManager().createQuery("select f from IntactParticipantEvidence f "  +
                 "join f.expressedInOrganism as o " +
@@ -134,6 +157,10 @@ public class ParticipantEvidenceDaoImpl extends ParticipantDaoImpl<ParticipantEv
         return query.getResultList();
     }
 
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public Collection<IntactParticipantEvidence> getByConfidence(String typeName, String typeMI, String value, int first, int max) {
         Query query;
         if (typeName == null && typeMI == null){
@@ -175,6 +202,10 @@ public class ParticipantEvidenceDaoImpl extends ParticipantDaoImpl<ParticipantEv
         return query.getResultList();
     }
 
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public Collection<IntactParticipantEvidence> getByInteractionAc(String ac) {
         Query query = getEntityManager().createQuery("select f from IntactParticipantEvidence f "  +
                 "join f.dbParentInteraction as i " +
@@ -183,6 +214,10 @@ public class ParticipantEvidenceDaoImpl extends ParticipantDaoImpl<ParticipantEv
         return query.getResultList();
     }
 
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public Collection<IntactParticipantEvidence> getByParameterType(String typeName, String typeMI) {
         Query query;
         if (typeMI != null){
@@ -210,6 +245,10 @@ public class ParticipantEvidenceDaoImpl extends ParticipantDaoImpl<ParticipantEv
         return query.getResultList();
     }
 
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public Collection<IntactParticipantEvidence> getByParameterUnit(String unitName, String unitMI) {
         Query query;
         if (unitMI == null && unitName == null){
@@ -242,6 +281,10 @@ public class ParticipantEvidenceDaoImpl extends ParticipantDaoImpl<ParticipantEv
         return query.getResultList();
     }
 
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public Collection<IntactParticipantEvidence> getByParameterTypeAndUnit(String typeName, String typeMI, String unitName, String unitMI) {
         Query query;
         if (typeMI != null){
@@ -344,6 +387,10 @@ public class ParticipantEvidenceDaoImpl extends ParticipantDaoImpl<ParticipantEv
         return query.getResultList();
     }
 
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public Collection<IntactParticipantEvidence> getByCausalRelationType(String typeName, String typeMI) {
         Query query;
         if (typeMI != null){
@@ -371,6 +418,10 @@ public class ParticipantEvidenceDaoImpl extends ParticipantDaoImpl<ParticipantEv
         return query.getResultList();
     }
 
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public Collection<IntactParticipantEvidence> getByCausalRelationshipTargetAc(String parentAc, boolean isExperimental) {
         Query query = getEntityManager().createQuery("select distinct e from IntactParticipantEvidence e  " +
                 "join e.causalRelationships as c " +
@@ -380,6 +431,10 @@ public class ParticipantEvidenceDaoImpl extends ParticipantDaoImpl<ParticipantEv
         return query.getResultList();
     }
 
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public Collection<IntactParticipantEvidence> getByCausalRelationship(String name, String mi, String targetAc, boolean isExperimental) {
         Query query;
         if (mi != null){
@@ -410,6 +465,10 @@ public class ParticipantEvidenceDaoImpl extends ParticipantDaoImpl<ParticipantEv
     }
 
     @Override
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public Collection<Confidence> getConfidencesForParticipant(String ac) {
         Query query = getEntityManager().createQuery("select x from IntactParticipantEvidence i " +
                 "join i.confidences as x " +
@@ -419,6 +478,10 @@ public class ParticipantEvidenceDaoImpl extends ParticipantDaoImpl<ParticipantEv
     }
 
     @Override
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public Collection<Parameter> getParametersForParticipant(String ac) {
         Query query = getEntityManager().createQuery("select x from IntactParticipantEvidence i " +
                 "join i.parameters as x " +
@@ -428,6 +491,10 @@ public class ParticipantEvidenceDaoImpl extends ParticipantDaoImpl<ParticipantEv
     }
 
     @Override
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public int countConfidencesForParticipant(String ac) {
         Query query = getEntityManager().createQuery("select size(i.confidences) from IntactParticipantEvidence i " +
                 "where i.ac = :ac");
@@ -436,6 +503,10 @@ public class ParticipantEvidenceDaoImpl extends ParticipantDaoImpl<ParticipantEv
     }
 
     @Override
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public int countParametersForParticipant(String ac) {
         Query query = getEntityManager().createQuery("select size(i.parameters) from IntactParticipantEvidence i " +
                 "where i.ac = :ac");
@@ -444,6 +515,10 @@ public class ParticipantEvidenceDaoImpl extends ParticipantDaoImpl<ParticipantEv
     }
 
     @Override
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public int countExperimentalPreparationsForParticipant(String ac) {
         Query query = getEntityManager().createQuery("select size(i.experimentalPreparations) from IntactParticipantEvidence i " +
                 "where i.ac = :ac");
@@ -452,6 +527,10 @@ public class ParticipantEvidenceDaoImpl extends ParticipantDaoImpl<ParticipantEv
     }
 
     @Override
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public int countIdentificationMethodsForParticipant(String ac) {
         Query query = getEntityManager().createQuery("select size(i.dbIdentificationMethods) from IntactParticipantEvidence i " +
                 "where i.ac = :ac");
@@ -460,6 +539,10 @@ public class ParticipantEvidenceDaoImpl extends ParticipantDaoImpl<ParticipantEv
     }
 
     @Override
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public int countParticipantsByExpressedInOrganism(String organismAc) {
         Query query = getEntityManager().createQuery("select count (distinct i.ac) from IntactParticipantEvidence i " +
                 "join i.expressedInOrganism o " +

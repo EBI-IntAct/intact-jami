@@ -1,5 +1,7 @@
 package uk.ac.ebi.intact.jami.dao.impl;
 
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import psidev.psi.mi.jami.model.*;
 import uk.ac.ebi.intact.jami.context.SynchronizerContext;
 import uk.ac.ebi.intact.jami.dao.ComplexDao;
@@ -8,6 +10,7 @@ import uk.ac.ebi.intact.jami.model.lifecycle.LifeCycleEvent;
 import uk.ac.ebi.intact.jami.synchronizer.IntactDbSynchronizer;
 
 import javax.persistence.EntityManager;
+import javax.persistence.PersistenceException;
 import javax.persistence.Query;
 import java.util.Collection;
 import java.util.Iterator;
@@ -31,6 +34,10 @@ public class ComplexDaoImpl extends InteractorDaoImpl<Complex,IntactComplex> imp
     }
 
     @Override
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public IntactComplex getLatestComplexVersionByComplexAc(String complexAc) {
 
         Collection<IntactComplex> complexes = getByComplexAc(complexAc);
@@ -54,6 +61,10 @@ public class ComplexDaoImpl extends InteractorDaoImpl<Complex,IntactComplex> imp
     }
 
     @Override
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public IntactComplex getByComplexAcAndVersion(String complexAc, String version) {
         Collection<IntactComplex> complexes = getByXref(Xref.COMPLEX_PORTAL, Xref.COMPLEX_PORTAL_MI, complexAc, version, Xref.COMPLEX_PRIMARY, Xref.COMPLEX_PRIMARY_MI);
 
@@ -65,10 +76,18 @@ public class ComplexDaoImpl extends InteractorDaoImpl<Complex,IntactComplex> imp
     }
 
     @Override
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public Collection<IntactComplex> getByComplexAc(String complexAc) {
         return super.getByXrefQualifier(Xref.COMPLEX_PRIMARY, Xref.COMPLEX_PRIMARY_MI, complexAc);
     }
 
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public Collection<IntactComplex> getByInteractionType(String typeName, String typeMI, int first, int max) {
         Query query;
         if (typeName == null && typeMI == null){
@@ -98,6 +117,10 @@ public class ComplexDaoImpl extends InteractorDaoImpl<Complex,IntactComplex> imp
         return query.getResultList();
     }
 
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public Collection<IntactComplex> getByLifecycleEvent(String evtName, int first, int max) {
         Query query;
         if (evtName == null){
@@ -116,6 +139,10 @@ public class ComplexDaoImpl extends InteractorDaoImpl<Complex,IntactComplex> imp
         return query.getResultList();
     }
 
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public Collection<IntactComplex> getByStatus(String statusName, int first, int max) {
         Query query;
         if (statusName == null){
@@ -133,6 +160,10 @@ public class ComplexDaoImpl extends InteractorDaoImpl<Complex,IntactComplex> imp
         return query.getResultList();
     }
 
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public Collection<IntactComplex> getByConfidence(String typeName, String typeMI, String value) {
         Query query;
         if (typeName == null && typeMI == null){
@@ -380,6 +411,10 @@ public class ComplexDaoImpl extends InteractorDaoImpl<Complex,IntactComplex> imp
         return query.getResultList();
     } */
 
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public Collection<IntactComplex> getByParameterType(String typeName, String typeMI) {
         Query query;
         if (typeMI != null){
@@ -407,6 +442,10 @@ public class ComplexDaoImpl extends InteractorDaoImpl<Complex,IntactComplex> imp
         return query.getResultList();
     }
 
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public Collection<IntactComplex> getByParameterUnit(String unitName, String unitMI) {
         Query query;
         if (unitMI == null && unitName == null){
@@ -439,6 +478,10 @@ public class ComplexDaoImpl extends InteractorDaoImpl<Complex,IntactComplex> imp
         return query.getResultList();
     }
 
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public Collection<IntactComplex> getByParameterTypeAndUnit(String typeName, String typeMI, String unitName, String unitMI) {
         Query query;
         if (typeMI != null){
@@ -620,6 +663,10 @@ public class ComplexDaoImpl extends InteractorDaoImpl<Complex,IntactComplex> imp
     } */
 
     @Override
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public Collection<LifeCycleEvent> getLifeCycleEventsForComplex(String ac) {
         Query query = getEntityManager().createQuery("select distinct l from IntactComplex p " +
                 "join p.lifecycleEvents as l " +
@@ -629,6 +676,10 @@ public class ComplexDaoImpl extends InteractorDaoImpl<Complex,IntactComplex> imp
     }
 
     @Override
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public int countParticipantsForComplex(String ac) {
         Query query = getEntityManager().createQuery("select size(i.participants) from IntactComplex i " +
                 "where i.ac = :ac");
@@ -637,6 +688,10 @@ public class ComplexDaoImpl extends InteractorDaoImpl<Complex,IntactComplex> imp
     }
 
     @Override
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public Collection<ModelledConfidence> getConfidencesForComplex(String ac) {
         Query query = getEntityManager().createQuery("select distinct x from IntactComplex i " +
                 "join i.modelledConfidences as x " +
@@ -646,6 +701,10 @@ public class ComplexDaoImpl extends InteractorDaoImpl<Complex,IntactComplex> imp
     }
 
     @Override
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public Collection<ModelledParameter> getParametersForComplex(String ac) {
         Query query = getEntityManager().createQuery("select distinct x from IntactComplex i " +
                 "join i.modelledParameters as x " +
@@ -655,6 +714,10 @@ public class ComplexDaoImpl extends InteractorDaoImpl<Complex,IntactComplex> imp
     }
 
     @Override
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public int countConfidencesForComplex(String ac) {
         Query query = getEntityManager().createQuery("select size(i.modelledConfidences) from IntactComplex i " +
                 "where i.ac = :ac");
@@ -663,6 +726,10 @@ public class ComplexDaoImpl extends InteractorDaoImpl<Complex,IntactComplex> imp
     }
 
     @Override
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public int countParametersForComplex(String ac) {
         Query query = getEntityManager().createQuery("select size(i.modelledParameters) from IntactComplex i " +
                 "where i.ac = :ac");
@@ -671,6 +738,10 @@ public class ComplexDaoImpl extends InteractorDaoImpl<Complex,IntactComplex> imp
     }
 
     @Override
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public int countComplexesInvolvingInteractor(String ac) {
         Query query = getEntityManager().createQuery("select count(distinct i.ac) from IntactComplex i " +
                 "join i.participants as p join p.interactor as inter " +
@@ -680,6 +751,47 @@ public class ComplexDaoImpl extends InteractorDaoImpl<Complex,IntactComplex> imp
     }
 
     @Override
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
+    public Collection<IntactComplex> getComplexesInvolvingProteinsWithEbiAcs(Collection<String> proteinAcs) {
+        Query query = getEntityManager().createQuery("select distinct c " +
+                "from IntactComplex c " +
+                "join c.participants as p " +
+                "join p.interactor as i " +
+                "where i.ac in (:acs)");
+        query.setParameter("acs", proteinAcs);
+        return query.getResultList();
+    }
+
+    @Override
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
+    public Collection<IntactComplex> getComplexesInvolvingSubComplex(String complexId) {
+        Query query = getEntityManager().createQuery("select distinct c " +
+                "from IntactComplex c " +
+                "join c.participants as p " +
+                "join p.interactor as i " +
+                "join i.dbXrefs as xref " +
+                "join xref.database as database " +
+                "join xref.qualifier as qualifier " +
+                "where database.identifier = :db " +
+                "and qualifier.identifier = :complexPrimaryMi " +
+                "and xref.id = :id ");
+        query.setParameter("db", Xref.COMPLEX_PORTAL_MI);
+        query.setParameter("id", complexId);
+        query.setParameter("complexPrimaryMi", Xref.COMPLEX_PRIMARY_MI);
+        return query.getResultList();
+    }
+
+    @Override
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public int countComplexesByOrganism(String organismAc) {
         Query query = getEntityManager().createQuery("select count (distinct i.ac) from IntactComplex i " +
                 "join i.organism o " +

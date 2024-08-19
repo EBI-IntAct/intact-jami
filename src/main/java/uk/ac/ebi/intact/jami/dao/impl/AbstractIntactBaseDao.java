@@ -1,5 +1,7 @@
 package uk.ac.ebi.intact.jami.dao.impl;
 
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import uk.ac.ebi.intact.jami.context.SynchronizerContext;
 import uk.ac.ebi.intact.jami.dao.IntactBaseDao;
 import uk.ac.ebi.intact.jami.model.audit.Auditable;
@@ -10,6 +12,7 @@ import uk.ac.ebi.intact.jami.synchronizer.SynchronizerException;
 
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
+import javax.persistence.PersistenceException;
 import javax.persistence.Query;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -49,6 +52,10 @@ public abstract class AbstractIntactBaseDao<I,T extends Auditable> implements In
         getEntityManager().flush();
     }
 
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public List<T> getByQuery(String query, Map<String, Object> queryParameters, int first, int max) {
 
         Query queryObject = getEntityManager().createQuery(query);
@@ -62,6 +69,10 @@ public abstract class AbstractIntactBaseDao<I,T extends Auditable> implements In
         return queryObject.getResultList();
     }
 
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public long countByQuery(String query, Map<String, Object> queryParameters) {
 
         Query queryObject = getEntityManager().createQuery(query);
@@ -73,11 +84,19 @@ public abstract class AbstractIntactBaseDao<I,T extends Auditable> implements In
         return getLongQueryResult(queryObject);
     }
 
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public List<T> getAll() {
         return this.entityManager.createQuery("select o from "+getEntityClass().getName()+" o")
                 .getResultList();
     }
 
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public List<T> getAll(String sortProperty, int firstResult, int maxResults) {
         String strQuery = "select o from "+getEntityClass().getName()+" o order by "+sortProperty;
         Query query = this.entityManager.createQuery(strQuery);
@@ -87,6 +106,10 @@ public abstract class AbstractIntactBaseDao<I,T extends Auditable> implements In
                 .getResultList();
     }
 
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public List<T> getAllSorted(int firstResult, int maxResults, String sortProperty, boolean ascendant) {
         String strQuery = "select o from "+getEntityClass().getName()+" o order by "+sortProperty+" "+((ascendant)? "asc" : "desc");
         Query query = this.entityManager.createQuery(strQuery);
@@ -96,6 +119,10 @@ public abstract class AbstractIntactBaseDao<I,T extends Auditable> implements In
                 .getResultList();
     }
 
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public long countAll() {
         CriteriaBuilder builder = getEntityManager().getCriteriaBuilder();
         CriteriaQuery<Long> criteria = builder.createQuery(Long.class);

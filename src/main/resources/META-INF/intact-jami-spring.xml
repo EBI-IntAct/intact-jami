@@ -18,6 +18,9 @@
     <!-- so the @Transactional annotations work -->
     <tx:annotation-driven transaction-manager="jamiTransactionManager"/>
 
+    <!-- for String retry -->
+    <bean class="org.springframework.retry.annotation.RetryConfiguration" />
+
     <!--
         Post-processor to perform exception translation on @Repository classes
         (from native exceptions such as JPA PersistenceExceptions to
