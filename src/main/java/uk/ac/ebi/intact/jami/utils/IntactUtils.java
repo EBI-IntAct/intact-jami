@@ -40,8 +40,8 @@ public class IntactUtils {
      */
     public static final int MAX_SEQ_LENGTH_PER_CHUNK = 1000;
 
-    public final static String YEAR_FORMAT_STR = "yyyy";
-    public final static DateFormat YEAR_FORMAT = new SimpleDateFormat(YEAR_FORMAT_STR);
+    public final static Pattern YEAR_FORMAT_REGEX = Pattern.compile("[0-9]{4}");
+    public final static DateFormat YEAR_FORMAT = new SimpleDateFormat("yyyy");
     public static final Pattern decimalPattern = Pattern.compile("(\\d+)");
 
     public static final String CV_LOCAL_SEQ = "intact.cv_local_seq";
