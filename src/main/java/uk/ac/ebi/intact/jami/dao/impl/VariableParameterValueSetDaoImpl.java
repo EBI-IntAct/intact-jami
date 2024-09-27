@@ -1,5 +1,7 @@
 package uk.ac.ebi.intact.jami.dao.impl;
 
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Repository;
 import psidev.psi.mi.jami.model.VariableParameter;
 import psidev.psi.mi.jami.model.VariableParameterValueSet;
@@ -13,6 +15,7 @@ import uk.ac.ebi.intact.jami.synchronizer.IntactDbSynchronizer;
 import uk.ac.ebi.intact.jami.synchronizer.impl.VariableParameterValueSetSynchronizer;
 
 import javax.persistence.EntityManager;
+import javax.persistence.PersistenceException;
 import javax.persistence.Query;
 import java.util.Collection;
 
@@ -29,6 +32,10 @@ public class VariableParameterValueSetDaoImpl extends AbstractIntactBaseDao<Vari
         super(IntactVariableParameterValueSet.class, entityManager, context);
     }
 
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public Collection<IntactVariableParameterValueSet> getByInteractionAc(String parentAc) {
         Query query = getEntityManager().createQuery("select distinct v from IntactInteractionEvidence i join i.variableParameterValues v " +
                 "where i.ac = :ac ");

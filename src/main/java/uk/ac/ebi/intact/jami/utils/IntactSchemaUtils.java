@@ -172,7 +172,7 @@ public class IntactSchemaUtils {
     }
 
     public static String[] getTableNames(DataSource dataSource) {
-        return persistenceProvider.getBasicMetaDataBuilder(dataSource, Oracle12cDialect.class.getName()).build()
+        return persistenceProvider.getBasicMetaDataBuilder(dataSource, PostgreSQL82Dialect.class.getName()).build()
                 .getEntityBindings()
                 .stream()
                 .map(persistentClass -> {

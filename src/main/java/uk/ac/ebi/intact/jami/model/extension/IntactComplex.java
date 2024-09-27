@@ -82,6 +82,8 @@ public class IntactComplex extends IntactInteractor implements Complex, Releasab
     private transient Annotation correctionComment;
     private transient Xref complexAcXref;
 
+    private Boolean predictedComplex;
+
     protected IntactComplex() {
         super();
     }
@@ -1107,6 +1109,18 @@ public class IntactComplex extends IntactInteractor implements Complex, Releasab
         ois.defaultReadObject();
         // read default status
         setCvStatus((CvTerm) ois.readObject());
+    }
+
+    @Type(type = "org.hibernate.type.NumericBooleanType")
+    @Column(name = "predicted_complex")
+    public boolean isPredictedComplex() {
+        return predictedComplex != null && predictedComplex;
+    }
+
+    @Type(type = "org.hibernate.type.NumericBooleanType")
+    @Column(name = "predicted_complex")
+    public void setPredictedComplex(Boolean predictedComplex) {
+        this.predictedComplex = predictedComplex;
     }
 
     private class ComplexChecksumList extends AbstractListHavingProperties<Checksum> {

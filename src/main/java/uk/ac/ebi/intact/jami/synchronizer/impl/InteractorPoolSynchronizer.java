@@ -16,6 +16,7 @@ import uk.ac.ebi.intact.jami.synchronizer.listener.impl.DbInteractorEnricherList
 import uk.ac.ebi.intact.jami.synchronizer.listener.impl.DbInteractorPoolEnricherListener;
 import uk.ac.ebi.intact.jami.utils.comparator.IntactInteractorPoolComparator;
 
+import javax.persistence.FlushModeType;
 import javax.persistence.Query;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
@@ -32,6 +33,37 @@ public class InteractorPoolSynchronizer extends InteractorSynchronizerTemplate<I
 
     public InteractorPoolSynchronizer(SynchronizerContext context) {
         super(context, IntactInteractorPool.class);
+    }
+
+    @Override
+    protected IntactInteractorPool processCachedObject(InteractorPool object,
+                                                       IntactInteractorPool intactEntity,
+                                                       FlushModeType mode,
+                                                       boolean needToSynchronize)
+            throws PersisterException, FinderException, SynchronizerException {
+
+        intactEntity.setLocalUserContext(getContext().getUserContext());
+        if (needToSynchronize) {
+            synchronizePartiallyInitialisedProperties(object, intactEntity);
+            needToSynchronize = false;
+        }
+        return super.processCachedObject(object, intactEntity, mode, needToSynchronize);
+    }
+
+    @Override
+    protected IntactInteractorPool processTransientObject(InteractorPool object,
+                                                          boolean persist,
+                                                          FlushModeType mode,
+                                                          IntactInteractorPool newObject,
+                                                          boolean needToSynchronizeProperties)
+            throws FinderException, PersisterException, SynchronizerException {
+
+        newObject.setLocalUserContext(getContext().getUserContext());
+        if (needToSynchronizeProperties) {
+            synchronizePartiallyInitialisedProperties(object, newObject);
+            needToSynchronizeProperties = false;
+        }
+        return super.processTransientObject(object, persist, mode, newObject, needToSynchronizeProperties);
     }
 
     @Override
@@ -63,7 +95,7 @@ public class InteractorPoolSynchronizer extends InteractorSynchronizerTemplate<I
                 if (interactor != intactInteractor){
                     Interactor interactorCheck = enableSynchronization ?
                             getContext().getInteractorSynchronizer().synchronize(interactor, true) :
-                            getContext().getInteractorSynchronizer().convertToPersistentObject(intactInteractor);
+                            getContext().getInteractorSynchronizer().convertToPersistentObject(interactor);
                     // we have a different instance because needed to be synchronized
                     if (interactorCheck != interactor){
                         intactInteractor.remove(interactor);

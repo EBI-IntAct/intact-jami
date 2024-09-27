@@ -235,26 +235,26 @@ public class ComplexSynchronizer extends InteractorSynchronizerTemplate<Complex,
         if (term.getComparableParticipants() != null && !term.getComparableParticipants().isEmpty()) {
             List<String> proteinIdList =
                     term.getComparableParticipants().stream()
-                            .map(ModelledComparableParticipant::getProteinId)
+                            .map(ModelledComparableParticipant::getInteractorId)
                             .collect(Collectors.toList());
 
 
-            query = getEntityManager().createNativeQuery("select cpx.ac as complex_ac from ia_interactor cpx join " +
-                    "ia_component part on part.interaction_ac=cpx.ac " +
-                    "join ia_interactor itor on (itor.ac=part.interactor_ac and itor.category in ('protein','interactor_pool','complex')) " +
+            query = getEntityManager().createNativeQuery("select cpx.ac as complex_ac from intact.ia_interactor cpx join " +
+                    "intact.ia_component part on part.interaction_ac=cpx.ac " +
+                    "join intact.ia_interactor itor on (itor.ac=part.interactor_ac and itor.category in ('protein','interactor_pool','complex')) " +
                     "" +
-                    "left outer join ia_interactor itorProtein on (itorProtein.ac=itor.ac and itor.category in ('protein')) " +
-                    "left outer join ia_interactor_xref itorProteinXref on (itorProteinXref.parent_ac=itorProtein.ac and " +
+                    "left outer join intact.ia_interactor itorProtein on (itorProtein.ac=itor.ac and itor.category in ('protein')) " +
+                    "left outer join intact.ia_interactor_xref itorProteinXref on (itorProteinXref.parent_ac=itorProtein.ac and " +
                     "                         (itorProteinXref.primaryid in (:proteinIds))) " +
                     "" +
-                    "left outer join ia_component itorPart on itorPart.interaction_ac=itor.ac " +
-                    "left outer join ia_interactor itorCpx on (itorCpx.ac=itorPart.interactor_ac and itorCpx.category in ('protein')) " +
-                    "left outer join ia_interactor_xref itorCpxXref on (itorCpxXref.parent_ac=itorCpx.ac and " +
+                    "left outer join intact.ia_component itorPart on itorPart.interaction_ac=itor.ac " +
+                    "left outer join intact.ia_interactor itorCpx on (itorCpx.ac=itorPart.interactor_ac and itorCpx.category in ('protein')) " +
+                    "left outer join intact.ia_interactor_xref itorCpxXref on (itorCpxXref.parent_ac=itorCpx.ac and " +
                     "                         (itorCpxXref.primaryid in (:proteinIds))) " +
                     "" +
-                    "left outer join ia_pool2interactor itorPool on itorPool.interactor_pool_ac=itor.ac " +
-                    "left outer join ia_interactor itorSet on (itorSet.ac=itorPool.interactor_ac and itorSet.category in ('protein')) " +
-                    "left outer join ia_interactor_xref itorSetXref on (itorSetXref.parent_ac=itorSet.ac and " +
+                    "left outer join intact.ia_pool2interactor itorPool on itorPool.interactor_pool_ac=itor.ac " +
+                    "left outer join intact.ia_interactor itorSet on (itorSet.ac=itorPool.interactor_ac and itorSet.category in ('protein')) " +
+                    "left outer join intact.ia_interactor_xref itorSetXref on (itorSetXref.parent_ac=itorSet.ac and " +
                     "                         (itorSetXref.primaryid in (:proteinIds))) " +
                     "" +
                     "where cpx.category='complex' " +
@@ -395,7 +395,8 @@ public class ComplexSynchronizer extends InteractorSynchronizerTemplate<Complex,
     @Override
     protected void prepareAnnotations(IntactComplex intactInteractor, boolean enableSynchronization) throws FinderException, PersisterException, SynchronizerException {
         if (intactInteractor.areAnnotationsInitialized()) {
-            if (AnnotationUtils.collectFirstAnnotationWithTopic(intactInteractor.getAnnotations(), null, "curated-complex") == null) {
+            if (!intactInteractor.isPredictedComplex() &&
+                    AnnotationUtils.collectFirstAnnotationWithTopic(intactInteractor.getAnnotations(), null, "curated-complex") == null) {
                 intactInteractor.getAnnotations().add(new InteractorAnnotation(IntactUtils.createMITopic("curated-complex", null)));
             }
         }

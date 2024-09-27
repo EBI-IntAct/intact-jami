@@ -100,8 +100,7 @@ public abstract class AbstractLifeCycleEvent extends AbstractIntactPrimaryObject
         this.when = when;
     }
 
-    @Lob
-    @Type(type = "org.hibernate.type.MaterializedClobType")
+    @Type(type = "org.hibernate.type.TextType")
     public String getNote() {
         return note;
     }

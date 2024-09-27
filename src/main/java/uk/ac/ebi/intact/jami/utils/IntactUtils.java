@@ -40,11 +40,12 @@ public class IntactUtils {
      */
     public static final int MAX_SEQ_LENGTH_PER_CHUNK = 1000;
 
+    public final static Pattern YEAR_FORMAT_REGEX = Pattern.compile("[0-9]{4}");
     public final static DateFormat YEAR_FORMAT = new SimpleDateFormat("yyyy");
     public static final Pattern decimalPattern = Pattern.compile("(\\d+)");
 
-    public static final String CV_LOCAL_SEQ = "cv_local_seq";
-    public static final String UNASSIGNED_SEQ = "unassigned_seq";
+    public static final String CV_LOCAL_SEQ = "intact.cv_local_seq";
+    public static final String UNASSIGNED_SEQ = "intact.unassigned_seq";
 
     public static final String DATABASE_OBJCLASS = "uk.ac.ebi.intact.model.CvDatabase";
     public static final String QUALIFIER_OBJCLASS = "uk.ac.ebi.intact.model.CvXrefQualifier";

@@ -5,7 +5,6 @@ import uk.ac.ebi.intact.jami.model.AbstractIntactPrimaryObject;
 
 import javax.persistence.Entity;
 import javax.persistence.Index;
-import javax.persistence.Lob;
 import javax.persistence.Table;
 
 /**
@@ -45,8 +44,7 @@ public class ApplicationProperty extends AbstractIntactPrimaryObject {
         this.key = key;
     }
 
-    @Lob
-    @Type(type = "org.hibernate.type.MaterializedClobType")
+    @Type(type = "org.hibernate.type.TextType")
     public String getValue() {
         return value;
     }

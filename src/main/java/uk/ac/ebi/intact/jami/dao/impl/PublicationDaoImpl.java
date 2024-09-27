@@ -1,5 +1,7 @@
 package uk.ac.ebi.intact.jami.dao.impl;
 
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import psidev.psi.mi.jami.model.*;
 import uk.ac.ebi.intact.jami.context.SynchronizerContext;
 import uk.ac.ebi.intact.jami.dao.PublicationDao;
@@ -11,6 +13,7 @@ import uk.ac.ebi.intact.jami.utils.IntactUtils;
 
 import javax.persistence.EntityManager;
 import javax.persistence.NonUniqueResultException;
+import javax.persistence.PersistenceException;
 import javax.persistence.Query;
 import java.util.Collection;
 import java.util.Date;
@@ -29,10 +32,18 @@ public class PublicationDaoImpl extends AbstractIntactBaseDao<Publication, Intac
         super(IntactPublication.class, entityManager, context);
     }
 
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public IntactPublication getByAc(String ac) {
         return getEntityManager().find(IntactPublication.class, ac);
     }
 
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public IntactPublication getByPubmedId(String value) {
         Query query = getEntityManager().createQuery("select distinct p from IntactPublication p " +
                 "join p.dbXrefs as x " +
@@ -58,6 +69,10 @@ public class PublicationDaoImpl extends AbstractIntactBaseDao<Publication, Intac
         }
     }
 
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public IntactPublication getByDOI(String value) {
         Query query = getEntityManager().createQuery("select distinct p from IntactPublication p " +
                 "join p.dbXrefs as x " +
@@ -83,6 +98,10 @@ public class PublicationDaoImpl extends AbstractIntactBaseDao<Publication, Intac
         }
     }
 
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public Collection<IntactPublication> getByTitle(String value) {
         Query query;
         if (value == null){
@@ -97,6 +116,10 @@ public class PublicationDaoImpl extends AbstractIntactBaseDao<Publication, Intac
         return query.getResultList();
     }
 
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public Collection<IntactPublication> getByTitleLike(String value) {
         Query query;
         if (value == null){
@@ -111,6 +134,10 @@ public class PublicationDaoImpl extends AbstractIntactBaseDao<Publication, Intac
         return query.getResultList();
     }
 
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public Collection<IntactPublication> getByXref(String primaryId) {
         Query query = getEntityManager().createQuery("select distinct p from IntactPublication p "  +
                 "join p.dbXrefs as x " +
@@ -119,6 +146,10 @@ public class PublicationDaoImpl extends AbstractIntactBaseDao<Publication, Intac
         return query.getResultList();
     }
 
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public Collection<IntactPublication> getByXrefLike(String primaryId) {
         Query query = getEntityManager().createQuery("select distinct p from IntactPublication p "  +
                 "join p.dbXrefs as x " +
@@ -127,6 +158,10 @@ public class PublicationDaoImpl extends AbstractIntactBaseDao<Publication, Intac
         return query.getResultList();
     }
 
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public Collection<IntactPublication> getByXref(String dbName, String dbMI, String primaryId) {
         Query query;
         if (dbMI != null){
@@ -158,6 +193,10 @@ public class PublicationDaoImpl extends AbstractIntactBaseDao<Publication, Intac
         return query.getResultList();
     }
 
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public Collection<IntactPublication> getByXrefLike(String dbName, String dbMI, String primaryId) {
         Query query;
         if (dbMI != null){
@@ -189,6 +228,10 @@ public class PublicationDaoImpl extends AbstractIntactBaseDao<Publication, Intac
         return query.getResultList();
     }
 
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public Collection<IntactPublication> getByXref(String dbName, String dbMI, String primaryId, String qualifierName, String qualifierMI) {
         Query query;
         if (dbMI != null){
@@ -303,6 +346,10 @@ public class PublicationDaoImpl extends AbstractIntactBaseDao<Publication, Intac
         return query.getResultList();
     }
 
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public Collection<IntactPublication> getByXrefLike(String dbName, String dbMI, String primaryId, String qualifierName, String qualifierMI) {
         Query query;
         if (dbMI != null){
@@ -417,6 +464,10 @@ public class PublicationDaoImpl extends AbstractIntactBaseDao<Publication, Intac
         return query.getResultList();
     }
 
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public Collection<IntactPublication> getByAnnotationTopic(String topicName, String topicMI) {
         Query query;
         if (topicMI != null){
@@ -444,6 +495,10 @@ public class PublicationDaoImpl extends AbstractIntactBaseDao<Publication, Intac
         return query.getResultList();
     }
 
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public Collection<IntactPublication> getByAnnotationTopicAndValue(String topicName, String topicMI, String value) {
         Query query;
         if (topicMI != null){
@@ -477,6 +532,10 @@ public class PublicationDaoImpl extends AbstractIntactBaseDao<Publication, Intac
         return query.getResultList();
     }
 
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public IntactPublication getByIMEx(String value) {
         Query query = getEntityManager().createQuery("select distinct p from IntactPublication p " +
                 "join p.dbXrefs as x " +
@@ -500,6 +559,10 @@ public class PublicationDaoImpl extends AbstractIntactBaseDao<Publication, Intac
         }
     }
 
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public Collection<IntactPublication> getByReleasedDate(Date date) {
         Query query;
         if (date == null){
@@ -519,6 +582,10 @@ public class PublicationDaoImpl extends AbstractIntactBaseDao<Publication, Intac
         return query.getResultList();
     }
 
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public Collection<IntactPublication> getByCurationDepth(CurationDepth depth, int first, int max){
         Query query = getEntityManager().createQuery("select distinct p from IntactPublication p "  +
                 "join p.dbAnnotations as a " +
@@ -543,6 +610,10 @@ public class PublicationDaoImpl extends AbstractIntactBaseDao<Publication, Intac
         return query.getResultList();
     }
 
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public Collection<IntactPublication> getByLifecycleEvent(String evtName, int first, int max){
         Query query;
         if (evtName == null){
@@ -561,6 +632,10 @@ public class PublicationDaoImpl extends AbstractIntactBaseDao<Publication, Intac
         return query.getResultList();
     }
 
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public Collection<IntactPublication> getByStatus(String statusName, int first, int max){
         Query query;
         if (statusName == null){
@@ -578,6 +653,10 @@ public class PublicationDaoImpl extends AbstractIntactBaseDao<Publication, Intac
         return query.getResultList();
     }
 
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public Collection<IntactPublication> getByCurator(String login, int first, int max){
         Query query;
         if (login != null){
@@ -595,6 +674,10 @@ public class PublicationDaoImpl extends AbstractIntactBaseDao<Publication, Intac
         return query.getResultList();
     }
 
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public Collection<IntactPublication> getByReviewer(String login, int first, int max){
         Query query;
         if (login != null){
@@ -612,6 +695,10 @@ public class PublicationDaoImpl extends AbstractIntactBaseDao<Publication, Intac
         return query.getResultList();
     }
 
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public Collection<IntactPublication> getBySource(String name, int first, int max){
         Query query;
         if (name != null){
@@ -629,6 +716,10 @@ public class PublicationDaoImpl extends AbstractIntactBaseDao<Publication, Intac
         return query.getResultList();
     }
 
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public Collection<IntactPublication> getByJournal(String value) {
         Query query = getEntityManager().createQuery("select distinct p from IntactPublication p " +
                 "join p.dbAnnotations as a " +
@@ -640,6 +731,10 @@ public class PublicationDaoImpl extends AbstractIntactBaseDao<Publication, Intac
         return query.getResultList();
     }
 
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public Collection<IntactPublication> getByJournalLike(String value) {
         Query query = getEntityManager().createQuery("select distinct p from IntactPublication p  " +
                 "join p.dbAnnotations as a " +
@@ -650,6 +745,10 @@ public class PublicationDaoImpl extends AbstractIntactBaseDao<Publication, Intac
         return query.getResultList();
     }
 
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public Collection<IntactPublication> getByPublicationDate(Date date) {
         Query query = getEntityManager().createQuery("select distinct p from IntactPublication p " +
                 "join p.dbAnnotations as a " +
@@ -661,6 +760,10 @@ public class PublicationDaoImpl extends AbstractIntactBaseDao<Publication, Intac
     }
 
     @Override
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public Collection<Xref> getXrefsForPublication(String ac) {
         Query query = getEntityManager().createQuery("select x from IntactPublication p " +
                 "join p.dbXrefs as x " +
@@ -670,6 +773,10 @@ public class PublicationDaoImpl extends AbstractIntactBaseDao<Publication, Intac
     }
 
     @Override
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public Collection<LifeCycleEvent> getLifeCycleEventsForPublication(String ac) {
         Query query = getEntityManager().createQuery("select l from IntactPublication p " +
                 "join p.lifecycleEvents as l " +
@@ -679,6 +786,10 @@ public class PublicationDaoImpl extends AbstractIntactBaseDao<Publication, Intac
     }
 
     @Override
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public int countExperimentsForPublication(String ac) {
         Query query = getEntityManager().createQuery("select size(p.experiments) from IntactPublication p " +
                 "where p.ac = :ac");
@@ -687,6 +798,10 @@ public class PublicationDaoImpl extends AbstractIntactBaseDao<Publication, Intac
     }
 
     @Override
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public int countXrefsForPublication(String ac) {
         Query query = getEntityManager().createQuery("select size(i.dbXrefs) from IntactPublication i " +
                 "where i.ac = :ac");
@@ -695,6 +810,10 @@ public class PublicationDaoImpl extends AbstractIntactBaseDao<Publication, Intac
     }
 
     @Override
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public int countAnnotationsForPublication(String ac) {
         Query query = getEntityManager().createQuery("select size(i.dbAnnotations) from IntactPublication i " +
                 "where i.ac = :ac");
@@ -703,6 +822,10 @@ public class PublicationDaoImpl extends AbstractIntactBaseDao<Publication, Intac
     }
 
     @Override
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public int countInteractionsForPublication(String ac) {
         String queryStr = "select sum(size(e.interactionEvidences)) from IntactPublication i " +
                 "join i.experiments as e " +

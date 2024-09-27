@@ -1,5 +1,7 @@
 package uk.ac.ebi.intact.jami.dao.impl;
 
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Repository;
 import psidev.psi.mi.jami.model.*;
 import uk.ac.ebi.intact.jami.context.DefaultSynchronizerContext;
@@ -11,6 +13,7 @@ import uk.ac.ebi.intact.jami.synchronizer.IntactDbSynchronizer;
 import uk.ac.ebi.intact.jami.synchronizer.impl.VariableParameterSynchronizer;
 
 import javax.persistence.EntityManager;
+import javax.persistence.PersistenceException;
 import javax.persistence.Query;
 import java.util.Collection;
 
@@ -27,18 +30,30 @@ public class VariableParameterDaoImpl extends AbstractIntactBaseDao<VariablePara
         super(IntactVariableParameter.class, entityManager, context);
     }
 
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public Collection<IntactVariableParameter> getByDescription(String desc) {
         Query query = getEntityManager().createQuery("select v from IntactVariableParameter v where v.description = :description");
         query.setParameter("description",desc);
         return query.getResultList();
     }
 
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public Collection<IntactVariableParameter> getByDescriptionLike(String desc) {
         Query query = getEntityManager().createQuery("select v from IntactVariableParameter v where upper(v.description) like :description");
         query.setParameter("description","%"+desc.toUpperCase()+"%");
         return query.getResultList();
     }
 
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public Collection<IntactVariableParameter> getByUnit(String unitName, String unitMI) {
         Query query;
         if (unitName == null && unitMI == null){
@@ -67,6 +82,10 @@ public class VariableParameterDaoImpl extends AbstractIntactBaseDao<VariablePara
         return query.getResultList();
     }
 
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public Collection<IntactVariableParameter> getByExperimentAc(String parentAc) {
         Query query = getEntityManager().createQuery("select v from IntactVariableParameter v " +
                 "join v.experiment as p " +

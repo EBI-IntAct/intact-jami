@@ -15,12 +15,15 @@
  */
 package uk.ac.ebi.intact.jami.dao.impl;
 
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import uk.ac.ebi.intact.jami.context.SynchronizerContext;
 import uk.ac.ebi.intact.jami.dao.DbInfoDao;
 import uk.ac.ebi.intact.jami.model.meta.DbInfo;
 import uk.ac.ebi.intact.jami.synchronizer.IntactDbSynchronizer;
 
 import javax.persistence.EntityManager;
+import javax.persistence.PersistenceException;
 import java.util.List;
 
 /**
@@ -33,10 +36,18 @@ public class DbInfoDaoImpl extends AbstractIntactBaseDao<DbInfo,DbInfo> implemen
         super(DbInfo.class, entityManager, context);
     }
 
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public DbInfo get( String key ) {
         return getEntityManager().find( DbInfo.class, key );
     }
 
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public List<DbInfo> getAll() {
         return getEntityManager().createQuery( "select d from DbInfo d" ).getResultList();
     }

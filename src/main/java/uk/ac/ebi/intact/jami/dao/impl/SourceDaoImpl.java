@@ -1,5 +1,7 @@
 package uk.ac.ebi.intact.jami.dao.impl;
 
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import psidev.psi.mi.jami.model.*;
 import uk.ac.ebi.intact.jami.context.SynchronizerContext;
 import uk.ac.ebi.intact.jami.dao.SourceDao;
@@ -8,6 +10,7 @@ import uk.ac.ebi.intact.jami.synchronizer.IntactDbSynchronizer;
 
 import javax.persistence.EntityManager;
 import javax.persistence.NonUniqueResultException;
+import javax.persistence.PersistenceException;
 import javax.persistence.Query;
 import java.util.Collection;
 import java.util.List;
@@ -24,10 +27,18 @@ public class SourceDaoImpl extends AbstractIntactBaseDao<Source, IntactSource> i
         super(IntactSource.class, entityManager, context);
     }
 
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public IntactSource getByAc(String ac) {
         return getEntityManager().find(getEntityClass(), ac);
     }
 
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public IntactSource getByShortName(String value) {
         Query query = getEntityManager().createQuery("select s from IntactSource s " +
                 "where s.shortName = :name");
@@ -44,6 +55,10 @@ public class SourceDaoImpl extends AbstractIntactBaseDao<Source, IntactSource> i
         }
     }
 
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public Collection<IntactSource> getByShortNameLike(String value) {
         Query query = getEntityManager().createQuery("select s from IntactSource s " +
                 "where upper(s.shortName) like :name");
@@ -51,6 +66,10 @@ public class SourceDaoImpl extends AbstractIntactBaseDao<Source, IntactSource> i
         return query.getResultList();
     }
 
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public Collection<IntactSource> getByXref(String primaryId) {
         Query query = getEntityManager().createQuery("select distinct s from IntactSource s " +
                 "join s.dbXrefs as x " +
@@ -59,6 +78,10 @@ public class SourceDaoImpl extends AbstractIntactBaseDao<Source, IntactSource> i
         return query.getResultList();
     }
 
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public Collection<IntactSource> getByXrefLike(String primaryId) {
         Query query = getEntityManager().createQuery("select distinct s from IntactSource s " +
                 "join s.dbXrefs as x " +
@@ -67,6 +90,10 @@ public class SourceDaoImpl extends AbstractIntactBaseDao<Source, IntactSource> i
         return query.getResultList();
     }
 
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public Collection<IntactSource> getByXref(String dbName, String dbMI, String primaryId) {
         Query query;
         if (dbMI != null){
@@ -98,6 +125,10 @@ public class SourceDaoImpl extends AbstractIntactBaseDao<Source, IntactSource> i
         return query.getResultList();
     }
 
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public Collection<IntactSource> getByXrefLike(String dbName, String dbMI, String primaryId) {
         Query query;
         if (dbMI != null){
@@ -129,6 +160,10 @@ public class SourceDaoImpl extends AbstractIntactBaseDao<Source, IntactSource> i
         return query.getResultList();
     }
 
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public Collection<IntactSource> getByXref(String dbName, String dbMI, String primaryId, String qualifierName, String qualifierMI) {
         Query query;
         if (dbMI != null){
@@ -243,6 +278,10 @@ public class SourceDaoImpl extends AbstractIntactBaseDao<Source, IntactSource> i
         return query.getResultList();
     }
 
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public Collection<IntactSource> getByXrefLike(String dbName, String dbMI, String primaryId, String qualifierName, String qualifierMI) {
         Query query;
         if (dbMI != null){
@@ -357,6 +396,10 @@ public class SourceDaoImpl extends AbstractIntactBaseDao<Source, IntactSource> i
         return query.getResultList();
     }
 
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public Collection<IntactSource> getByAnnotationTopic(String topicName, String topicMI) {
         Query query;
         if (topicMI != null){
@@ -384,6 +427,10 @@ public class SourceDaoImpl extends AbstractIntactBaseDao<Source, IntactSource> i
         return query.getResultList();
     }
 
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public Collection<IntactSource> getByAnnotationTopicAndValue(String topicName, String topicMI, String value) {
         Query query;
         if (topicMI != null){
@@ -417,6 +464,10 @@ public class SourceDaoImpl extends AbstractIntactBaseDao<Source, IntactSource> i
         return query.getResultList();
     }
 
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public Collection<IntactSource> getByAliasName(String name) {
         Query query = getEntityManager().createQuery("select distinct so from IntactSource so " +
                 "join so.synonyms as s " +
@@ -425,6 +476,10 @@ public class SourceDaoImpl extends AbstractIntactBaseDao<Source, IntactSource> i
         return query.getResultList();
     }
 
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public Collection<IntactSource> getByAliasNameLike(String name) {
         Query query = getEntityManager().createQuery("select distinct so from IntactSource so " +
                 "join so.synonyms as s " +
@@ -433,6 +488,10 @@ public class SourceDaoImpl extends AbstractIntactBaseDao<Source, IntactSource> i
         return query.getResultList();
     }
 
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public Collection<IntactSource> getByAliasTypeAndName(String typeName, String typeMI, String name) {
         Query query;
         if (typeName == null && typeMI == null){
@@ -471,6 +530,10 @@ public class SourceDaoImpl extends AbstractIntactBaseDao<Source, IntactSource> i
         return query.getResultList();
     }
 
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public Collection<IntactSource> getByAliasTypeAndNameLike(String typeName, String typeMI, String name) {
         Query query;
         if (typeName == null && typeMI == null){
@@ -509,6 +572,10 @@ public class SourceDaoImpl extends AbstractIntactBaseDao<Source, IntactSource> i
         return query.getResultList();
     }
 
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public IntactSource getByMIIdentifier(String primaryId) {
         Query query = getEntityManager().createQuery("select distinct s from IntactSource s " +
                 "join s.dbXrefs as x " +
@@ -533,6 +600,10 @@ public class SourceDaoImpl extends AbstractIntactBaseDao<Source, IntactSource> i
         }
     }
 
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public IntactSource getByPARIdentifier(String primaryId) {
         Query query = getEntityManager().createQuery("select distinct s from IntactSource s " +
                 "join s.dbXrefs as x " +
@@ -558,6 +629,10 @@ public class SourceDaoImpl extends AbstractIntactBaseDao<Source, IntactSource> i
     }
 
     @Override
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public Collection<Xref> getXrefsForSource(String ac) {
         Query query = getEntityManager().createQuery("select x from IntactSource cv " +
                 "join cv.dbXrefs as x " +
@@ -567,6 +642,10 @@ public class SourceDaoImpl extends AbstractIntactBaseDao<Source, IntactSource> i
     }
 
     @Override
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public Collection<Annotation> getAnnotationsForSource(String ac) {
         Query query = getEntityManager().createQuery("select a from IntactSource cv " +
                 "join cv.dbAnnotations as a " +
@@ -576,6 +655,10 @@ public class SourceDaoImpl extends AbstractIntactBaseDao<Source, IntactSource> i
     }
 
     @Override
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public Collection<Alias> getSynonymsForSource(String ac) {
         Query query = getEntityManager().createQuery("select a from IntactSource cv " +
                 "join cv.aliases as a " +
@@ -585,6 +668,10 @@ public class SourceDaoImpl extends AbstractIntactBaseDao<Source, IntactSource> i
     }
 
     @Override
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public int countSynonymsForSource(String ac) {
         Query query = getEntityManager().createQuery("select size(i.synonyms) from IntactSource i " +
                 "where i.ac = :ac");
@@ -593,6 +680,10 @@ public class SourceDaoImpl extends AbstractIntactBaseDao<Source, IntactSource> i
     }
 
     @Override
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public int countXrefsForSource(String ac) {
         Query query = getEntityManager().createQuery("select size(i.dbXrefs) from IntactSource i " +
                 "where i.ac = :ac");
@@ -601,6 +692,10 @@ public class SourceDaoImpl extends AbstractIntactBaseDao<Source, IntactSource> i
     }
 
     @Override
+    @Retryable(
+            include = PersistenceException.class,
+            maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}", multiplierExpression = "${retry.multiplier}"))
     public int countAnnotationsForSource(String ac) {
         Query query = getEntityManager().createQuery("select size(i.dbAnnotations) from IntactSource i " +
                 "where i.ac = :ac");

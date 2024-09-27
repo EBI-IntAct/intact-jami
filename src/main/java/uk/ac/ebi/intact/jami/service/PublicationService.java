@@ -33,7 +33,7 @@ import java.util.logging.Logger;
 @Scope( BeanDefinition.SCOPE_PROTOTYPE )
 public class PublicationService extends AbstractReleasableLifeCycleService<IntactPublication> implements IntactService<Publication>{
 
-    private static final Logger LOGGER = Logger.getLogger("ComplexService");
+    private static final Logger LOGGER = Logger.getLogger("PublicationService");
 
     @Transactional(propagation = Propagation.REQUIRED, value = "jamiTransactionManager", readOnly = true)
     public long countAll() {
