@@ -18,15 +18,21 @@ package uk.ac.ebi.intact.jami.lifecycle.status;
 import org.springframework.stereotype.Component;
 import uk.ac.ebi.intact.jami.lifecycle.IllegalTransitionException;
 import uk.ac.ebi.intact.jami.lifecycle.LifecycleEventListener;
+import uk.ac.ebi.intact.jami.lifecycle.correctionassigner.CorrectionAssigner;
 import uk.ac.ebi.intact.jami.model.lifecycle.LifeCycleEventType;
 import uk.ac.ebi.intact.jami.model.lifecycle.LifeCycleStatus;
 import uk.ac.ebi.intact.jami.model.lifecycle.Releasable;
 import uk.ac.ebi.intact.jami.model.user.User;
 
+import javax.annotation.Resource;
+
 /**
  */
 @Component(value = "jamiReleasedStatus")
 public class ReleasedStatus extends GlobalStatus {
+
+    @Resource(name = "jamiCorrectionAssigner")
+    private CorrectionAssigner jamiCorrectionAssigner;
 
     protected ReleasedStatus() {
         setLifecycleStatus(LifeCycleStatus.RELEASED);
@@ -57,6 +63,10 @@ public class ReleasedStatus extends GlobalStatus {
         releasable.removeAccepted();
 
         changeStatus(releasable, LifeCycleStatus.READY_FOR_CHECKING, LifeCycleEventType.READY_FOR_CHECKING, null, who);
+
+        if (releasable.getCurrentReviewer() == null) {
+            jamiCorrectionAssigner.assignReviewer(releasable);
+        }
 
         // Notify listeners
         for ( LifecycleEventListener listener : getListeners() ) {
